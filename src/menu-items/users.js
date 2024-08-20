@@ -1,8 +1,8 @@
 // assets
-import { IconDashboard, IconUser } from '@tabler/icons-react';
+import { IconDashboard, IconUser , IconPaperclip} from '@tabler/icons-react';
 
 // constant
-const icons = { IconDashboard, IconUser };
+const icons = { IconDashboard, IconUser, IconPaperclip };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
@@ -25,6 +25,14 @@ const users = {
       type: 'item',
       url: '/performance',
       icon: icons.IconDashboard,
+      breadcrumbs: false
+    },
+    {
+      id: 'documentation',
+      title: 'Documentation',
+      type: 'item',
+      url: '/documentation',
+      icon: icons.IconPaperclip,
       breadcrumbs: false
     }
   ]

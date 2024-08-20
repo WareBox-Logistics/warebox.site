@@ -12,6 +12,7 @@ const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')
 const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
 const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const Documentation = Loadable(lazy(() => import('views/docs/Index')));
 
 const MainRoutes = {
   path: '/',
@@ -44,6 +45,10 @@ const MainRoutes = {
             {
               path: 'performance',
               element: <PerformanceDashboard />
+            },
+            {
+              path: 'documentation',
+              element: <Documentation />
             }
           ]
         }
