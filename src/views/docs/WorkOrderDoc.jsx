@@ -16,45 +16,48 @@ import {
 import { ArrowRightAlt } from '@mui/icons-material';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { useTranslation } from 'react-i18next';
 
 const WorkOrderDoc = () => {
+  const { t } = useTranslation();
+
   const routes = [
     {
       name: 'wo_close_status',
-      description: 'Ruta para cerrar el estado de la orden de trabajo.'
+      description: t("documentationView.tabs.workorder.routes.route1")
     },
     {
       name: 'wo_last_free_day',
-      description: 'Ruta para obtener o actualizar el último día libre de la orden de trabajo.'
+      description: t("documentationView.tabs.workorder.routes.route2")
     },
     {
       name: 'wo_empty_notify',
-      description: 'Ruta para gestionar la notificación de vacío relacionada con la orden de trabajo.'
+      description: t("documentationView.tabs.workorder.routes.route3")
     },
     {
       name: 'wo_delivery_date',
-      description: 'Ruta para establecer o consultar la fecha de entrega de la orden de trabajo.'
+      description: t("documentationView.tabs.workorder.routes.route4")
     },
     {
       name: 'route1_wo',
-      description: 'Ruta personalizada para la orden de trabajo - Ruta 1.'
+      description: t("documentationView.tabs.workorder.routes.route5")
     },
     {
       name: 'route_wo2',
-      description: 'Ruta personalizada para la orden de trabajo - Ruta 2.'
+      description: t("documentationView.tabs.workorder.routes.route6")
     }
   ];
-  
+
 
   return (
-    <Container fixed style={{padding: 0, paddingTop:"24px"}}>
+    <Container fixed style={{ padding: 0, paddingTop: "24px" }}>
       <Grid container>
         <Grid item xs={12} md={6}>
           <Typography variant="h4" gutterBottom>
-            Descripción
+            {t("documentationView.tabs.workorder.title")}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Las rutas predefinidas para el módulo de movimiento de conductor son las siguientes:
+            {t("documentationView.tabs.workorder.subtitle")}
           </Typography>
           <List>
             {routes.map((route, index) => (
@@ -67,7 +70,7 @@ const WorkOrderDoc = () => {
             ))}
           </List>
         </Grid>
-        <SyntaxHighlighter language="json" style={atomOneDark} customStyle={{overflowX: 'auto'}} wrapLines={true}>
+        <SyntaxHighlighter language="json" style={atomOneDark} customStyle={{ overflowX: 'auto' }} wrapLines={true}>
           {`
 {
   "work_order_id": "<--- id de la orden de trabajo",

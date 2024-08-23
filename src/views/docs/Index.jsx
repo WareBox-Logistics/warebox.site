@@ -44,7 +44,7 @@ const Index = () => {
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }} style={{ padding:0 }}>
+                <Box sx={{ p: 3 }} style={{ padding: 0 }}>
                     {children}
                 </Box>
             )}
@@ -54,56 +54,56 @@ const Index = () => {
     return (
         <Paper sx={{ padding: 4, maxWidth: 1200, margin: 'auto', minHeight: "100vh", backgroundColor: '#f5f5f5' }}>
             <Typography variant="h4" gutterBottom>
-                Configuración de Notificaciones y Rutas
+                {t('documentationView.title')}
             </Typography>
             <Typography variant="body1" gutterBottom sx={{ marginBottom: 3 }}>
-                A continuación se muestran las opciones para configurar las notificaciones y visualizar la información de las rutas.
+                {t('documentationView.subtitle')}
             </Typography>
             <Divider sx={{ marginBottom: 4 }} />
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <Typography variant="h6" gutterBottom>
-                        Receive All Data
+                        {t('customerConfig.receiveAllData')}
                     </Typography>
                     <Typography variant="body2" gutterBottom>
-                        Activa esta opción para recibir todos los datos de notificaciones sin ningún filtro.
+                        {t('documentationView.notification.title1')}
                     </Typography>
                     <FormControlLabel
-                        control={<Switch checked={true} name="Receive All Data" color="primary" disabled />}
-                        label="Receive All Data"
+                        control={<Switch checked={true} name={t('customerConfig.receiveAllData')} color="primary" disabled />}
+                        label={t('customerConfig.receiveAllData')}
                         sx={{ color: theme.palette.primary.main }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Typography variant="h6" gutterBottom>
-                        Allow Multiple Notifications
+                        {t('customerConfig.allowMultipleNotifications')}
                     </Typography>
                     <Typography variant="body2" gutterBottom>
-                        Permite que se envíen múltiples notificaciones para cada evento, en lugar de solo una.
+                        {t('documentationView.notification.title2')}
                     </Typography>
                     <FormControlLabel
-                        control={<Switch checked={true} name="Allow Multiple Notifications" color="primary" disabled />}
-                        label="Allow Multiple Notifications"
+                        control={<Switch checked={true} name={t('customerConfig.allowMultipleNotifications')} color="primary" disabled />}
+                        label={t('customerConfig.allowMultipleNotifications')}
                         sx={{ color: theme.palette.secondary.main }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Typography variant="h6" gutterBottom>
-                        Allow Notifications
+                        {t('customerConfig.allowNotifications')}
                     </Typography>
                     <Typography variant="body2" gutterBottom>
-                        Activa o desactiva las notificaciones de eventos y movimientos.
+                        {t('documentationView.notification.title3')}
                     </Typography>
                     <FormControlLabel
-                        control={<Switch checked={true} name="Allow Notifications" color="primary" disabled />}
-                        label="Allow Notifications"
+                        control={<Switch checked={true} name={t('customerConfig.allowNotifications')} color="primary" disabled />}
+                        label={t('customerConfig.allowNotifications')}
                     />
                 </Grid>
             </Grid>
             <Grid container spacing={3} marginTop={1}>
                 <Grid item xs={12} sm={6} md={4}>
                     <Typography variant="h6" gutterBottom>
-                        Nombre de la ruta predefinida
+                        {t('documentationView.input.title1')}
                     </Typography>
                     <TextField
                         label="Route Name"
@@ -115,7 +115,7 @@ const Index = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                     <Typography variant="h6" gutterBottom>
-                        URL de tu endpoint
+                        {t('documentationView.input.title2')}
                     </Typography>
                     <TextField
                         label="URL"
@@ -130,7 +130,7 @@ const Index = () => {
             <Grid container alignItems="center" marginTop={3}>
                 <Box sx={{ width: '100%' }}>
                     <Typography variant="h6" gutterBottom>
-                        Nombre del campo que se enviará en el cuerpo de la petición
+                        {t('documentationView.input.title3')}
                     </Typography>
                     <Grid item xs={12} sm={6} md={4}>
 
@@ -145,7 +145,7 @@ const Index = () => {
                         />
                     </Grid>
                     <Typography variant="h6" gutterBottom>
-                        Puedes usar valores estáticos o los ya definidos en el sistema.
+                        {t('documentationView.input.title4')}
                     </Typography>
                     <Grid item xs={12} sm={6} md={4}>
 
@@ -178,7 +178,7 @@ const Index = () => {
                     <Grid container alignItems="center" marginTop={3}>
                         <Box sx={{ width: '100%' }}>
                             <Typography variant="h6" gutterBottom>
-                                Valor si se decide enviar estático
+                                {t('documentationView.input.title5')}
                             </Typography>
                             <Grid item xs={12} sm={6} md={4}>
 
@@ -196,8 +196,8 @@ const Index = () => {
                         <Table sx={{ minWidth: 650 }} aria-label="simple table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center">Estatico <br /><code>Estatico</code></TableCell>
-                                    <TableCell align="center">Variable <br /><code>&#123;&#123;arrival_date&#125;&#125;</code></TableCell>
+                                    <TableCell align="center">{t('documentationView.table.title1')}<br /><code>{t('documentationView.table.title1')}</code></TableCell>
+                                    <TableCell align="center">{t('documentationView.table.title2')} <br /><code>&#123;&#123;arrival_date&#125;&#125;</code></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
