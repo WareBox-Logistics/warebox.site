@@ -77,5 +77,49 @@
     "cancel": "Cancelar",
     "userUpdated": "Usuario actualizado exitosamente",
     "updateFailed": "Error al actualizar usuario"
+  },
+  "documentationView" : {
+    "title": "Configuración de notificaciones y rutas",
+    "subtitle": "A continuación se muestran las opciones para configurar las notificaciones y visualizar la información de las rutas.",
+    "notification": {
+      "title1": "Activa esta opción para recibir todos los datos de notificaciones sin ningún filtro.",
+      "title2": "Permite que se envíen múltiples notificaciones para cada evento, en lugar de solo una.",
+      "title3": "Activa o desactiva las notificaciones de eventos y movimientos."
+    },
+    "input": {
+      "title1": "Nombre de la ruta predefinida",
+      "title2": "URL de tu endpoint",
+      "title3": "Nombre del campo que se enviará en el cuerpo de la petición",
+      "title4": "Puedes usar valores estáticos o los ya definidos en el sistema.",
+      "title5": "Valor si se decide enviar estático"
+    },
+    "table": {
+      "title1": "Estatico",
+      "title2": "Variable"
+    },
+    "tabs" : {
+      "workorder" : {
+        "title" : "Descripción",
+        "subtitle" : "Las rutas predefinidas para el módulo de movimiento de conductor son las siguientes:",
+        "routes"  :{
+          "route1" : "Ruta para programar una cita de movimiento de conductor.",
+          "route2" : "Ruta para obtener o actualizar el último día libre de la orden de trabajo.",
+          "route3" : "Ruta para gestionar la notificación de vacío relacionada con la orden de trabajo.",
+          "route4" : "Ruta para establecer o consultar la fecha de entrega de la orden de trabajo.",
+          "route5" : "Ruta personalizada para la orden de trabajo - Ruta 1.",
+          "route6" : "Ruta personalizada para la orden de trabajo - Ruta 2."
+        }
+      },
+      "driverMove" : {
+        "title" : "Descripción",
+        "subtitle" : "Las rutas predefinidas para el módulo de movimiento de conductor son las siguientes:",
+        "routes" :{
+          "route1" : "Ruta para cerrar el estado de la orden de trabajo.",
+          "route2" : "Ruta para obtener o actualizar la fecha de la cita del movimiento.",
+          "route3" : "Ruta para gestionar la entrega relacionada con el movimiento del conductor.",
+          "route4" : "Ruta para establecer o consultar la fecha de salida del conductor."
+        }
+      }
+    }
   }
 }

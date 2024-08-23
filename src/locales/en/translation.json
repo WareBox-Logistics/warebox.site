@@ -77,5 +77,49 @@
     "cancel": "Cancel",
     "userUpdated": "User updated successfully",
     "updateFailed": "Failed to update user"
+  },
+  "documentationView": {
+    "title": "Setting up notifications and routes",
+    "subtitle": "Below are the options for setting up notifications and viewing route information.",
+    "notification": {
+      "title1": "Activate this option to receive all notification data without any filters.",
+      "title2": "Allows multiple notifications to be sent for each event, rather than just one.",
+      "title3": "Enable or disable notifications for events and movements."
+    },
+    "input": {
+      "title1": "Name of the predefined route",
+      "title2": "URL of your endpoint",
+      "title3": "Name of the field that will be sent in the request body",
+      "title4": "You can use static values or those already defined in the system.",
+      "title5": "Value if you choose to send it as static"
+    },
+    "table": {
+      "title1": "Static",
+      "title2": "Variable"
+    },
+    "tabs": {
+      "workorder": {
+        "title": "Description",
+        "subtitle": "The predefined routes for the driver movement module are as follows:",
+        "routes": {
+          "route1": "Route to schedule a driver movement appointment.",
+          "route2": "Route to obtain or update the movement appointment date.",
+          "route3": "Route to manage the delivery related to the driver's movement.",
+          "route4": "Route to set or consult the driver's departure date."
+        }
+      },
+      "driverMove": {
+        "title": "Description",
+        "subtitle": "The predefined routes for the driver movement module are as follows:",
+        "routes": {
+          "route1": "Route to close the work order status.",
+          "route2": "Route to obtain or update the last day off for the work order.",
+          "route3": "Route to manage the empty notification related to the work order.",
+          "route4": "Route to set or consult the work order delivery date.",
+          "route5": "Custom route for the work order - Route 1.",
+          "route6": "Custom route for the work order - Route 2."
+        }
+      }
+    }
   }
 }

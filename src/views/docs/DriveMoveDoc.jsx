@@ -16,36 +16,39 @@ import {
 import { ArrowRightAlt } from '@mui/icons-material';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { useTranslation } from 'react-i18next';
 
 const DriveMoveRoutesDoc = () => {
+  const { t } = useTranslation();
+
   const routes = [
     {
       name: 'dm_schedule_appointment',
-      description: 'Ruta para programar una cita de movimiento de conductor.'
+      description: t("documentationView.tabs.driverMove.routes.route1")
     },
     {
       name: 'dm_app_date',
-      description: 'Ruta para obtener o actualizar la fecha de la cita del movimiento.'
+      description: t("documentationView.tabs.driverMove.routes.route2")
     },
     {
       name: 'dm_delivery',
-      description: 'Ruta para gestionar la entrega relacionada con el movimiento del conductor.'
+      description: t("documentationView.tabs.driverMove.routes.route3")
     },
     {
       name: 'dm_departure_date',
-      description: 'Ruta para establecer o consultar la fecha de salida del conductor.'
+      description: t("documentationView.tabs.driverMove.routes.route4")
     },
   ];
 
   return (
-    <Container fixed style={{padding: 0, paddingTop:"24px"}}>
+    <Container fixed style={{ padding: 0, paddingTop: "24px" }}>
       <Grid container>
         <Grid item xs={12} md={6}>
           <Typography variant="h4" gutterBottom>
-            Descripción
+            {t("documentationView.tabs.driverMove.title")}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Las rutas predefinidas para el módulo de movimiento de conductor son las siguientes:
+            {t("documentationView.tabs.driverMove.subtitle")}
           </Typography>
           <List>
             {routes.map((route, index) => (
@@ -58,7 +61,7 @@ const DriveMoveRoutesDoc = () => {
             ))}
           </List>
         </Grid>
-        <SyntaxHighlighter language="json" style={atomOneDark} customStyle={{overflowX: 'auto'}} wrapLines={true}>
+        <SyntaxHighlighter language="json" style={atomOneDark} customStyle={{ overflowX: 'auto' }} wrapLines={true}>
           {`
 {
   "id": "<--- id del movimiento",
