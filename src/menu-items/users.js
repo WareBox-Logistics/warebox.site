@@ -1,8 +1,8 @@
 // assets
-import { IconDashboard, IconUser , IconPaperclip} from '@tabler/icons-react';
+import { IconDashboard, IconUser , IconPaperclip, IconMap2} from '@tabler/icons-react';
 
 // constant
-const icons = { IconDashboard, IconUser, IconPaperclip };
+const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
@@ -33,6 +33,14 @@ const users = {
       type: 'item',
       url: '/documentation',
       icon: icons.IconPaperclip,
+      breadcrumbs: false
+    },
+    {
+      id: 'edi',
+      title: 'Edi Config',
+      type: 'item',
+      url: '/edi',
+      icon: icons.IconMap2,
       breadcrumbs: false
     }
   ]

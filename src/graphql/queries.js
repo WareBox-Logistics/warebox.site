@@ -506,3 +506,137 @@ export const CHECK_EMAIL_EXISTS = gql`
     }
   }
 `;
+
+export const GET_WEB_SERVICES_EDI_CONFIGS = gql`
+  query GetWebServicesEdiConfigs($limit: Int!, $offset: Int!) {
+    web_services_edi_config_aggregate {
+      aggregate {
+        count
+      }
+    }
+    web_services_edi_config(limit: $limit, offset: $offset, order_by: { created_at: desc }) {
+      id
+      customer {
+        id
+        name
+      }
+      sftp_url
+      sftp_user
+      sftp_password
+      sftp_folder_get
+      sftp_folder_send
+      sftp_folder_send_history
+      sftp_folder_get_history
+      unit_type {
+        id
+        shortname
+      }
+      lb_id
+      hc_equipment_type_id
+      do_status {
+        id
+        name
+      }
+      content_status {
+        id
+        name
+      }
+      load_type {
+        id
+        name
+      }
+      file_name_patterns
+      edi_990_accept
+      edi_214_plan_delivery
+      edi_214_plan_pickup
+    }
+  }
+`;
+
+
+export const GET_CUSTOMER_WEB_SERVICES_EDI_CONFIGS = gql`
+  query GetCustomerEdiConfig($id: uuid!) {
+    web_services_edi_config(where: { id: { _eq: $id } }) {
+      customer {
+        id
+        name
+      }
+      sftp_url
+      sftp_user
+      sftp_password
+      sftp_folder_get
+      sftp_folder_send
+      sftp_folder_send_history
+      sftp_folder_get_history
+      unit_type {
+        id
+        shortname
+      }
+      lb_id
+      hc_equipment_type_id
+      do_status {
+        id
+        name
+      }
+      content_status {
+        id
+        name
+      }
+      load_type {
+        id
+        name
+      }
+      file_name_patterns
+      edi_990_accept
+      edi_214_plan_delivery
+      edi_214_plan_pickup
+    }
+  }
+`;
+
+export const GET_STATUS = gql`
+ query GetStatus {
+    status(where: { type: { _eq: "all" } }) {
+      id
+      name
+      type
+    }
+  }
+`;
+
+export const GET_LOAD_TYPE = gql`
+  query GetLoadType {
+    load_types {
+      id
+      name
+    }
+  }
+`;
+
+export const GET_UNIT_TYPE = gql`
+  query GetUnirType {
+    unit_types {
+      id
+      name
+    }
+  }
+`;
+
+export const UPDATE_WEB_SERVICES_EDI_CONFIG = gql`
+mutation updateEdiWebServices($id: uuid!, $input: web_services_edi_config_set_input!) {
+  update_web_services_edi_config_by_pk(
+    pk_columns: { id: $id },
+    _set: $input
+  ) {
+    id
+  }
+}
+`;
+
+export const INSERT_WEB_SERVICES_EDI_CONFIG = gql`
+mutation InsertEDIConfig($input: web_services_edi_config_insert_input!) {
+  insert_web_services_edi_config_one(object: $input) {
+    id
+  }
+}
+`;
