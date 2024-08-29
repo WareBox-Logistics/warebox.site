@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { Tooltip, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, FormControl, InputLabel, Select, MenuItem, CircularProgress, Autocomplete, Grid, Tabs, Tab, Snackbar, Alert, IconButton } from '@mui/material';
+import { InputAdornment, Tooltip, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, FormControl, InputLabel, Select, MenuItem, CircularProgress, Autocomplete, Grid, Tabs, Tab, Snackbar, Alert, IconButton } from '@mui/material';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { GET_ACTIVE_COMPANIES, GET_UNIT_TYPE, GET_STATUS, GET_LOAD_TYPE, GET_CUSTOMER_WEB_SERVICES_EDI_CONFIGS, UPDATE_WEB_SERVICES_EDI_CONFIG } from '/src/graphql/queries';
@@ -52,6 +52,10 @@ const validationSchema = Yup.object({
     .matches(/^\[.*\]$/, 'Debe ser un array de patrones, e.g., ["KEY_204", "IMP"]'),
 });
 
+const highlightKeys = (text) => {
+  const regex = /{{(.*?)}}/g; // Busca las llaves dobles {{ }}
+  return text.replace(regex, (match) => `<span style="background-color: yellow;">${match}</span>`);
+};
 
 const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen }) => {
   const [tabValue, setTabValue] = useState(0);
@@ -59,6 +63,8 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
   const [snackbarSeverityLocal, setSnackbarSeverityLocal] = useState('success');
   const [snackbarOpenLocal, setSnackbarOpenLocal] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [openValidationModal, setOpenValidationModal] = useState(false);
+  const [highlightedEDI, setHighlightedEDI] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -113,7 +119,21 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
       updateEDIConfig({ variables: { id: configId, input: values } });
     },
   });
+  const highlightKeys = (text) => {
+    const regex = /{{(.*?)}}/g; // Resalta las llaves dobles {{ }}
+    return text.replace(regex, (match) => `<span style="background-color: yellow;">${match}</span>`);
+  };
 
+
+  const handleValidateEDI = (ediString) => {
+    setHighlightedEDI(highlightKeys(ediString));
+    setOpenValidationModal(true);
+  };
+
+  const handleCloseValidationModal = () => {
+    setOpenValidationModal(false);
+    setHighlightedEDI('');
+  };
   // Consultas para obtener los catálogos
   const [fetchCompanies, { data: companyData, loading: companyLoading }] = useLazyQuery(GET_ACTIVE_COMPANIES);
   const [fetchUnitTypes, { data: unitTypeData, loading: unitTypeLoading }] = useLazyQuery(GET_UNIT_TYPE);
@@ -459,6 +479,17 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                     autoComplete="off"
                     error={formik.touched.edi_990_accept && Boolean(formik.errors.edi_990_accept)}
                     helperText={formik.touched.edi_990_accept && formik.errors.edi_990_accept}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Ver">
+                            <IconButton onClick={() => handleValidateEDI(formik.values.edi_990_accept)}>
+                              <VisibilityIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
 
@@ -475,6 +506,17 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                     autoComplete="off"
                     error={formik.touched.edi_214_plan_delivery && Boolean(formik.errors.edi_214_plan_delivery)}
                     helperText={formik.touched.edi_214_plan_delivery && formik.errors.edi_214_plan_delivery}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Ver">
+                            <IconButton onClick={() => handleValidateEDI(formik.values.edi_214_plan_delivery)}>
+                              <VisibilityIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
 
@@ -491,11 +533,32 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                     autoComplete="off"
                     error={formik.touched.edi_214_plan_pickup && Boolean(formik.errors.edi_214_plan_pickup)}
                     helperText={formik.touched.edi_214_plan_pickup && formik.errors.edi_214_plan_pickup}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Validar EDI">
+                            <IconButton onClick={() => handleValidateEDI(formik.values.edi_214_plan_pickup)}>
+                              <VisibilityIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
               </Grid>
+              <Dialog open={openValidationModal} onClose={handleCloseValidationModal}>
+                <DialogTitle>EDI</DialogTitle>
+                <DialogContent>
+                  <div dangerouslySetInnerHTML={{ __html: highlightedEDI }} style={{ whiteSpace: 'pre-wrap' }} />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseValidationModal} color="primary">
+                    Cerrar
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </TabPanel>
-
           </DialogContent>
           <DialogActions>
             <Button onClick={onClose} disabled={updateLoading}>Cancelar</Button>

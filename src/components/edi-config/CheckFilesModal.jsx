@@ -11,6 +11,9 @@ const CheckFilesModal = ({ open, onClose, sftpFolderSend, sftpUrl, sftpUser, sft
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [ediContent, setEdiContent] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isLineBreaksEnabled, setIsLineBreaksEnabled] = useState(false);
+  const [alreadyContainsLineBreaks, setAlreadyContainsLineBreaks] = useState(false);
+  const [highlightedSegment, setHighlightedSegment] = useState(null);
 
   useEffect(() => {
     if (open) {
@@ -18,6 +21,9 @@ const CheckFilesModal = ({ open, onClose, sftpFolderSend, sftpUrl, sftpUser, sft
       setSelectedFile(null);
       setEdiContent(null);
       setShowPreview(false);
+      setAlreadyContainsLineBreaks(false);
+      setIsLineBreaksEnabled(false); // Resetear el estado de saltos de línea
+      setHighlightedSegment(null); // Resetear el segmento resaltado cuando se abre el modal
       fetchFiles();
     }
   }, [open]);
@@ -46,7 +52,8 @@ const CheckFilesModal = ({ open, onClose, sftpFolderSend, sftpUrl, sftpUser, sft
   const handleFileClick = async (filename) => {
     setSelectedFile(filename);
     setLoadingDetails(true);
-    setShowPreview(false); // Reset the preview state
+    setShowPreview(false);
+    setHighlightedSegment(null);
 
     try {
       const contentResponse = await axios.post(import.meta.env.VITE_SFTP_GET_EDI_CONTENT, {
@@ -59,6 +66,9 @@ const CheckFilesModal = ({ open, onClose, sftpFolderSend, sftpUrl, sftpUser, sft
       if (contentResponse.data.success) {
         const ediContent = contentResponse.data.edi_content;
         setEdiContent(ediContent);
+
+        const containsLineBreaks = ediContent.includes('\n') || ediContent.includes('\r');
+        setAlreadyContainsLineBreaks(containsLineBreaks);
 
         const parseResponse = await axios.post(import.meta.env.VITE_SFTP_PARSE_EDI, {
           edi_content: ediContent
@@ -79,8 +89,44 @@ const CheckFilesModal = ({ open, onClose, sftpFolderSend, sftpUrl, sftpUser, sft
     }
   };
 
+  const handleDetailClick = (key, value) => {
+    // Solo establecer el segmento resaltado si el valor es válido, no es null, ni "N/A"
+    if (value && value !== 'N/A' && value !== null && value !== '') {
+      setHighlightedSegment(value);
+    } else {
+      setHighlightedSegment(null);
+    }
+  };
+
   const handlePreviewClick = () => {
     setShowPreview((prev) => !prev);
+  };
+
+  const handleToggleLineBreaks = () => {
+    setIsLineBreaksEnabled((prev) => !prev);
+  };
+
+  const getHighlightedEdiContent = () => {
+    if (!ediContent) return '';
+
+    // Formatear el contenido EDI según los saltos de línea seleccionados
+    const formattedContent = isLineBreaksEnabled
+      ? (alreadyContainsLineBreaks ? ediContent : ediContent.replace(/~/g, '~\n')) // Control de saltos de línea
+      : ediContent.replace(/\n/g, '').replace(/\r/g, ''); // Quitar saltos de línea
+
+    const segments = formattedContent.split('~');
+
+    return segments.map((segment, index) => {
+      // Resaltar solo si el segmento contiene el valor seleccionado y no es "N/A"
+      const style = highlightedSegment && segment.includes(highlightedSegment) && highlightedSegment !== 'N/A'
+        ? { backgroundColor: 'yellow' }
+        : {};
+      return (
+        <span key={index} style={style}>
+          {segment}~
+        </span>
+      );
+    });
   };
 
   return (
@@ -130,27 +176,28 @@ const CheckFilesModal = ({ open, onClose, sftpFolderSend, sftpUrl, sftpUser, sft
             ) : fileDetails ? (
               <Box>
                 <Typography variant="h6">Detalles del EDI 204</Typography>
-                <Typography><strong>WO:</strong> {fileDetails.work_order_number || 'N/A'}</Typography>
-                <Typography><strong>Order Number:</strong> {fileDetails.order_number || 'N/A'}</Typography>
-                <Typography><strong>Container Number:</strong> {fileDetails.container_number || 'N/A'}</Typography>
-                <Typography><strong>Origin:</strong> {fileDetails.origin || 'N/A'}</Typography>
-                <Typography><strong>Destination:</strong> {fileDetails.destination || 'N/A'}</Typography>
-                <Typography><strong>Ship Date:</strong> {fileDetails.ship_date || 'N/A'}</Typography>
-                <Typography><strong>Estimated Delivery:</strong> {fileDetails.estimated_delivery || 'N/A'}</Typography>
-                <Typography><strong>Tracking Number:</strong> {fileDetails.tracking_number || 'N/A'}</Typography>
-                <Typography><strong>Shipment Status:</strong> {fileDetails.shipment_status || 'N/A'}</Typography>
-                <Typography><strong>Carrier:</strong> {fileDetails.carrier_name || 'N/A'}</Typography>
-                <Typography><strong>Sender ID:</strong> {fileDetails.sender_id || 'N/A'}</Typography>
-                <Typography><strong>Receiver ID:</strong> {fileDetails.receiver_id || 'N/A'}</Typography>
-                <Typography><strong>Consignee Address:</strong> {fileDetails.consignee_address || 'N/A'}</Typography>
+                {Object.entries(fileDetails).map(([key, value]) => (
+                  <Typography 
+                    key={key}
+                    onClick={() => handleDetailClick(key, value)} // Ajuste para manejar el clic en el detalle
+                    style={{ cursor: 'pointer', backgroundColor: highlightedSegment === value && value !== 'N/A' && value !== null ? 'yellow' : 'inherit' }}
+                  >
+                    <strong>{key.replace(/_/g, ' ').toUpperCase()}:</strong> {value !== null && value !== '' ? value : 'N/A'}
+                  </Typography>
+                ))}
                 <Box mt={2}>
                   <Button onClick={handlePreviewClick} variant="contained" color="primary" fullWidth>
                     {showPreview ? 'Ocultar Vista Previa' : 'Vista Previa del Contenido EDI'}
                   </Button>
                   {showPreview && (
                     <Box mt={2} p={2} style={{ backgroundColor: '#f7f7f7', borderRadius: '4px', overflowX: 'auto' }}>
+                      <Box position="sticky" top={0} bgcolor="#f7f7f7" zIndex={1} py={1}>
+                        <Button onClick={handleToggleLineBreaks} variant="outlined" color="primary" fullWidth>
+                          {isLineBreaksEnabled ? 'Quitar Saltos de Línea' : 'Poner Saltos de Línea'}
+                        </Button>
+                      </Box>
                       <Typography variant="body2" style={{ whiteSpace: 'pre-wrap' }}>
-                        {ediContent}
+                        {getHighlightedEdiContent()}
                       </Typography>
                     </Box>
                   )}
