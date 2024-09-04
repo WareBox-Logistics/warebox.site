@@ -1,25 +1,32 @@
 import React, { useState } from 'react';
-import { CircularProgress, IconButton, Tooltip } from '@mui/material';
+import { CircularProgress, IconButton, Tooltip, Box, Chip, Typography } from '@mui/material';
 import axios from 'axios';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-const TestSFTPConnection = ({ sftp_url, sftp_user, sftp_password, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen }) => {
+const TestSFTPConnection = ({ sftp_url, sftp_user, sftp_password, sftp_folders, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen }) => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // null: default, 'success': green, 'error': red
+  const [folderStatuses, setFolderStatuses] = useState({}); // Estado para almacenar el estado de las carpetas
 
   const handleTestConnection = async () => {
     setLoading(true);
     setStatus(null);
+    setFolderStatuses({}); // Limpiar el estado anterior de las carpetas
     try {
       const response = await axios.post(import.meta.env.VITE_SFTP_TEST_CONNECTION, {
         sftp_url,
         sftp_user,
         sftp_password,
+        folders: sftp_folders, // Pasar las carpetas al backend
       });
+      
       setSnackbarSeverity(response.data.success ? 'success' : 'error');
       setSnackbarMessage(response.data.message);
       setSnackbarOpen(true);
       setStatus(response.data.success ? 'success' : 'error');
+      setFolderStatuses(response.data.folder_statuses || {}); // Actualizar el estado con el estado de las carpetas
     } catch (error) {
       setSnackbarSeverity('error');
       const errorMessage = error.response && error.response.data && error.response.data.message 
@@ -54,6 +61,20 @@ const TestSFTPConnection = ({ sftp_url, sftp_user, sftp_password, setSnackbarMes
           </IconButton>
         </span>
       </Tooltip>
+
+      {/* Mostrar estado de las carpetas */}
+      <Box mt={2} display="flex" flexDirection="column" gap={1}>
+        {Object.entries(folderStatuses).map(([folder, status]) => (
+          <Chip
+            key={folder}
+            icon={status === 'exists' ? <CheckIcon /> : <CancelIcon />}
+            label={`${folder}: ${status === 'exists' ? 'OK' : 'NO'}`}
+            color={status === 'exists' ? 'success' : 'error'}
+            variant="outlined"
+            style={{ maxWidth: '100%' }}
+          />
+        ))}
+      </Box>
     </div>
   );
 };
