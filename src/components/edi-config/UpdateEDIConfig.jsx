@@ -65,6 +65,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
   const [isModalOpen, setModalOpen] = useState(false);
   const [openValidationModal, setOpenValidationModal] = useState(false);
   const [highlightedEDI, setHighlightedEDI] = useState('');
+  const [modalField, setModalField] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -74,12 +75,14 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
     setSnackbarOpenLocal(false);
   };
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (field) => {
+    setModalField(field);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
+    setModalField('');
   };
 
   // Consulta para obtener los datos de la configuración específica
@@ -269,6 +272,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                           sftp_url={formik.values.sftp_url}
                           sftp_user={formik.values.sftp_user}
                           sftp_password={formik.values.sftp_password}
+                          sftp_folders={[formik.values.sftp_folder_get, formik.values.sftp_folder_send, formik.values.sftp_folder_send_history, formik.values.sftp_folder_get_history]}
                           setSnackbarMessage={setSnackbarMessageLocal}
                           setSnackbarSeverity={setSnackbarSeverityLocal}
                           setSnackbarOpen={setSnackbarOpenLocal}
@@ -279,18 +283,33 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <TextField
-                    label="SFTP Folder Get"
-                    name="sftp_folder_get"
-                    value={formik.values.sftp_folder_get}
-                    onChange={formik.handleChange}
-                    fullWidth
-                    size="small"
-                    autoComplete="off"
-                    error={formik.touched.sftp_folder_get && Boolean(formik.errors.sftp_folder_get)}
-                    helperText={formik.touched.sftp_folder_get && formik.errors.sftp_folder_get}
-                  />
+                  <Box display="flex" alignItems="center">
+                    <TextField
+                      label="SFTP Folder Get"
+                      name="sftp_folder_get"
+                      value={formik.values.sftp_folder_get}
+                      onChange={formik.handleChange}
+                      fullWidth
+                      size="small"
+                      autoComplete="off"
+                      error={formik.touched.sftp_folder_get && Boolean(formik.errors.sftp_folder_get)}
+                      helperText={formik.touched.sftp_folder_get && formik.errors.sftp_folder_get}
+                    />
+                    {formik.values.sftp_folder_get && (
+                      <Box ml={2}>
+                        <Tooltip title="Ver Archivos">
+                          <IconButton
+                            onClick={() => handleOpenModal('sftp_folder_get')}
+                            color="primary"
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    )}
+                  </Box>
                 </Grid>
+
                 <Grid item xs={12} md={6}>
                   <Box display="flex" alignItems="center">
                     <TextField
@@ -308,42 +327,71 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                       <Box ml={2}>
                         <Tooltip title="Ver Archivos">
                           <IconButton
-                            onClick={handleOpenModal}
+                            onClick={() => handleOpenModal('sftp_folder_send')}
                             color="primary"
                           >
                             <VisibilityIcon />
                           </IconButton>
                         </Tooltip>
                       </Box>
-
                     )}
                   </Box>
                 </Grid>
+
                 <Grid item xs={12} md={6}>
-                  <TextField
-                    label="SFTP Folder Send History"
-                    name="sftp_folder_send_history"
-                    value={formik.values.sftp_folder_send_history}
-                    onChange={formik.handleChange}
-                    fullWidth
-                    size="small"
-                    autoComplete="off"
-                    error={formik.touched.sftp_folder_send_history && Boolean(formik.errors.sftp_folder_send_history)}
-                    helperText={formik.touched.sftp_folder_send_history && formik.errors.sftp_folder_send_history}
-                  />
+                  <Box display="flex" alignItems="center">
+                    <TextField
+                      label="SFTP Folder Send History"
+                      name="sftp_folder_send_history"
+                      value={formik.values.sftp_folder_send_history}
+                      onChange={formik.handleChange}
+                      fullWidth
+                      size="small"
+                      autoComplete="off"
+                      error={formik.touched.sftp_folder_send_history && Boolean(formik.errors.sftp_folder_send_history)}
+                      helperText={formik.touched.sftp_folder_send_history && formik.errors.sftp_folder_send_history}
+                    />
+                    {formik.values.sftp_folder_send_history && (
+                      <Box ml={2}>
+                        <Tooltip title="Ver Archivos">
+                          <IconButton
+                            onClick={() => handleOpenModal('sftp_folder_send_history')}
+                            color="primary"
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    )}
+                  </Box>
                 </Grid>
+
                 <Grid item xs={12} md={6}>
-                  <TextField
-                    label="SFTP Folder Get History"
-                    name="sftp_folder_get_history"
-                    value={formik.values.sftp_folder_get_history}
-                    onChange={formik.handleChange}
-                    fullWidth
-                    size="small"
-                    autoComplete="off"
-                    error={formik.touched.sftp_folder_get_history && Boolean(formik.errors.sftp_folder_get_history)}
-                    helperText={formik.touched.sftp_folder_get_history && formik.errors.sftp_folder_get_history}
-                  />
+                  <Box display="flex" alignItems="center">
+                    <TextField
+                      label="SFTP Folder Get History"
+                      name="sftp_folder_get_history"
+                      value={formik.values.sftp_folder_get_history}
+                      onChange={formik.handleChange}
+                      fullWidth
+                      size="small"
+                      autoComplete="off"
+                      error={formik.touched.sftp_folder_get_history && Boolean(formik.errors.sftp_folder_get_history)}
+                      helperText={formik.touched.sftp_folder_get_history && formik.errors.sftp_folder_get_history}
+                    />
+                    {formik.values.sftp_folder_get_history && (
+                      <Box ml={2}>
+                        <Tooltip title="Ver Archivos">
+                          <IconButton
+                            onClick={() => handleOpenModal('sftp_folder_get_history')}
+                            color="primary"
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    )}
+                  </Box>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -583,7 +631,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
       <CheckFilesModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        sftpFolderSend={formik.values.sftp_folder_send}
+        sftpFolderSend={formik.values[modalField]}
         sftpUrl={formik.values.sftp_url}
         sftpUser={formik.values.sftp_user}
         sftpPassword={formik.values.sftp_password}
