@@ -640,3 +640,58 @@ mutation InsertEDIConfig($input: web_services_edi_config_insert_input!) {
   }
 }
 `;
+
+// chat helper
+export const GET_CHAT_HELPER = gql`
+query GET_CHAT_HELPER {
+  web_services_chat_helper(order_by: {display_order: asc, created_at: asc}) {
+    id
+    category
+    question
+    answer
+    display_order
+    status
+    created_at
+    updated_at
+  }
+}
+`;
+
+export const UPDATE_FAVORITE = gql`
+mutation UPDATE_FAVORITE($id: Int!, $favorite: Boolean!) {
+  update_web_services_chat_helper_by_pk(pk_columns: { id: $id }, _set: { favorite: $favorite }) {
+    id
+    favorite
+  }
+}
+`;
+
+export const INSERT_CHAT_HELPER = gql`
+mutation INSERT_CHAT_HELPER($category: String!, $question: String!, $answer: String!, $display_order: Int, $created_by: uuid, $status: String) {
+  insert_web_services_chat_helper_one(object: {category: $category, question: $question, answer: $answer, display_order: $display_order, created_by: $created_by, status: $status}) {
+    id
+    category
+    question
+    answer
+    display_order
+    created_at
+  }
+}
+`;
+
+export const INSERT_FEEDBACK = gql`
+mutation INSERT_FEEDBACK($input: web_services_user_feedback_insert_input!) {
+  insert_web_services_user_feedback_one(object: $input) {
+    id
+  }
+}
+`;
+
+export const CHECK_USER_FEEDBACK = gql`
+query CHECK_USER_FEEDBACK($user_id: uuid!, $question_id: uuid!) {
+  web_services_user_feedback(where: {user_id: {_eq: $user_id}, question_id: {_eq: $question_id}}) {
+    id
+  }
+}
+
+`;
