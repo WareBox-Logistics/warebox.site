@@ -546,6 +546,7 @@ export const GET_WEB_SERVICES_EDI_CONFIGS = gql`
         name
       }
       file_name_patterns
+      file_name_patterns_ret
       edi_990_accept
       edi_214_plan_delivery
       edi_214_plan_pickup
@@ -587,6 +588,7 @@ export const GET_CUSTOMER_WEB_SERVICES_EDI_CONFIGS = gql`
         name
       }
       file_name_patterns
+      file_name_patterns_ret
       edi_990_accept
       edi_214_plan_delivery
       edi_214_plan_pickup
