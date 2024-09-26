@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { InputAdornment, Tooltip, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, FormControl, InputLabel, Select, MenuItem, CircularProgress, Autocomplete, Grid, Tabs, Tab, Snackbar, Alert, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { GET_ACTIVE_COMPANIES, GET_UNIT_TYPE, GET_STATUS, GET_LOAD_TYPE, GET_CUSTOMER_WEB_SERVICES_EDI_CONFIGS, UPDATE_WEB_SERVICES_EDI_CONFIG } from '/src/graphql/queries';
 import TestSFTPConnection from './TestSFTPConnection';
 import CheckFilesModal from './CheckFilesModal';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ValidationModal from './ValidationEdiModal';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -50,12 +52,11 @@ const validationSchema = Yup.object({
   file_name_patterns: Yup.string()
     .required('Los patrones de nombre de archivo son requeridos')
     .matches(/^\[.*\]$/, 'Debe ser un array de patrones, e.g., ["KEY_204", "IMP"]'),
+  file_name_patterns_ret: Yup.string()
+    .required('Los patrones de nombre de archivo son requeridos')
+    .matches(/^\[.*\]$/, 'Debe ser un array de patrones, e.g., ["KEY_204", "RET"]'),
 });
 
-const highlightKeys = (text) => {
-  const regex = /{{(.*?)}}/g; // Busca las llaves dobles {{ }}
-  return text.replace(regex, (match) => `<span style="background-color: yellow;">${match}</span>`);
-};
 
 const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen }) => {
   const [tabValue, setTabValue] = useState(0);
@@ -64,7 +65,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
   const [snackbarOpenLocal, setSnackbarOpenLocal] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [openValidationModal, setOpenValidationModal] = useState(false);
-  const [highlightedEDI, setHighlightedEDI] = useState('');
+  const [ediString, setEdiString] = useState('');
   const [modalField, setModalField] = useState('');
 
   const handleTabChange = (event, newValue) => {
@@ -84,6 +85,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
     setModalOpen(false);
     setModalField('');
   };
+  
 
   // Consulta para obtener los datos de la configuración específica
   const [fetchEdiConfig, { data: configData, loading: configLoading }] = useLazyQuery(GET_CUSTOMER_WEB_SERVICES_EDI_CONFIGS, {
@@ -115,6 +117,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
       edi_214_plan_delivery: configData?.web_services_edi_config[0]?.edi_214_plan_delivery || '',
       edi_214_plan_pickup: configData?.web_services_edi_config[0]?.edi_214_plan_pickup || '',
       file_name_patterns: configData?.web_services_edi_config[0]?.file_name_patterns || '',
+      file_name_patterns_ret: configData?.web_services_edi_config[0]?.file_name_patterns_ret || '',
     },
     validationSchema: validationSchema,
     enableReinitialize: true,
@@ -129,7 +132,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
 
 
   const handleValidateEDI = (ediString) => {
-    setHighlightedEDI(highlightKeys(ediString));
+    setEdiString(ediString);
     setOpenValidationModal(true);
   };
 
@@ -173,7 +176,16 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Actualizar Configuración EDI</DialogTitle>
+      <DialogTitle>
+        Actualizar Configuración EDI
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          style={{ position: 'absolute', right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
       {configLoading ? (
         <CircularProgress />
       ) : (
@@ -248,7 +260,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                     onChange={formik.handleChange}
                     fullWidth
                     size="small"
-                    autoComplete="off"
+                    autoComplete="of</Grid>f"
                     error={formik.touched.sftp_user && Boolean(formik.errors.sftp_user)}
                     helperText={formik.touched.sftp_user && formik.errors.sftp_user}
                   />
@@ -394,7 +406,7 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={3}>
                   <TextField
                     label="File Name Patterns"
                     name="file_name_patterns"
@@ -406,6 +418,20 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                     placeholder='["KEY_204", "IMP"]'
                     error={formik.touched.file_name_patterns && Boolean(formik.errors.file_name_patterns)}
                     helperText={formik.touched.file_name_patterns && formik.errors.file_name_patterns}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    label="File Name Patterns RET"
+                    name="file_name_patterns_ret"
+                    value={formik.values.file_name_patterns_ret}
+                    onChange={formik.handleChange}
+                    fullWidth
+                    size="small"
+                    autoComplete="off"
+                    placeholder='["KEY_204", "RET"]'
+                    error={formik.touched.file_name_patterns_ret && Boolean(formik.errors.file_name_patterns_ret)}
+                    helperText={formik.touched.file_name_patterns_ret && formik.errors.file_name_patterns_ret}
                   />
                 </Grid>
               </Grid>
@@ -595,17 +621,11 @@ const UpdateEDIConfig = ({ open, onClose, onUpdate, configId, setSnackbarMessage
                   />
                 </Grid>
               </Grid>
-              <Dialog open={openValidationModal} onClose={handleCloseValidationModal}>
-                <DialogTitle>EDI</DialogTitle>
-                <DialogContent>
-                  <div dangerouslySetInnerHTML={{ __html: highlightedEDI }} style={{ whiteSpace: 'pre-wrap' }} />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseValidationModal} color="primary">
-                    Cerrar
-                  </Button>
-                </DialogActions>
-              </Dialog>
+              <ValidationModal
+              open={openValidationModal}
+              onClose={handleCloseValidationModal}
+              ediString={ediString}
+            />
             </TabPanel>
           </DialogContent>
           <DialogActions>

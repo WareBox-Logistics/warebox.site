@@ -7,6 +7,7 @@ import { useFormik } from 'formik';
 import { GET_ACTIVE_COMPANIES, GET_UNIT_TYPE, GET_STATUS, GET_LOAD_TYPE, INSERT_WEB_SERVICES_EDI_CONFIG } from '/src/graphql/queries';
 import TestSFTPConnection from './TestSFTPConnection';
 import CheckFilesModal from './CheckFilesModal';
+import CloseIcon from '@mui/icons-material/Close';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -160,7 +161,16 @@ const RegisterEDIConfig = ({ open, onClose, onSave }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Registrar Configuración EDI</DialogTitle>
+      <DialogTitle>
+        Registrar Configuración EDI
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          style={{ position: 'absolute', right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
       <form onSubmit={formik.handleSubmit}>
         <DialogContent>
           <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary" variant="fullWidth">
