@@ -7,7 +7,7 @@ import jwt_decode from 'jwt-decode';
 
 // Configuración del enlace HTTP
 const httpLink = new HttpLink({
-  uri: 'https://has.balidexone.io/v1/graphql',
+  uri: 'https://utt-products.hasura.app/v1/graphql',
 });
 
 // Configuración del enlace WebSocket de Hasura

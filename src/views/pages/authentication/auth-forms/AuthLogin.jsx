@@ -30,8 +30,11 @@ const AuthLogin = () => {
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (values, { setSubmitting }) => {
+    console.log(import.meta.env.VITE_JWT_LOGIN);
+
     logout(); // Ensure any existing session is cleared
     try {
+      
       const response = await axios.post(import.meta.env.VITE_JWT_LOGIN, {
         input: { email: values.email, password: values.password }
       });
@@ -78,7 +81,7 @@ const AuthLogin = () => {
           onSubmit={handleSubmit}
         >
           {({ isSubmitting, errors, touched }) => (
-            <Form>
+            <Form autoComplete="off">
               <Stack spacing={2}>
                 <Field
                   as={TextField}
@@ -89,6 +92,8 @@ const AuthLogin = () => {
                   margin="normal"
                   error={touched.email && !!errors.email}
                   helperText={touched.email && errors.email}
+                  id="email"
+                  autoComplete="email"
                 />
                 <Field
                   as={TextField}
@@ -99,6 +104,8 @@ const AuthLogin = () => {
                   margin="normal"
                   error={touched.password && !!errors.password}
                   helperText={touched.password && errors.password}
+                  id="password"
+                  autoComplete="current-password"
                 />
                 <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
                   {isSubmitting ? 'Logging in...' : 'Login'}

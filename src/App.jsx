@@ -7,7 +7,6 @@ import router from 'routes';
 import themes from 'themes';
 import NavigationScroll from 'layout/NavigationScroll';
 import { RouterProvider } from 'react-router-dom';
-import FloatingHelpButton from './components/floating-help/FloatingHelpButton';
 
 const App = () => {
   const customization = useSelector((state) => state.customization);
@@ -18,8 +17,9 @@ const App = () => {
         <CssBaseline />
         <AuthProvider>
           <NavigationScroll>
-            <RouterProvider router={router} />
-            {/* <FloatingHelpButton /> */}
+            <RouterProvider 
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+            router={router} />
           </NavigationScroll>
         </AuthProvider>
       </ThemeProvider>

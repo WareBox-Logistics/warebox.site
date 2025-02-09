@@ -53,17 +53,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [checkUserStatus]);
 
-  useSubscription(USER_STATUS_SUBSCRIPTION, {
-    variables: { id: localStorage.getItem('user_id') },
-    skip: !isAuthenticated, // Skip subscription if not authenticated
-    onSubscriptionData: ({ subscriptionData }) => {
-      const userStatus = subscriptionData.data.web_services_users_by_pk;
-      if (!userStatus.is_active) {
-        logout();
-      }
-    },
-  });
-
+  
   const login = (token) => {
     const decoded = jwt_decode(token);
     const userId = decoded['https://hasura.io/jwt/claims']['x-hasura-user-id'];
