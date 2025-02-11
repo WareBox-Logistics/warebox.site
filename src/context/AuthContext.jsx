@@ -1,8 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { useLazyQuery, useMutation, useSubscription } from '@apollo/client';
-import { CHECK_USER_STATUS, UPDATE_SESSION_STATUS, USER_STATUS_SUBSCRIPTION } from '/src/graphql/queries';
-import { initializeWebSocket, closeWebSocket } from '/src/websocket';
-import jwt_decode from 'jwt-decode';
+import {useMutation } from '@apollo/client';
+import { UPDATE_SESSION_STATUS } from '/src/graphql/queries';
+import { closeWebSocket } from '/src/websocket';
 
 const AuthContext = createContext();
 
@@ -12,76 +11,47 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
-  const [checkUserStatus] = useLazyQuery(CHECK_USER_STATUS);
   const [updateSessionStatus] = useMutation(UPDATE_SESSION_STATUS);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('user_id');
-    if (token && userId) {
-      checkUserStatus({ variables: { id: userId } }).then(({ data }) => {
-        if (data && data.web_services_users_by_pk) {
-          if (data.web_services_users_by_pk.is_active) {
-            const decoded = jwt_decode(token);
-            const userData = {
-              id: userId,
-              email: decoded['https://hasura.io/jwt/claims']['x-hasura-email'],
-              customer_id: decoded['https://hasura.io/jwt/claims']['x-hasura-customer-id'],
-              is_admin: decoded['https://hasura.io/jwt/claims']['x-hasura-role'] === 'admin',
-            };
-            setUser(userData);
-            setIsAuthenticated(true);
-            setIsAdmin(data.web_services_users_by_pk.is_admin);
-            console.log('is_admin_log: ' + data.web_services_users_by_pk.is_admin);
-            initializeWebSocket(userId);
-          } else {
-            logout();
-          }
-        } else {
-          logout();
-        }
-        setLoadingAuth(false);
-        setAuthChecked(true);
-      }).catch(error => {
-        logout();
-        setLoadingAuth(false);
-        setAuthChecked(true);
-      });
+    if (token) {
+      setIsAuthenticated(true);
     } else {
-      setLoadingAuth(false);
-      setAuthChecked(true);
+      setIsAuthenticated(false);
+      setUser(null);
+      setIsAdmin(false);
     }
-  }, [checkUserStatus]);
+    setLoadingAuth(false); 
+    setAuthChecked(true);
+  }, [isAuthenticated]);
+  
+  
 
   
-  const login = (token) => {
-    const decoded = jwt_decode(token);
-    const userId = decoded['https://hasura.io/jwt/claims']['x-hasura-user-id'];
+  const login = (token, data) => {
+    const userId = data.employee_by_pk.id;
+    const role = data.employee_by_pk.role_table.name;
+    const permisos = data.employee_by_pk.role_table.permisos.map(p => p.permiso.nombre);
     const userData = {
       id: userId,
-      email: decoded['https://hasura.io/jwt/claims']['x-hasura-email'],
-      customer_id: decoded['https://hasura.io/jwt/claims']['x-hasura-customer-id'],
+      email: data.employee_by_pk.email,
+      customer_id: userId,
     };
+
     localStorage.setItem('token', token);
     localStorage.setItem('user_id', userId);
-    localStorage.setItem('customer_id', decoded['https://hasura.io/jwt/claims']['x-hasura-customer-id']);
+    localStorage.setItem('customer_id', userId);
+    localStorage.setItem('role', role);
+    localStorage.setItem('permisos', JSON.stringify(permisos));
     setIsAuthenticated(true);
     setUser(userData);
-
-    checkUserStatus({ variables: { id: userId } }).then(({ data }) => {
-      if (data && data.web_services_users_by_pk) {
-        setIsAdmin(data.web_services_users_by_pk.is_admin);
-      }
-    });
-
-    updateSessionStatus({ variables: { id: userId, is_session_active: true, is_online: true } });
-    initializeWebSocket(userId);
   };
 
   const logout = () => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('user_id');
-    if (token && userId) {
+    if (token) {
       updateSessionStatus({ variables: { id: userId, is_session_active: false } })
         .finally(() => {
           closeWebSocket();

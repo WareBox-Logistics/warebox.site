@@ -697,3 +697,30 @@ query CHECK_USER_FEEDBACK($user_id: uuid!, $question_id: uuid!) {
 }
 
 `;
+
+export const GET_INFO_USER = gql`
+query GetInforUser($id: bigint!) {
+  employee_by_pk(id: $id) {
+    id
+    first_name
+    last_name
+    email
+    role_table {
+      name
+      permisos {
+        permiso {
+          nombre
+        }
+      }
+    }
+  }
+}
+`;
+
+export const QUERY = gql`
+query {
+  employee {
+    id
+  }
+}
+`;

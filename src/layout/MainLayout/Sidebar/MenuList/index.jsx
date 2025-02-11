@@ -1,15 +1,12 @@
 // src/layout/MainLayout/Sidebar/MenuList/index.jsx
 import { Typography } from '@mui/material';
-import { useContext } from 'react';
-import AuthContext from '/src/context/AuthContext';
 import NavGroup from './NavGroup';
 import getMenuItems from 'menu-items';
 
 // ==============================|| SIDEBAR MENU LIST ||============================== //
 
 const MenuList = () => {
-  const { isAdmin } = useContext(AuthContext); // Obtiene isAdmin desde el contexto
-  const menuItems = getMenuItems(isAdmin); // Obtiene los items del menú basados en isAdmin
+  const menuItems = getMenuItems(true);
 
   if (!menuItems || !menuItems.items) {
     return (
