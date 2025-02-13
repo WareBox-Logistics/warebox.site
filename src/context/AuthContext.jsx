@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       setIsAuthenticated(true);
+      setUser(JSON.parse(localStorage.getItem('userData')));
     } else {
       setIsAuthenticated(false);
       setUser(null);
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('customer_id', userId);
     localStorage.setItem('role', role);
     localStorage.setItem('permisos', JSON.stringify(permisos));
+    localStorage.setItem('userData', JSON.stringify(userData));
     setIsAuthenticated(true);
     setUser(userData);
   };
