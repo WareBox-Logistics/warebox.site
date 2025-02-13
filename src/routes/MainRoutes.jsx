@@ -33,6 +33,30 @@ const MainRoutes = {
           element: <NotificationHistory />
         },
         {
+          path: 'administrador',
+          element: <DashboardDefault />
+        },
+        {
+          path: 'almacenista',
+          element: <NotificationHistory />
+        },
+        {
+          path: 'chofer',
+          element: <DashboardDefault />
+        },
+        {
+          path: 'despacho',
+          element: <NotificationHistory />
+        },
+        {
+          path: 'operador',
+          element: <DashboardDefault />
+        },
+        {
+          path: 'supervisor',
+          element: <NotificationHistory />
+        },
+        {
           path: '',
           element: <PrivateRoute adminOnly />, // Protege la ruta de usuarios
           children: [

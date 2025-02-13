@@ -5,7 +5,7 @@ const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
 const userPermissions = JSON.parse(localStorage.getItem('permisos') || '[]'); // Convertir JSON a array
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 const administrador = {
-  id: 'administradp',
+  id: 'administrador',
   title: 'Administrador',
   type: 'group',
   children: []
@@ -17,7 +17,7 @@ if (userPermissions.includes('crear_rutas')) {
     id: 'rutas',
     title: 'Crear rutas',
     type: 'item',
-    url: '/rutas',
+    url: '/administrador',
     icon: icons.IconUser,
     breadcrumbs: false
   });
@@ -28,7 +28,7 @@ if (userPermissions.includes('gestionar_usuarios_roles')) {
     id: 'usuarios',
     title: 'Usuarios',
     type: 'item',
-    url: '/usuarios',
+    url: '/administrador',
     icon: icons.IconDashboard,
     breadcrumbs: false
   });
@@ -39,7 +39,7 @@ if (userPermissions.includes('registrar_editar_almacenes')) {
     id: 'almacenes',
     title: 'Almacenes',
     type: 'item',
-    url: '/almacenes',
+    url: '/administrador',
     icon: icons.IconMap2,
     breadcrumbs: false
   });
@@ -50,7 +50,7 @@ if (userPermissions.includes('generar_reportes_globales')) {
     id: 'reportes',
     title: 'Generar reportes',
     type: 'item',
-    url: '/reportes',
+    url: '/administrador',
     icon: icons.IconPaperclip,
     breadcrumbs: false
   });
@@ -61,7 +61,7 @@ if (userPermissions.includes('gestionar_ubicaciones_productos')) {
     id: 'ubicaciones_productos',
     title: 'Ubicaciones de productos',
     type: 'item',
-    url: '/ubicaciones-productos',
+    url: '/administrador',
     icon: icons.IconUser,
     breadcrumbs: false
   });
@@ -72,7 +72,7 @@ if (userPermissions.includes('aumentar_stock_productos')) {
     id: 'productos',
     title: 'Productos',
     type: 'item',
-    url: '/productos',
+    url: '/administrador',
     icon: icons.IconDashboard,
     breadcrumbs: false
   });
@@ -83,7 +83,7 @@ if (userPermissions.includes('consultar_informacion_productos')) {
     id: 'edi',
     title: 'Edi Config',
     type: 'item',
-    url: '/edi',
+    url: '/administrador',
     icon: icons.IconMap2,
     breadcrumbs: false
   });
@@ -94,7 +94,7 @@ if (userPermissions.includes('registrar_cajas')) {
     id: 'registrar_cajas',
     title: 'Cajas',
     type: 'item',
-    url: '/cajas',
+    url: '/administrador',
     icon: icons.IconPaperclip,
     breadcrumbs: false
   });
@@ -105,7 +105,7 @@ if (userPermissions.includes('ver_viajes_asignados')) {
     id: 'viajes',
     title: 'Viajes',
     type: 'item',
-    url: '/viajes',
+    url: '/administrador',
     icon: icons.IconUser,
     breadcrumbs: false
   });
@@ -116,7 +116,7 @@ if (userPermissions.includes('visualizar_mapas_rutas')) {
     id: 'mapas',
     title: 'Mapas',
     type: 'item',
-    url: '/mapas',
+    url: '/administrador',
     icon: icons.IconDashboard,
     breadcrumbs: false
   });
@@ -127,7 +127,7 @@ if (userPermissions.includes('recibir_notificaciones')) {
     id: 'notificaciones',
     title: 'Notificaciones',
     type: 'item',
-    url: '/notificaciones',
+    url: '/administrador',
     icon: icons.IconMap2,
     breadcrumbs: false
   });
@@ -138,7 +138,7 @@ if (userPermissions.includes('ver_perfil_personal')) {
     id: 'perfil',
     title: 'Perfil',
     type: 'item',
-    url: '/perfil',
+    url: '/administrador',
     icon: icons.IconPaperclip,
     breadcrumbs: false
   });
@@ -149,7 +149,7 @@ if (userPermissions.includes('monitorear_viajes_tiempo_real')) {
     id: 'monitorear_viajes',
     title: 'Monitorear Viajes',
     type: 'item',
-    url: '/viajes-despacho',
+    url: '/administrador',
     icon: icons.IconUser,
     breadcrumbs: false
   });
@@ -160,7 +160,7 @@ if (userPermissions.includes('revisar_historial_rutas_desempeno')) {
     id: 'historial_desempeno',
     title: 'Historial Desempeño',
     type: 'item',
-    url: '/historial-desempeno',
+    url: '/administrador',
 
     icon: icons.IconDashboard,
     breadcrumbs: false
@@ -172,7 +172,7 @@ if (userPermissions.includes('asignar_viajes_choferes')) {
     id: 'asignar_viajes',
     title: 'Asignar Viajes',
     type: 'item',
-    url: '/asignar-viajes',
+    url: '/administrador',
     icon: icons.IconUser,
     breadcrumbs: false
   });
@@ -183,7 +183,7 @@ if (userPermissions.includes('registrar_productos_viajes')) {
     id: 'productos_viajes',
     title: 'Productos Viajes',
     type: 'item',
-    url: '/productos-viajes',
+    url: '/administrador',
     icon: icons.IconDashboard,
     breadcrumbs: false
   });
@@ -194,7 +194,7 @@ if (userPermissions.includes('monitorear_progreso_viajes')) {
     id: 'progreso_viajes',
     title: 'Progreso Viajes',
     type: 'item',
-    url: '/progreso-viajes',
+    url: '/administrador',
     icon: icons.IconMap2,
     breadcrumbs: false
   });
@@ -204,7 +204,7 @@ if (userPermissions.includes('visualizar_reportes')) {
     id: 'documentation',
     title: 'Documentation',
     type: 'item',
-    url: '/documentation',
+    url: '/administrador',
     icon: icons.IconPaperclip,
     breadcrumbs: false
   });
@@ -215,7 +215,7 @@ if (userPermissions.includes('monitorear_viajes_tiempo_real')) {
     id: 'monitorear_viajes',
     title: 'Monitorear Viajes',
     type: 'item',
-    url: '/viajes-despacho',
+    url: '/administrador',
     icon: icons.IconUser,
     breadcrumbs: false
   });
@@ -226,7 +226,7 @@ if (userPermissions.includes('revisar_historial_rutas_desempeno')) {
     id: 'historial_desempeno',
     title: 'Historial Desempeño',
     type: 'item',
-    url: '/historial-desempeno',
+    url: '/administrador',
     icon: icons.IconDashboard,
     breadcrumbs: false
   });
@@ -237,7 +237,7 @@ if (userPermissions.includes('supervisar_capacidad_almacenes')) {
     id: 'supervisar_capacidad',
     title: 'Supervisar Capacidad',
     type: 'item',
-    url: '/supervisar-capacidad',
+    url: '/administrador',
     icon: icons.IconPaperclip,
     breadcrumbs: false
   });
