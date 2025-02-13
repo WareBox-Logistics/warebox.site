@@ -60,7 +60,8 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && pr
 const MainLayout = () => {
   const theme = useTheme();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
-  const { user } = useContext(AuthContext);
+  // const { user } = useContext(AuthContext);
+  const role = localStorage.getItem('role');
 
   // Handle left drawer
   const leftDrawerOpened = useSelector((state) => state.customization.opened);
@@ -69,7 +70,7 @@ const MainLayout = () => {
     dispatch({ type: SET_MENU, opened: !leftDrawerOpened });
   };
 
-  const menuItems = getMenuItems(user && user.is_admin);
+  const menuItems = getMenuItems(role);
 
   return (
     <Box sx={{ display: 'flex' }}>

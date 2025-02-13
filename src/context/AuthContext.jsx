@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   
   const login = (token, data) => {
+    console.log("Permisos en la respuesta:", data.employee_by_pk.role_table.permisos);
     const userId = data.employee_by_pk.id;
     const role = data.employee_by_pk.role_table.name;
     const permisos = data.employee_by_pk.role_table.permisos.map(p => p.permiso.nombre);
@@ -58,6 +59,8 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('token');
           localStorage.removeItem('user_id');
           localStorage.removeItem('customer_id');
+          localStorage.removeItem('role');
+          localStorage.removeItem('permisos');
           setIsAuthenticated(false);
           setUser(null);
           setIsAdmin(false);
@@ -72,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAdmin(false);
       setAuthChecked(true);
+
     }
   };
 
