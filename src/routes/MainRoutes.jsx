@@ -11,6 +11,12 @@ const UsersPage = Loadable(lazy(() => import('views/users/UsersPage')));
 const PerformanceDashboard = Loadable(lazy(() => import('views/performance/PerformanceDashboard')));
 const Documentation = Loadable(lazy(() => import('views/docs/Index')));
 const EdiConfig = Loadable(lazy(() => import('views/edi-config/Index')));
+const Administrador = Loadable(lazy(() => import('views/pages/administrador/Index')));
+const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Index')));
+const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
+const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
+const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
+const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 
 const MainRoutes = {
   path: '/',
@@ -34,27 +40,27 @@ const MainRoutes = {
         },
         {
           path: 'administrador',
-          element: <DashboardDefault />
+          element: <Administrador />
         },
         {
           path: 'almacenista',
-          element: <NotificationHistory />
+          element: <Almacenista />
         },
         {
           path: 'chofer',
-          element: <DashboardDefault />
+          element: <Chofer />
         },
         {
           path: 'despacho',
-          element: <NotificationHistory />
+          element: <Despacho />
         },
         {
           path: 'operador',
-          element: <DashboardDefault />
+          element: <Operador />
         },
         {
           path: 'supervisor',
-          element: <NotificationHistory />
+          element: <Supervisor />
         },
         {
           path: '',
