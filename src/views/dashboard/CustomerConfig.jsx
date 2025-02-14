@@ -3,6 +3,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
+import { Button } from 'antd';
 
 const CustomerConfig = () => {
   return (
@@ -17,6 +18,7 @@ const CustomerConfig = () => {
           cuspidate non president, sunk in culpa qui officiate descent molls
           anim id est labours.
         </Typography>
+        <Button type="primary">Primary Button</Button>
       </MainCard>
     </Paper>
   );
