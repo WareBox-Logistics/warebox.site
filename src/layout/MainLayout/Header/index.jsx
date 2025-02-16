@@ -1,19 +1,19 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import ButtonBase from '@mui/material/ButtonBase';
+import { useTheme } from "@mui/material/styles";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 
 // project imports
-import LogoSection from '../LogoSection';
-import SearchSection from './SearchSection';
-import NotificationSection from './NotificationSection';
-import ProfileSection from './ProfileSection';
+import LogoSection from "../LogoSection";
+import SearchSection from "./SearchSection";
+import NotificationSection from "./NotificationSection";
+import ProfileSection from "./ProfileSection";
 
 // assets
-import { IconMenu2 } from '@tabler/icons-react';
+import { IconMenu2 } from "@tabler/icons-react";
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
@@ -26,28 +26,31 @@ const Header = ({ handleLeftDrawerToggle }) => {
       <Box
         sx={{
           width: 228,
-          display: 'flex',
-          [theme.breakpoints.down('md')]: {
-            width: 'auto'
-          }
+          display: "flex",
+          [theme.breakpoints.down("md")]: {
+            width: "auto",
+          },
         }}
       >
-        <Box component="span" sx={{ display: { xs: 'none', md: 'block' }, flexGrow: 1 }}>
+        <Box
+          component="span"
+          sx={{ display: { xs: "none", md: "block" }, flexGrow: 1 }}
+        >
           <LogoSection />
         </Box>
-        <ButtonBase sx={{ borderRadius: '8px', overflow: 'hidden' }}>
+        <ButtonBase sx={{ overflow: "hidden" }}>
           <Avatar
-            variant="rounded"
             sx={{
               ...theme.typography.commonAvatar,
               ...theme.typography.mediumAvatar,
-              transition: 'all .2s ease-in-out',
+              transition: "all .2s ease-in-out",
               background: theme.palette.secondary.light,
               color: theme.palette.secondary.dark,
-              '&:hover': {
+              borderRadius: "4px", // Se elimina el redondeo
+              "&:hover": {
                 background: theme.palette.secondary.dark,
-                color: theme.palette.secondary.light
-              }
+                color: theme.palette.secondary.light,
+              },
             }}
             onClick={handleLeftDrawerToggle}
             color="inherit"
@@ -70,7 +73,7 @@ const Header = ({ handleLeftDrawerToggle }) => {
 };
 
 Header.propTypes = {
-  handleLeftDrawerToggle: PropTypes.func
+  handleLeftDrawerToggle: PropTypes.func,
 };
 
 export default Header;

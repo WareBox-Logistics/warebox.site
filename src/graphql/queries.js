@@ -1,15 +1,18 @@
 import gql from 'graphql-tag';
 
-// export const LOGIN_USER = gql`
-//   query LoginUser($email: String!, $password: String!) {
-//     web_services_users(where: { email: { _eq: $email }, password: { _eq: $password }, is_active: { _eq: true } }) {
-//       id
-//       email
-//       customer_id
-//       is_active
-//     }
-//   }
-// `;
+export const GET_EMPLOYES = gql `
+query GeEmployes {
+  employee{
+    id
+    first_name
+    last_name
+    email
+    role_table{
+      id
+      name
+    }
+  }
+}`
 export const REGISTER_USER = gql`
   mutation RegisterUser($email: String!, $password: String!, $customer_id: uuid!, $is_admin: Boolean!) {
     insert_web_services_users_one(object: { email: $email, password: $password, customer_id: $customer_id, is_admin: $is_admin }) {

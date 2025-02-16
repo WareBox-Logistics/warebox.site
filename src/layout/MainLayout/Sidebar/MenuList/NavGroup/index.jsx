@@ -34,6 +34,7 @@ const NavGroup = ({ item }) => {
   return (
     <>
       <List
+      // style={{padding: 0, backgroundColor: 'black'}}
         subheader={
           item.title && (
             <Typography variant="caption" sx={{ ...theme.typography.menuCaption }} display="block" gutterBottom>

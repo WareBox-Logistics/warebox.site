@@ -17,7 +17,7 @@ const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
 const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
 const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
-
+const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
 const MainRoutes = {
   path: '/',
   element: <MainLayout />,
@@ -26,6 +26,10 @@ const MainRoutes = {
       path: '/',
       element: <PrivateRoute />,
       children: [
+        {
+          path: '/usuarios',
+          element: <Users />
+        },
         {
           path: '',
           element: <DashboardDefault />

@@ -29,13 +29,15 @@ const NavItem = ({ item, level }) => {
   const matchesSM = useMediaQuery(theme.breakpoints.down('lg'));
 
   const Icon = item.icon;
+  const isSelected = customization.isOpen.includes(item.id);
+
   const itemIcon = item?.icon ? (
     <Icon stroke={1.5} size="1.3rem" />
   ) : (
     <FiberManualRecordIcon
       sx={{
-        width: customization.isOpen.findIndex((id) => id === item?.id) > -1 ? 8 : 6,
-        height: customization.isOpen.findIndex((id) => id === item?.id) > -1 ? 8 : 6
+        width: isSelected ? 8 : 6,
+        height: isSelected ? 8 : 6
       }}
       fontSize={level > 0 ? 'inherit' : 'medium'}
     />
@@ -75,20 +77,33 @@ const NavItem = ({ item, level }) => {
       {...listItemProps}
       disabled={item.disabled}
       sx={{
-        borderRadius: `${customization.borderRadius}px`,
+        borderRadius: `4px`,
         mb: 0.5,
         alignItems: 'flex-start',
         backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
         py: level > 1 ? 1 : 1.25,
-        pl: `${level * 24}px`
+        pl: `${level * 24}px`,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: isSelected ? '4px' : '0px',
+          height: '60%',
+          backgroundColor: theme.palette.primary.main,
+          borderRadius: '4px',
+          transition: 'width 0.3s ease-in-out'
+        }
       }}
-      selected={customization.isOpen.findIndex((id) => id === item.id) > -1}
+      selected={isSelected}
       onClick={() => itemHandler(item.id)}
     >
       <ListItemIcon sx={{ my: 'auto', minWidth: !item?.icon ? 18 : 36 }}>{itemIcon}</ListItemIcon>
       <ListItemText
         primary={
-          <Typography variant={customization.isOpen.findIndex((id) => id === item.id) > -1 ? 'h5' : 'body1'} color="inherit">
+          <Typography variant={isSelected ? 'h5' : 'body1'} color="inherit">
             {item.title}
           </Typography>
         }

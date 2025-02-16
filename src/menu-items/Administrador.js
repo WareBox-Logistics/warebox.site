@@ -18,7 +18,7 @@ if (userPermissions.includes('crear_rutas')) {
     title: 'Crear rutas',
     type: 'item',
     url: '/administrador',
-    icon: icons.IconUser,
+    icon: icons.IconMap2,
     breadcrumbs: false
   });
 }
@@ -28,8 +28,8 @@ if (userPermissions.includes('gestionar_usuarios_roles')) {
     id: 'usuarios',
     title: 'Usuarios',
     type: 'item',
-    url: '/administrador',
-    icon: icons.IconDashboard,
+    url: '/usuarios',
+    icon: icons.IconUser,
     breadcrumbs: false
   });
 }
