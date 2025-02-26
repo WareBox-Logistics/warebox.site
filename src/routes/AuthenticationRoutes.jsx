@@ -2,6 +2,9 @@
 import { lazy } from 'react';
 import Loadable from 'ui-component/Loadable';
 import MinimalLayout from 'layout/MinimalLayout';
+import { patch } from '@mui/system';
+import { element } from 'prop-types';
+import OfflinePage from 'views/pages/ofline';
 
 const AuthLogin = Loadable(lazy(() => import('views/pages/authentication/auth-forms/AuthLogin')));
 const AuthRegister = Loadable(lazy(() => import('views/pages/authentication/auth-forms/AuthRegister')));
@@ -22,7 +25,11 @@ const AuthenticationRoutes = {
     {
       path: 'logout',
       element: <Logout />
-    }
+    },
+    {
+      path: 'offline',
+      element: <OfflinePage />
+    },
   ]
 };
 
