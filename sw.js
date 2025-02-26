@@ -1,7 +1,6 @@
 //shell cache 
-const shellCache = 'shell-cache-v4';
-const dynamicCache = 'dynamic-cache-v4';
-
+const shellCache = 'shell-cache-v1';
+const dynamicCache = 'dynamic-cache-v1';
 const shellAssets = [
     '/',
     '/index.html',
@@ -16,7 +15,7 @@ const shellAssets = [
 //install
 self.addEventListener('install', event => {
     console.log('Service worker installed', event);
-    //pre cache shel assets
+    //pre cache shell assets
     console.log('App shell cache')
     event.waitUntil(
         caches.open(shellCache).then(cache => {
@@ -41,17 +40,19 @@ self.addEventListener('activate', event => {
 
 //fetch
 self.addEventListener('fetch', event => {
-    console.log('Fetch event', event);
-    //saves the cache if its not prev save
     event.respondWith(
-        caches.match(event.request).then( cacheResponse => {
+        caches.match(event.request).then(cacheResponse => {
             return cacheResponse || fetch(event.request).then(fetchResponse => {
                 return caches.open(dynamicCache).then(cache => {
                     cache.put(event.request.url, fetchResponse.clone());
                     return fetchResponse;
-                })
+                });
             });
+        }).catch(() => {
+            if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+                return caches.match('/offline.html');
+            }
+            return caches.match(event.request);
         })
-        .catch(() => { return caches.match('/offline.html');})
     );
-})
+});
