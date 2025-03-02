@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import {
@@ -42,7 +42,7 @@ const EmployeeSchema = Yup.object().shape({
 const Employees = () => {
   const [searchText, setSearchText] = useState("");
   const [employees, setEmployees] = useState([]);
-  const { data, loading, error } = useQuery(GET_EMPLOYES, {
+  const { data, loading: loadingUsers, error, refetch } = useQuery(GET_EMPLOYES, {
     notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
       if (data && data.employee) {
@@ -59,17 +59,14 @@ const Employees = () => {
     },
   });
 
+  useEffect(() => {
+    refetch();
+  },[])
+
   if (error) {
     message.error("Error al cargar empleados");
     return null;
   }
-
-  // Manejo de submit
-  const handleSubmit = (values, { resetForm }) => {
-    setEmployees([...employees, { id: employees.length + 1, ...values }]);
-    message.success("Empleado agregado correctamente");
-    resetForm();
-  };
 
   // Filtrar empleados según el texto de búsqueda
   const filteredEmployees = employees.filter((employee) =>
@@ -86,6 +83,7 @@ const Employees = () => {
     { title: "Rol", dataIndex: "role", key: "role" },
   ];
 
+  
   return (
     <Paper
       style={{
@@ -95,6 +93,8 @@ const Employees = () => {
         height: "100%",
       }}
     >
+          {/* <h1>{loadingUsers ? 'Cargando usuarios' : 'Ya estan cargados los users'}</h1> */}
+
       {/* Cards de métricas */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8}>
@@ -140,7 +140,7 @@ const Employees = () => {
           onSubmit={async (values, { setSubmitting, resetForm }) => {
             setSubmitting(true);
             try {
-              const response = await axios.post(
+              await axios.post(
                 "https://back.warebox.pro/api/registerEmployee",
                 {
                   first_name: values.first_name,
@@ -238,12 +238,12 @@ const Employees = () => {
                               setFieldValue("role", value || null)
                             }
                             options={[
-                              { value: "3", label: "Administrador" },
-                              { value: "4", label: "Operador" },
-                              { value: "5", label: "Chofer" },
-                              { value: "6", label: "Supervisor" },
-                              { value: "7", label: "Almacenista" },
-                              { value: "8", label: "Monito (Despacho)" },
+                              { value: "1", label: "Administrador" },
+                              { value: "2", label: "Operador" },
+                              { value: "3", label: "Chofer" },
+                              { value: "4", label: "Supervisor" },
+                              { value: "5", label: "Almacenista" },
+                              { value: "6", label: "Monito (Despacho)" },
                             ]}
                           />
                         )}
@@ -302,7 +302,7 @@ const Employees = () => {
           dataSource={filteredEmployees}
           columns={columns}
           rowKey="id"
-          pagination={{ pageSize: 5 }}
+          pagination={{ pageSize: 20}}
         />
       </div>
     </Paper>
