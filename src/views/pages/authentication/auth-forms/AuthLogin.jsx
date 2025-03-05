@@ -49,6 +49,8 @@ const AuthLogin = () => {
         password: values.password,
       });
 
+      console.log(response.data);
+      
       // Estraer información del usuario
       const { data } = await fetchChatHelper({
         variables: { id: response.data.user.id },
@@ -64,6 +66,9 @@ const AuthLogin = () => {
         setSnackbarOpen(true);
       }
     } catch (error) {
+
+      console.log(error);
+      
       if (
         error.response &&
         error.response.data &&
@@ -76,6 +81,7 @@ const AuthLogin = () => {
       setSnackbarOpen(true);
     }
     setSubmitting(false);
+
   };
 
   return (

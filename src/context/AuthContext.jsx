@@ -31,10 +31,10 @@ export const AuthProvider = ({ children }) => {
 
   
   const login = (token, data) => {
-    console.log("Permisos en la respuesta:", data.employee_by_pk.role_table.permisos);
+    // console.log("Permisos en la respuesta:", data.employee_by_pk.role_table.permisos);
     const userId = data.employee_by_pk.id;
-    const role = data.employee_by_pk.role_table.name;
-    const permisos = data.employee_by_pk.role_table.permisos.map(p => p.permiso.nombre);
+    // const role = data.employee_by_pk.role_table.name;
+    // const permisos = data.employee_by_pk.role_table.permisos.map(p => p.permiso.nombre);
     const userData = {
       id: userId,
       email: data.employee_by_pk.email,
@@ -44,8 +44,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user_id', userId);
     localStorage.setItem('customer_id', userId);
-    localStorage.setItem('role', role);
-    localStorage.setItem('permisos', JSON.stringify(permisos));
+    // localStorage.setItem('role', role);
+    // localStorage.setItem('permisos', JSON.stringify(permisos));
     localStorage.setItem('userData', JSON.stringify(userData));
     setIsAuthenticated(true);
     setUser(userData);

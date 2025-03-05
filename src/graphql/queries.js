@@ -710,11 +710,6 @@ query GetInforUser($id: bigint!) {
     email
     role_table {
       name
-      permisos {
-        permiso {
-          nombre
-        }
-      }
     }
   }
 }
