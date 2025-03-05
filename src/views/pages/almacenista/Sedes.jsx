@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaEye, FaSearch,FaWarehouse } from 'react-icons/fa';
 import '../styles/Sedes.css';
 import '../styles/Listasedes.css';
-import { getSedes, saveSedes } from "../services/sedes";
+import { getSedes, saveSedes } from "../src/api/sedes.js";
 //import bodegaImagen from "../images/sedededistribucion2.png";
 
 
