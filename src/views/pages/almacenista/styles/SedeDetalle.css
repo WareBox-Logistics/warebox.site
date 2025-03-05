@@ -1,0 +1,65 @@
+.sede-detalle-container {
+    /* max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    text-align: center; */
+    max-width: 90%;
+    margin: auto;
+    padding: 50px;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .muelles-container {
+    display: flex;
+    gap: 10px;
+    
+  }
+  
+  .muelle {
+    font-size: 180px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    max-width: 90%;
+    margin: auto;
+    padding: 50px;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .muelle.disponible {
+    color: green;
+  }
+  
+  .muelle.ocupado {
+    color: red;
+  }
+  
+  .muelle:hover {
+    transform: scale(1.2);
+  }
+  
+  .back-button {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: #ef8120;
+    color: white;
+    border-radius: 5px;
+  }
+  
+  .back-button:hover {
+    background-color: #eb944c;
+  }
+  
+  .error-message {
+    color: red;
+    font-weight: bold;
+  }
