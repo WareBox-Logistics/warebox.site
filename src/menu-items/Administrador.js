@@ -8,6 +8,14 @@ const administrador = {
     type: 'group',
     children: [
         {
+            id: 'dashboard',
+            title: 'Dashboard',
+            type: 'item',
+            url: '/dashboard',
+            icon: icons.IconDashboard,
+            breadcrumbs: true
+        },
+        {
             id: 'rutas',
             title: 'Crear rutas',
             type: 'item',
