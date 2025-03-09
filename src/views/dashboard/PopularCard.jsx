@@ -1,295 +1,115 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 
-// material-ui
+// Material UI
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 
-// project imports
+// Project imports
 import BajajAreaChartCard from './BajajAreaChartCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SkeletonPopularCard from 'ui-component/cards/Skeleton/PopularCard';
 import { gridSpacing } from 'store/constant';
 
-// assets
+// Icons
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
 export default function PopularCard({ isLoading }) {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const stocks = [
+    { name: 'Bajaj Finery', price: '$1839.00', change: '10% Profit', up: true },
+    { name: 'TTML', price: '$100.00', change: '10% Loss', up: false },
+    { name: 'Reliance', price: '$200.00', change: '10% Profit', up: true },
+    { name: 'TTML', price: '$189.00', change: '10% Loss', up: false },
+    { name: 'Stolon', price: '$189.00', change: '10% Loss', up: false }
+  ];
 
   return (
     <>
       {isLoading ? (
         <SkeletonPopularCard />
       ) : (
-        <MainCard content={false}>
+        <MainCard content={false} sx={{ p: 2 }}>
           <CardContent>
-            <Grid container spacing={gridSpacing}>
-              <Grid size={12}>
-                <Grid container sx={{ alignContent: 'center', justifyContent: 'space-between' }}>
-                  <Grid>
-                    <Typography variant="h4">Popular Stocks</Typography>
-                  </Grid>
-                  <Grid>
-                    <IconButton size="small" sx={{ mt: -0.625 }}>
-                      <MoreHorizOutlinedIcon
-                        fontSize="small"
-                        sx={{ cursor: 'pointer' }}
-                        aria-controls="menu-popular-card"
-                        aria-haspopup="true"
-                      />
-                    </IconButton>
-                    <Menu
-                      id="menu-popular-card"
-                      anchorEl={anchorEl}
-                      keepMounted
-                      open={Boolean(anchorEl)}
-                      onClose={handleClose}
-                      variant="selectedMenu"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                    >
-                      <MenuItem onClick={handleClose}> Today</MenuItem>
-                      <MenuItem onClick={handleClose}> This Month</MenuItem>
-                      <MenuItem onClick={handleClose}> This Year </MenuItem>
-                    </Menu>
-                  </Grid>
-                </Grid>
+            <Grid container spacing={gridSpacing} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Grid item>
+                <Typography variant="h4">Popular Stocks</Typography>
               </Grid>
-              <Grid size={12} sx={{ mt: -1 }}>
-                <BajajAreaChartCard />
-              </Grid>
-              <Grid size={12}>
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          Bajaj Finery
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $1839.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'success.light',
-                                color: 'success.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'success.dark' }}>
-                      10% Profit
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          TTML
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $100.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'orange.light',
-                                color: 'orange.dark',
-                                marginLeft: 1.875
-                              }}
-                            >
-                              <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'orange.dark' }}>
-                      10% loss
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          Reliance
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $200.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'success.light',
-                                color: 'success.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'success.dark' }}>
-                      10% Profit
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          TTML
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $189.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'orange.light',
-                                color: 'orange.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'orange.dark' }}>
-                      10% loss
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          Stolon
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $189.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'orange.light',
-                                color: 'orange.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'orange.dark' }}>
-                      10% loss
-                    </Typography>
-                  </Grid>
-                </Grid>
+              <Grid item>
+                <IconButton size="small" onClick={handleMenuOpen}>
+                  <MoreHorizOutlinedIcon fontSize="small" />
+                </IconButton>
+                <Menu
+                  id="menu-popular-card"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  <MenuItem onClick={handleMenuClose}>Today</MenuItem>
+                  <MenuItem onClick={handleMenuClose}>This Month</MenuItem>
+                  <MenuItem onClick={handleMenuClose}>This Year</MenuItem>
+                </Menu>
               </Grid>
             </Grid>
+
+            <Grid item xs={12} sx={{ mt: 2, mb: 3 }}>
+              <BajajAreaChartCard />
+            </Grid>
+
+            {stocks.map((stock, index) => (
+              <React.Fragment key={stock.name + index}>
+                <Grid container justifyContent="space-between" alignItems="center" sx={{ py: 1 }}>
+                  <Grid item>
+                    <Typography variant="subtitle1">{stock.name}</Typography>
+                  </Grid>
+                  <Grid item sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle1">{stock.price}</Typography>
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: '5px',
+                        bgcolor: stock.up ? '#d4edda' : '#f8d7da',
+                        color: stock.up ? '#155724' : '#721c24'
+                      }}
+                    >
+                      {stock.up ? (
+                        <KeyboardArrowUpOutlinedIcon fontSize="small" />
+                      ) : (
+                        <KeyboardArrowDownOutlinedIcon fontSize="small" />
+                      )}
+                    </Avatar>
+                  </Grid>
+                </Grid>
+                <Typography variant="subtitle2" sx={{ color: stock.up ? '#155724' : '#721c24' }}>
+                  {stock.change}
+                </Typography>
+                {index !== stocks.length - 1 && <Divider sx={{ my: 1.5 }} />}
+              </React.Fragment>
+            ))}
           </CardContent>
-          <CardActions sx={{ p: 1.25, pt: 0, justifyContent: 'center' }}>
+
+          <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
             <Button size="small" disableElevation>
-              View All
-              <ChevronRightOutlinedIcon />
+              View All <ChevronRightOutlinedIcon />
             </Button>
           </CardActions>
         </MainCard>

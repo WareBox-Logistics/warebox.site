@@ -1,23 +1,21 @@
 import { useEffect, useState } from 'react';
 
-
 // material-ui
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
+import { Paper, Typography } from "@mui/material";
 
 // project imports
 import EarningCard from './EarningCard';
 import PopularCard from './PopularCard';
 import TotalOrderLineChartCard from './TotalOrderLineChartCard';
-import TotalIncomeDarkCard from '../../../ui-component/cards/TotalIncomeDarkCard';
-import TotalIncomeLightCard from '../../../ui-component/cards/TotalIncomeLightCard';
+import TotalIncomeDarkCard from '../../ui-component/cards/TotalIncomeDarkCard';
+import TotalIncomeLightCard from '../../ui-component/cards/TotalIncomeLightCard';
 import TotalGrowthBarChart from './TotalGrowthBarChart';
 
 import { gridSpacing } from 'store/constant';
 
 // assets
 import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
-
-
 
 const CustomerConfig = () => {
   const [isLoading, setLoading] = useState(true);
@@ -26,23 +24,22 @@ const CustomerConfig = () => {
     setLoading(false);
   }, []);
 
-
   return (
-    <Grid container spacing={gridSpacing}>
-      <Grid size={12}>
-        <Grid container spacing={gridSpacing}>
-          <Grid size={{ lg: 4, md: 6, sm: 6, xs: 12 }}>
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Grid container spacing={3}>
+          <Grid item lg={4} md={6} sm={6} xs={12}>
             <EarningCard isLoading={isLoading} />
           </Grid>
-          <Grid size={{ lg: 4, md: 6, sm: 6, xs: 12 }}>
+          <Grid item lg={4} md={6} sm={6} xs={12}>
             <TotalOrderLineChartCard isLoading={isLoading} />
           </Grid>
-          <Grid size={{ lg: 4, md: 12, sm: 12, xs: 12 }}>
-            <Grid container spacing={gridSpacing}>
-              <Grid size={{ sm: 6, xs: 12, md: 6, lg: 12 }}>
+          <Grid item lg={4} md={12} sm={12} xs={12}>
+            <Grid container spacing={3}>
+              <Grid item sm={6} xs={12} md={6} lg={12}>
                 <TotalIncomeDarkCard isLoading={isLoading} />
               </Grid>
-              <Grid size={{ sm: 6, xs: 12, md: 6, lg: 12 }}>
+              <Grid item sm={6} xs={12} md={6} lg={12}>
                 <TotalIncomeLightCard
                   {...{
                     isLoading: isLoading,
@@ -56,12 +53,12 @@ const CustomerConfig = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Grid size={12}>
-        <Grid container spacing={gridSpacing}>
-          <Grid size={{ xs: 12, md: 8 }}>
+      <Grid item xs={12}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={8} >
             <TotalGrowthBarChart isLoading={isLoading} />
           </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid item xs={12} md={4}>
             <PopularCard isLoading={isLoading} />
           </Grid>
         </Grid>
