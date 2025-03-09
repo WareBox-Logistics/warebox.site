@@ -1,6 +1,6 @@
-import { IconDashboard, IconUser, IconPaperclip, IconMap2 } from '@tabler/icons-react';
+import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding } from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
+const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding };
 
 const administrador = {
     id: 'administrador',
@@ -37,6 +37,14 @@ const administrador = {
             type: 'item',
             url: '/administrador',
             icon: icons.IconMap2,
+            breadcrumbs: false
+        },
+        {
+            id: 'companies',
+            title: 'Companies',
+            type: 'item',
+            url: '/companies',
+            icon: icons.IconBuilding,
             breadcrumbs: false
         },
         {

@@ -18,6 +18,8 @@ const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
 const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
+const Companies = Loadable(lazy(() => import('views/pages/administrador/Companies')));
+
 const MainRoutes = {
   path: '/',
   element: <MainLayout />,
@@ -29,6 +31,10 @@ const MainRoutes = {
         {
           path: '/usuarios',
           element: <Users />
+        },
+        {
+          path: '/companies',
+          element: <Companies />
         },
         {
           path: '',
