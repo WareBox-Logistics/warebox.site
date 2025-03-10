@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaWarehouse } from "react-icons/fa";
+import { IconWarehouse } from '@tabler/icons-react';
 import "../almacenista/styles/SedeDetalle.css";
 import { getSedes, saveSedes } from "../src/api/sedes.js";
 
 const SedeDetalle = () => {
   const { id } = useParams();
-  const [sedes, setSedes] = useState(getSedes());
-  const sedeIndex = parseInt(id, 10);
-  const [sede, setSede] = useState(sedes[sedeIndex]);
+  const storedSedes = JSON.parse(localStorage.getItem('sedes'));
+  const sede = storedSedes ? storedSedes[id] : null;
 
-  useEffect(() => {
-    setSedes(getSedes());
-    setSede(getSedes()[sedeIndex]);
-  }, [sedeIndex]);
+  if (!sede) {
+    return <div>No se encontró la sede.</div>;
+  }
 
   // Función para alternar estado del muelle (disponible u ocupado)
   const toggleMuelle = (index) => {
@@ -21,17 +19,9 @@ const SedeDetalle = () => {
       i === index ? (estado === "disponible" ? "ocupado" : "disponible") : estado
     );
 
-    const nuevasSedes = [...sedes];
-    nuevasSedes[sedeIndex] = { ...sede, muelles: nuevosMuelles };
-
-    setSede(nuevasSedes[sedeIndex]);
-    setSedes(nuevasSedes);
-    saveSedes(nuevasSedes);
+    const nuevasSedes = { ...sede, muelles: nuevosMuelles };
+    localStorage.setItem('sedes', JSON.stringify(nuevasSedes));
   };
-
-  if (!sede) {
-    return <p className="error-message">⚠ No se encontró la sede.</p>;
-  }
 
   return (
     <div className="sede-detalle-container">
@@ -48,7 +38,7 @@ const SedeDetalle = () => {
       <div className="muelles-container">
       <h1>Muelles</h1>
         {sede.muelles.map((estado, index) => (
-          <FaWarehouse
+          <IconWarehouse
             key={index}
             className={`muelle ${estado}`}
             title={`Muelle ${estado}`}
