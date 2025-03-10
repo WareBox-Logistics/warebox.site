@@ -13,6 +13,8 @@ const Documentation = Loadable(lazy(() => import('views/docs/Index')));
 const EdiConfig = Loadable(lazy(() => import('views/edi-config/Index')));
 const Administrador = Loadable(lazy(() => import('views/pages/administrador/Index')));
 const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Sedes')));//ruta sedes(alamacenes)
+const AlmacenistaRacks = Loadable(lazy(()=> import('views/pages/almacenista/GestionRacks')));
+const AlmacenistaPallets = Loadable(lazy(()=> import('views/pages/almacenista/GestionPallets')));
 const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
 const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
@@ -55,6 +57,14 @@ const MainRoutes = {
         {
           path: 'almacenista',
           element: <Almacenista />
+        },
+        {
+          path: 'gestion-racks',
+          element: <AlmacenistaRacks />
+        },
+        {
+          path: 'gestion-pallets',
+          element: <AlmacenistaPallets />
         },
         {
           path: 'chofer',
