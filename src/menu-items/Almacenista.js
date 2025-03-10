@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse,IconTruckLoading,IconPackageExport } from '@tabler/icons-react';
 
 const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2,IconBuildingWarehouse,IconTruckLoading,IconPackageExport };
+=======
+import { IconDashboard, IconPackage, IconPaperclip, IconMap2, IconBrandDatabricks, IconTruckLoading } from '@tabler/icons-react';
+
+const icons = { IconDashboard, IconPackage, IconPaperclip, IconMap2, IconBrandDatabricks, IconTruckLoading };
+>>>>>>> origin/desarrollo
 
 const almacenista = {
     id: 'almacenista',
@@ -8,11 +14,19 @@ const almacenista = {
     type: 'group',
     children: [
         {
-            id: 'ubicaciones_productos',
-            title: 'Ubicaciones de productos',
+            id: 'Gestion-Almacenamiento',
+            title: 'Gestion de almacenamiento',
             type: 'item',
-            url: '/ubicaciones-productos',
-            icon: icons.IconUser,
+            url: '/gestion-racks',
+            icon: icons.IconBrandDatabricks,
+            breadcrumbs: false
+        },
+        {
+            id: 'Gestion-Pallets',
+            title: 'Localizacion y transferencia de pallets',
+            type: 'item',
+            url: '/gestion-pallets',
+            icon: icons.IconTruckLoading,
             breadcrumbs: false
         },
         {
@@ -31,6 +45,7 @@ const almacenista = {
             icon: icons.IconMap2,
             breadcrumbs: false
         },
+<<<<<<< HEAD
         {
             id: 'registrar_cajas',
             title: 'Cajas',
@@ -55,6 +70,8 @@ const almacenista = {
             icon: icons.IconTruckLoading,
             breadcrumbs: false
         }
+=======
+>>>>>>> origin/desarrollo
     ]
 };
 

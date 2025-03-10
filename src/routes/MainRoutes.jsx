@@ -17,6 +17,8 @@ const Administrador = Loadable(lazy(() => import('views/pages/administrador/Inde
 const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Index')));
 const SedesPage = Loadable(lazy(() => import('views/pages/almacenista/Sedes')));
 const MuellesPage = Loadable(lazy(() => import('views/pages/almacenista/Muelles')));
+const AlmacenistaRacks = Loadable(lazy(()=> import('views/pages/almacenista/GestionRacks')));
+const AlmacenistaPallets = Loadable(lazy(()=> import('views/pages/almacenista/GestionPallets')));
 const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
 const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
@@ -59,6 +61,14 @@ const MainRoutes = {
         {
           path: 'almacenista',
           element: <Almacenista />
+        },
+        {
+          path: 'gestion-racks',
+          element: <AlmacenistaRacks />
+        },
+        {
+          path: 'gestion-pallets',
+          element: <AlmacenistaPallets />
         },
         {
           path: 'Sedes',
