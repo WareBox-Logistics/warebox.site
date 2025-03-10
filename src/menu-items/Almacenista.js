@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse,IconTruckLoading,IconPackageExport } from '@tabler/icons-react';
+import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse, IconTruckLoading, 
+    IconPackageExport, IconPackage, IconBrandDatabricks } from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2,IconBuildingWarehouse,IconTruckLoading,IconPackageExport };
-=======
-import { IconDashboard, IconPackage, IconPaperclip, IconMap2, IconBrandDatabricks, IconTruckLoading } from '@tabler/icons-react';
-
-const icons = { IconDashboard, IconPackage, IconPaperclip, IconMap2, IconBrandDatabricks, IconTruckLoading };
->>>>>>> origin/desarrollo
+const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse, IconTruckLoading, 
+    IconPackageExport, IconPackage, IconBrandDatabricks};
 
 const almacenista = {
     id: 'almacenista',
@@ -15,7 +11,7 @@ const almacenista = {
     children: [
         {
             id: 'Gestion-Almacenamiento',
-            title: 'Gestion de almacenamiento',
+            title: 'Gestión de almacenamiento',
             type: 'item',
             url: '/gestion-racks',
             icon: icons.IconBrandDatabricks,
@@ -23,7 +19,7 @@ const almacenista = {
         },
         {
             id: 'Gestion-Pallets',
-            title: 'Localizacion y transferencia de pallets',
+            title: 'Localización y transferencia de pallets',
             type: 'item',
             url: '/gestion-pallets',
             icon: icons.IconTruckLoading,
@@ -39,22 +35,21 @@ const almacenista = {
         },
         {
             id: 'edi',
-            title: 'Edi Config',
+            title: 'EDI Config',
             type: 'item',
             url: '/edi',
             icon: icons.IconMap2,
             breadcrumbs: false
         },
-<<<<<<< HEAD
         {
             id: 'registrar_cajas',
             title: 'Cajas',
             type: 'item',
             url: '/cajas',
-            icon: icons.IconPackageExport, //SE AJUSTO EL ICONO
+            icon: icons.IconPackageExport,
             breadcrumbs: false
         },
-        {//SE AJUSTO EN EL MENU
+        {
             id: 'registrar_sede',
             title: 'Sedes',
             type: 'item',
@@ -62,7 +57,7 @@ const almacenista = {
             icon: icons.IconBuildingWarehouse,
             breadcrumbs: false
         },
-        {//SE AJUSTO EN EL MENU
+        {
             id: 'muelle',
             title: 'Muelles',
             type: 'item',
@@ -70,9 +65,8 @@ const almacenista = {
             icon: icons.IconTruckLoading,
             breadcrumbs: false
         }
-=======
->>>>>>> origin/desarrollo
     ]
 };
 
 export default almacenista;
+
