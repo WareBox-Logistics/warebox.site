@@ -1,6 +1,6 @@
-import { IconDashboard, IconUser, IconPaperclip, IconMap2 } from '@tabler/icons-react';
+import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse,IconTruckLoading,IconPackageExport } from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
+const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2,IconBuildingWarehouse,IconTruckLoading,IconPackageExport };
 
 const almacenista = {
     id: 'almacenista',
@@ -36,7 +36,23 @@ const almacenista = {
             title: 'Cajas',
             type: 'item',
             url: '/cajas',
-            icon: icons.IconPaperclip,
+            icon: icons.IconPackageExport, //SE AJUSTO EL ICONO
+            breadcrumbs: false
+        },
+        {//SE AJUSTO EN EL MENU
+            id: 'registrar_sede',
+            title: 'Sedes',
+            type: 'item',
+            url: '/Sedes',
+            icon: icons.IconBuildingWarehouse,
+            breadcrumbs: false
+        },
+        {//SE AJUSTO EN EL MENU
+            id: 'muelle',
+            title: 'Muelles',
+            type: 'item',
+            url: '/Muelles',
+            icon: icons.IconTruckLoading,
             breadcrumbs: false
         }
     ]

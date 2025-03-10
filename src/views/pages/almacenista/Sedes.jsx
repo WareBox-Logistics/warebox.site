@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaEye, FaSearch,FaWarehouse } from 'react-icons/fa';
-import '../styles/Sedes.css';
-import '../styles/Listasedes.css';
-import { getSedes, saveSedes } from "../src/api/sedes.js";
+import { IconSearch, IconBuildingWarehouse, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
+import { getSedes, saveSedes } from "/src/api/sedes.js";
+import '../almacenista/styles/Sedes.css';
+import '../almacenista/styles/Listasedes.css';
+import {Location} from 'graphql';
 //import bodegaImagen from "../images/sedededistribucion2.png";
-
-
-
 
 const Sedes = () => {
   const [sedes, setSedes] = useState(getSedes());
@@ -84,7 +82,7 @@ const Sedes = () => {
 
   return (
     <div className="sedes-container">
-      <h1>Administrar Sedes</h1>
+      <h1>Managing Locations</h1>
 
       {/* Imagen
       <div className="image-container">
@@ -93,7 +91,7 @@ const Sedes = () => {
 
       {/* Buscador */}
       <div className="search-container">
-        <FaSearch className="search-icon" />
+        <IconSearch className="search-icon" />
         <input
           type="text"
           placeholder="Buscar sede..."
@@ -104,43 +102,43 @@ const Sedes = () => {
 
       {/* Formulario */}
       <div className="form-container">
-        <h2>Registrar Nueva Sede</h2>
+        <h2>Register New Location</h2>
         <form onSubmit={handleSubmit} className="sede-form">
           <div className="form-group">
-            <label>Nombre de la sede</label>
+            <label>Location Name</label>
             <input type="text" name="nombre" value={nuevaSede.nombre} onChange={handleInputChange} required />
           </div>
           <div className="form-group">
-            <label>Ubicación</label>
+            <label>Location</label>
             <input type="text" name="ubicacion" value={nuevaSede.ubicacion} onChange={handleInputChange} required />
           </div>
           <div className="form-group">
-            <label>Capacidad Total</label>
+            <label>Total Capacity</label>
             <input type="number" name="capacidadTotal" value={nuevaSede.capacidadTotal} onChange={handleInputChange} required />
           </div>
           <div className="form-group">
-            <label>Capacidad Disponible</label>
+            <label>Available Capacity</label>
             <input type="number" name="capacidadDisponible" value={nuevaSede.capacidadDisponible} onChange={handleInputChange} required />
           </div>
           <div className="form-group">
-            <label>Puertos de Carga</label>
+            <label>Loading Ports</label>
             <input type="number" name="puertosCarga" value={nuevaSede.puertosCarga} onChange={handleInputChange} required />
           </div>
-          <button type="submit" className="submit-button"> <FaWarehouse/> Registrar</button>
+          <button type="submit" className="submit-button"> <IconBuildingWarehouse/> Register</button>
         </form>
       </div>
 
       {/* Lista de Sedes */}
-      <h2>Lista de Sedes</h2>
+      <h2>List of Venues</h2>
 <table className="sedes-list">
   <thead>
     <tr>
-      <th>Nombre</th>
-      <th>Ubicación</th>
-      <th>Capacidad Total</th>
-      <th>Capacidad Disponible</th>
-      <th>Puertos Carga</th>
-      <th>Acciones</th>
+      <th>Name</th>
+      <th>Location</th>
+      <th>Total Capacity</th>
+      <th>Available Capacity</th>
+      <th>Loading Ports</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -154,20 +152,20 @@ const Sedes = () => {
           <td>{sede.puertosCarga}</td>
           <td className="sede-actions">
             <Link to={`/sedes/${index}`} className="eye">
-              <FaEye /> Ver
+              <IconEye /> View
             </Link>
             <button onClick={() => handleEditarSede(index)} className="action-button">
-              <FaEdit /> Editar
+              <IconEdit /> Edit
             </button>
             <button onClick={() => handleEliminarSede(index)} className="action-button delete">
-              <FaTrash /> Eliminar
+              <IconTrash /> Delete
             </button>
           </td>
         </tr>
       ))
     ) : (
       <tr>
-        <td colSpan="7">No se encontraron sedes.</td>
+        <td colSpan="7">No venue found.</td>
       </tr>
     )}
   </tbody>
@@ -176,29 +174,29 @@ const Sedes = () => {
       {/* Formulario de edición */}
       {sedeEditando !== null && (
         <div className="edit-form-container">
-          <h2>Editar Sede</h2>
+          <h2>Edit location</h2>
           <form onSubmit={(e) => {
             e.preventDefault();
             handleGuardarSede(sedeEditando, nuevaSede);
           }} className="sede-form">
             <div className="form-group">
-              <label>Nombre de la sede</label>
+              <label>Location Name</label>
               <input type="text" name="nombre" value={nuevaSede.nombre} onChange={handleInputChange} required />
             </div>
             <div className="form-group">
-              <label>Ubicación</label>
+              <label>Location</label>
               <input type="text" name="ubicacion" value={nuevaSede.ubicacion} onChange={handleInputChange} required />
             </div>
             <div className="form-group">
-              <label>Capacidad Total</label>
+              <label>Total Capacity</label>
               <input type="number" name="capacidadTotal" value={nuevaSede.capacidadTotal} onChange={handleInputChange} required />
             </div>
             <div className="form-group">
-              <label>Capacidad Disponible</label>
+              <label>Available Capacity</label>
               <input type="number" name="capacidadDisponible" value={nuevaSede.capacidadDisponible} onChange={handleInputChange} required />
             </div>
-            <button type="submit" className="submit-button">Guardar Cambios</button>
-            <button type="button" className="cancel-button" onClick={() => setSedeEditando(null)}>Cancelar</button>
+            <button type="submit" className="submit-button">Save Changes</button>
+            <button type="button" className="cancel-button" onClick={() => setSedeEditando(null)}>Cancel</button>
           </form>
         </div>
       )}

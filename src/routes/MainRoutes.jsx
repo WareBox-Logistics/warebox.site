@@ -4,6 +4,8 @@ import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoute from '/src/components/PrivateRoute';
 import { element } from 'prop-types';
+import Sedes from 'views/pages/almacenista/Sedes';
+import Muelles from 'views/pages/almacenista/Muelles';
 
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/CustomerConfig')));
 const NotificationHistory = Loadable(lazy(() => import('views/history/NotificationHistory')));
@@ -12,7 +14,9 @@ const PerformanceDashboard = Loadable(lazy(() => import('views/performance/Perfo
 const Documentation = Loadable(lazy(() => import('views/docs/Index')));
 const EdiConfig = Loadable(lazy(() => import('views/edi-config/Index')));
 const Administrador = Loadable(lazy(() => import('views/pages/administrador/Index')));
-const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Sedes')));//ruta sedes(alamacenes)
+const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Index')));
+const SedesPage = Loadable(lazy(() => import('views/pages/almacenista/Sedes')));
+const MuellesPage = Loadable(lazy(() => import('views/pages/almacenista/Muelles')));
 const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
 const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
@@ -55,6 +59,14 @@ const MainRoutes = {
         {
           path: 'almacenista',
           element: <Almacenista />
+        },
+        {
+          path: 'Sedes',
+          element: <SedesPage />
+        },
+        {
+          path: 'Muelles',
+          element: <Muelles />
         },
         {
           path: 'chofer',
