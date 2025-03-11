@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { IconSearch, IconBuildingWarehouse, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { getSedes, saveSedes } from "/src/api/sedes.js";
 import '../almacenista/styles/Sedes.css';
-import '../almacenista/styles/Listasedes.css';
+//import '../almacenista/styles/Listasedes.css';
 import {Location} from 'graphql';
 //import bodegaImagen from "../images/sedededistribucion2.png";
 
