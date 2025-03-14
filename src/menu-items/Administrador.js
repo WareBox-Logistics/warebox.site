@@ -1,12 +1,38 @@
-import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding, IconShoppingCart, IconDeviceAirtag } from '@tabler/icons-react';
+import { 
+    IconDashboard, 
+    IconUser, 
+    IconPaperclip, 
+    IconMap2, 
+    IconBuilding, 
+    IconShoppingCart, 
+    IconDeviceAirtag, 
+    IconRoute 
+} from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding, IconShoppingCart, IconDeviceAirtag };
+const icons = { 
+    IconDashboard, 
+    IconUser, 
+    IconPaperclip, 
+    IconMap2, 
+    IconBuilding, 
+    IconShoppingCart, 
+    IconDeviceAirtag,
+    IconRoute
+};
 
 const administrador = {
     id: 'administrador',
     title: 'Administrador',
     type: 'group',
     children: [
+        {
+            id: 'companies',
+            title: 'Companies',
+            type: 'item',
+            url: '/companies',
+            icon: icons.IconBuilding,
+            breadcrumbs: false
+        },
         {
             id: 'dashboard',
             title: 'Dashboard',
@@ -16,11 +42,27 @@ const administrador = {
             breadcrumbs: true
         },
         {
-            id: 'rutas',
-            title: 'Crear rutas',
+            id: 'products',
+            title: 'Products',
             type: 'item',
-            url: '/administrador',
-            icon: icons.IconMap2,
+            url: '/products',
+            icon: icons.IconShoppingCart,
+            breadcrumbs: false
+        },
+        {
+            id: 'routes',
+            title: 'Routes',
+            type: 'item',
+            url: '/routes',
+            icon: icons.IconRoute,
+            breadcrumbs: false
+        },
+        {
+            id: 'services',
+            title: 'Services',
+            type: 'item',
+            url: '/services',
+            icon: icons.IconDeviceAirtag,
             breadcrumbs: false
         },
         {
@@ -40,14 +82,6 @@ const administrador = {
             breadcrumbs: false
         },
         {
-            id: 'companies',
-            title: 'Companies',
-            type: 'item',
-            url: '/companies',
-            icon: icons.IconBuilding,
-            breadcrumbs: false
-        },
-        {
             id: 'reportes',
             title: 'Generar reportes',
             type: 'item',
@@ -64,27 +98,11 @@ const administrador = {
             breadcrumbs: false
         },
         {
-            id: 'products',
-            title: 'Products',
-            type: 'item',
-            url: '/products',
-            icon: icons.IconShoppingCart,
-            breadcrumbs: false
-        },
-        {
             id: 'productos_viajes',
             title: 'Productos Viajes',
             type: 'item',
             url: '/administrador',
             icon: icons.IconDashboard,
-            breadcrumbs: false
-        },
-        {
-            id: 'services',
-            title: 'Services',
-            type: 'item',
-            url: '/services',
-            icon: icons.IconDeviceAirtag,
             breadcrumbs: false
         }
     ]
