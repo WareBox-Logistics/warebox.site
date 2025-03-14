@@ -20,6 +20,8 @@ export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 export const API_URL_DELIVERY_DETAIL = BASE_API_URL + '/delivery-detail';
 //Employee
 export const API_URL_EMPLOYEE = BASE_API_URL + '/employee';
+//Location
+export const API_URL_LOCATION = BASE_API_URL + '/location';
 //Routes
 export const API_URL_ROUTE = BASE_API_URL + '/route';
 export const API_URL_ROUTES_DELIVERY = BASE_API_URL + '/routes-delivery';
