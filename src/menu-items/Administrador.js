@@ -1,6 +1,6 @@
-import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding } from '@tabler/icons-react';
+import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding, IconShoppingCart, IconDeviceAirtag } from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding };
+const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuilding, IconShoppingCart, IconDeviceAirtag };
 
 const administrador = {
     id: 'administrador',
@@ -64,11 +64,27 @@ const administrador = {
             breadcrumbs: false
         },
         {
+            id: 'products',
+            title: 'Products',
+            type: 'item',
+            url: '/products',
+            icon: icons.IconShoppingCart,
+            breadcrumbs: false
+        },
+        {
             id: 'productos_viajes',
             title: 'Productos Viajes',
             type: 'item',
             url: '/administrador',
             icon: icons.IconDashboard,
+            breadcrumbs: false
+        },
+        {
+            id: 'services',
+            title: 'Services',
+            type: 'item',
+            url: '/services',
+            icon: icons.IconDeviceAirtag,
             breadcrumbs: false
         }
     ]

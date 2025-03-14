@@ -21,8 +21,9 @@ const Companies = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [currentCompany, setCurrentCompany] = useState(null);
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const formRef = useRef(null);
 
   useEffect(() => {
@@ -30,14 +31,8 @@ const Companies = () => {
     fetchServices();
   }, []);
 
-  useEffect(() => {
-    if (isFormVisible && formRef.current) {
-      formRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [isFormVisible]);
-
-
   const fetchCompanies = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get(API_URL_COMPANY, {
         headers: {
@@ -49,6 +44,8 @@ const Companies = () => {
     } catch (error) {
       console.error('Error fetching companies:', error);
       setCompanies([]); // Set companies to an empty array in case of error
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,7 +81,7 @@ const Companies = () => {
       setCompanies([...companies, { ...response.data.company, service: selectedService }]);
       message.success("Empresa agregada correctamente");
       resetForm();
-      setIsFormVisible(false);
+      setIsModalVisible(false);
     } catch (error) {
       message.error("Error al agregar empresa");
       console.error("Error adding company:", error);
@@ -118,7 +115,7 @@ const Companies = () => {
       service: company.service ? company.service.id : null,
     });
     setIsEditMode(true);
-    setIsFormVisible(true);
+    setIsModalVisible(true);
   };
 
   const handleUpdateCompany = async (e) => {
@@ -141,7 +138,7 @@ const Companies = () => {
       message.success("Empresa actualizada correctamente");
       setIsEditMode(false);
       resetForm();
-      setIsFormVisible(false);
+      setIsModalVisible(false);
     } catch (error) {
       message.error("Error al actualizar empresa");
       console.error("Error updating company:", error);
@@ -222,8 +219,10 @@ const Companies = () => {
           <Col>
             <Button 
               type="primary" 
-              onClick={() => { setIsFormVisible(true); setIsEditMode(false); }}
-              // style={{ backgroundColor: '#FF731D' }}
+              onClick={() => { setIsModalVisible(true); setIsEditMode(false); }}
+              // style={{ backgroundColor: '#FF731D', borderColor: '#FF731D' }}
+              // onMouseEnter={(e) => e.target.style.backgroundColor = '#FF4500'}
+              // onMouseLeave={(e) => e.target.style.backgroundColor = '#FF731D' }}
             >
               Add Company
             </Button>
@@ -237,89 +236,94 @@ const Companies = () => {
             columns={columns}
             rowKey="id"
             pagination={{ pageSize: 20 }}
+            loading={isLoading}
           />
         </div>
 
-        {/* Formulario de registro/edición */}
-        {isFormVisible && (
-          <Card title={isEditMode ? "Update Company" : "Add New Company"} style={{ marginTop: 20 }} ref={formRef}>
-            <Button
-              type="text"
-              icon={<CloseOutlined />}
-              onClick={() => { setIsFormVisible(false); resetForm(); }}
-              style={{ position: 'absolute', top: 10, right: 10 }}
-            />
-            <form onSubmit={isEditMode ? handleUpdateCompany : handleAddCompany}>
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={6}>
-                  <Input
-                    name="name"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6}>
-                  <Input
-                    name="rfc"
-                    placeholder="RFC"
-                    value={formData.rfc}
-                    onChange={handleChange}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6}>
-                  <Input
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6}>
-                  <Input
-                    name="phone"
-                    placeholder="Phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6}>
-                  <Select
-                    placeholder="Service"
-                    style={{ width: "100%" }}
-                    value={formData.service}
-                    onChange={handleSelectChange}
-                    options={services.map(service => ({
-                      label: service.type,
-                      value: service.id,
-                    }))}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={isSubmitting}
-                    icon={
-                      isSubmitting ? (
-                        <Spin
-                          indicator={
-                            <LoadingOutlined spin style={{ color: "white" }} />
-                          }
-                        />
-                      ) : (
-                        <UserAddOutlined />
-                      )
-                    }
-                    block
-                  >
-                    {isSubmitting ? "Saving..." : isEditMode ? "Update" : "Add"}
-                  </Button>
-                </Col>
-              </Row>
-            </form>
-          </Card>
-        )}
+        {/* Modal de registro/edición */}
+        <Modal
+          title={isEditMode ? "Update Company" : "Add New Company"}
+          visible={isModalVisible}
+          onCancel={() => { setIsModalVisible(false); resetForm(); }}
+          footer={null}
+          width={400}
+          // mask={true}
+          // maskStyle={{ zIndex: 1000 }}
+        >
+          <form onSubmit={isEditMode ? handleUpdateCompany : handleAddCompany}>
+            <Row gutter={[16, 16]}>
+              <Col xs={24}>
+                <Input
+                  name="name"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  style={{ width: '100%' }}
+                />
+              </Col>
+              <Col xs={24}>
+                <Input
+                  name="rfc"
+                  placeholder="RFC"
+                  value={formData.rfc}
+                  onChange={handleChange}
+                  style={{ width: '100%' }}
+                />
+              </Col>
+              <Col xs={24}>
+                <Input
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  style={{ width: '100%' }}
+                />
+              </Col>
+              <Col xs={24}>
+                <Input
+                  name="phone"
+                  placeholder="Phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  style={{ width: '100%' }}
+                />
+              </Col>
+              <Col xs={24}>
+                <Select
+                  placeholder="Service"
+                  style={{ width: '100%' }}
+                  value={formData.service}
+                  onChange={handleSelectChange}
+                  options={services.map(service => ({
+                    label: service.type,
+                    value: service.id,
+                  }))}
+                />
+              </Col>
+              <Col xs={24}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  disabled={isSubmitting}
+                  icon={
+                    isSubmitting ? (
+                      <Spin
+                        indicator={
+                          <LoadingOutlined spin style={{ color: "white" }} />
+                        }
+                      />
+                    ) : (
+                      <UserAddOutlined />
+                    )
+                  }
+                  block
+                >
+                  {isSubmitting ? "Saving..." : isEditMode ? "Update" : "Add"}
+                </Button>
+              </Col>
+            </Row>
+          </form>
+        </Modal>
 
         {/* Modal de eliminación */}
         <Modal

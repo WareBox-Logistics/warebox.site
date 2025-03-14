@@ -25,6 +25,8 @@ const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
 const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
 const Companies = Loadable(lazy(() => import('views/pages/administrador/Companies')));
+const Products = Loadable(lazy(() => import('views/pages/administrador/Products')));
+const Services = Loadable(lazy(() => import('views/pages/administrador/Services')));
 
 const MainRoutes = {
   path: '/',
@@ -41,6 +43,14 @@ const MainRoutes = {
         {
           path: '/companies',
           element: <Companies />
+        },
+        {
+          path: '/products',
+          element: <Products />
+        },
+        {
+          path: '/services',
+          element: <Services />
         },
         {
           path: '',
