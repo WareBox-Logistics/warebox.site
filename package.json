@@ -32,6 +32,7 @@
     "@mui/system": "^5.15.9",
     "@mui/utils": "^5.15.11",
     "@mui/x-charts": "^7.27.1",
+    "@react-google-maps/api": "^2.20.6",
     "@reduxjs/toolkit": "^2.2.1",
     "@tabler/icons-react": "^2.47.0",
     "@vitejs/plugin-react": "^4.2.1",

@@ -4,6 +4,9 @@ export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 //TOKEN
 export const authToken = `Bearer ${localStorage.getItem('token')}`;
 
+//GEOAPIFY
+export const GEOAPIFY_BASE_API_URL = 'https://api.geoapify.com/v1/routing?';
+
 
 // ***** API URL VARIABLES *****
 
