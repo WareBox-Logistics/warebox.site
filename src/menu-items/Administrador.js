@@ -1,23 +1,28 @@
+import { Icon } from '@mui/material';
 import { 
-    IconDashboard, 
+    IconDashboard,
+    IconChartBar,
     IconUser, 
     IconPaperclip, 
     IconMap2, 
     IconBuilding, 
     IconShoppingCart, 
     IconDeviceAirtag, 
-    IconRoute 
+    IconRoute,
+    IconBuildingWarehouse 
 } from '@tabler/icons-react';
 
 const icons = { 
-    IconDashboard, 
+    IconDashboard,
+    IconChartBar,
     IconUser, 
     IconPaperclip, 
     IconMap2, 
     IconBuilding, 
     IconShoppingCart, 
     IconDeviceAirtag,
-    IconRoute
+    IconRoute,
+    IconBuildingWarehouse
 };
 
 const administrador = {
@@ -38,7 +43,15 @@ const administrador = {
             title: 'Dashboard',
             type: 'item',
             url: '/dashboard',
-            icon: icons.IconDashboard,
+            icon: icons.IconChartBar,
+            breadcrumbs: true
+        },
+        {
+            id: 'locations',
+            title: 'Locations',
+            type: 'item',
+            url: '/locations',
+            icon: icons.IconMap2,
             breadcrumbs: true
         },
         {
@@ -74,11 +87,11 @@ const administrador = {
             breadcrumbs: false
         },
         {
-            id: 'almacenes',
-            title: 'Almacenes',
+            id: 'warehouses',
+            title: 'Warehouses',
             type: 'item',
-            url: '/administrador',
-            icon: icons.IconMap2,
+            url: '/warehouses',
+            icon: icons.IconBuildingWarehouse,
             breadcrumbs: false
         },
         {

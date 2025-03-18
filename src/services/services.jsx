@@ -30,13 +30,16 @@ export const API_URL_ROUTE = BASE_API_URL + '/route';
 export const API_URL_ROUTES_DELIVERY = BASE_API_URL + '/routes-delivery';
 //Service
 export const API_URL_SERVICE = BASE_API_URL + '/service';
-//Service
-export const API_URL_TRAILER = BASE_API_URL + '/trailer';
-//Truck
-export const API_URL_TRUCK = BASE_API_URL + '/truck';
-
+//Vehicle
+export const API_URL_VEHICLE = BASE_API_URL + '/vehicle';
+//Brand
+export const API_URL_BRAND = BASE_API_URL + '/brand';
+//Model
+export const API_URL_MODEL = BASE_API_URL + '/model';
 //Warehouse
 export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
+
+
 export const API_URL_BOX_INVENTORY = BASE_API_URL + '/box-inventory';
 export const API_URL_PALLET = BASE_API_URL + '/pallet';
 export const API_URL_DOCK = BASE_API_URL + '/dock';
@@ -53,3 +56,9 @@ export const API_URL_SUPPORT = BASE_API_URL + '/support';
 export const API_URL_CATEGORY = BASE_API_URL + '/category';
 //Product
 export const API_URL_PRODUCT = BASE_API_URL + '/product';
+
+
+//Trailer
+export const API_URL_TRAILER = BASE_API_URL + '/trailer';
+//Truck
+export const API_URL_TRUCK = BASE_API_URL + '/truck';
