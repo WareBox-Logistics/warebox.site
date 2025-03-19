@@ -1,6 +1,6 @@
-import { IconDashboard, IconUser } from '@tabler/icons-react';
+import { IconDashboard, IconLayoutDashboard, IconReport, IconTimelineEventExclamation, IconFlag3 } from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser };
+const icons = { IconDashboard,  IconLayoutDashboard, IconReport, IconTimelineEventExclamation, IconFlag3 };
 
 const despacho = {
     id: 'despacho',
@@ -8,19 +8,35 @@ const despacho = {
     type: 'group',
     children: [
         {
-            id: 'monitorear_viajes',
-            title: 'Monitorear Viajes',
+            id: 'Dashboard',
+            title: 'Monitoreo de Reportes',
             type: 'item',
-            url: '/viajes-despacho',
-            icon: icons.IconUser,
+            url: '/dashboard-despacho',
+            icon: icons.IconLayoutDashboard,
             breadcrumbs: false
         },
         {
-            id: 'historial_desempeno',
-            title: 'Historial Desempeño',
+            id: 'Reporte',
+            title: 'Reportes',
             type: 'item',
-            url: '/historial-desempeno',
-            icon: icons.IconDashboard,
+            url: '/report-despacho',
+            icon: icons.IconReport,
+            breadcrumbs: false
+        },
+        {
+            id: 'Issue',
+            title: 'Issue',
+            type: 'item',
+            url: '/issue-despacho',
+            icon: icons.IconTimelineEventExclamation,
+            breadcrumbs: false
+        },
+        {
+            id: 'Support',
+            title: 'Support',
+            type: 'item',
+            url: '/support-despacho',
+            icon: icons.IconFlag3,
             breadcrumbs: false
         }
     ]

@@ -20,7 +20,14 @@ const MuellesPage = Loadable(lazy(() => import('views/pages/almacenista/Muelles'
 const AlmacenistaRacks = Loadable(lazy(()=> import('views/pages/almacenista/GestionRacks')));
 const AlmacenistaPallets = Loadable(lazy(()=> import('views/pages/almacenista/GestionPallets')));
 const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
-const Despacho = Loadable(lazy(() => import('views/pages/despacho/Index')));
+
+const DashboardDis = Loadable(lazy(() => import('views/pages/despacho/DashboardDis')));
+const Report = Loadable(lazy(() => import('views/pages/despacho/Report')))
+const Issue = Loadable(lazy(() => import('views/pages/despacho/Issue')))
+const Support = Loadable(lazy(() => import('views/pages/despacho/Support')))
+
+
+
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
 const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
@@ -108,8 +115,20 @@ const MainRoutes = {
           element: <Chofer />
         },
         {
-          path: 'despacho',
-          element: <Despacho />
+          path: '/dashboard-despacho',
+          element: <DashboardDis />
+        },
+        {
+          path: '/report-despacho',
+          element: <Report />
+        },
+        {
+          path: '/issue-despacho',
+          element: <Issue />
+        },
+        {
+          path: '/support-despacho',
+          element: <Support />
         },
         {
           path: 'operador',
