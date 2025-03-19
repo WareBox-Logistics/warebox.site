@@ -9,7 +9,8 @@ import {
     IconShoppingCart, 
     IconDeviceAirtag, 
     IconRoute,
-    IconBuildingWarehouse 
+    IconBuildingWarehouse,
+    IconTruck
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -22,7 +23,8 @@ const icons = {
     IconShoppingCart, 
     IconDeviceAirtag,
     IconRoute,
-    IconBuildingWarehouse
+    IconBuildingWarehouse,
+    IconTruck
 };
 
 const administrador = {
@@ -79,11 +81,19 @@ const administrador = {
             breadcrumbs: false
         },
         {
-            id: 'usuarios',
-            title: 'Usuarios',
+            id: 'users',
+            title: 'Users',
             type: 'item',
-            url: '/usuarios',
+            url: '/users',
             icon: icons.IconUser,
+            breadcrumbs: false
+        },
+        {
+            id: 'vehicles',
+            title: 'Vehicles',
+            type: 'item',
+            url: '/vehicles',
+            icon: icons.IconTruck,
             breadcrumbs: false
         },
         {
