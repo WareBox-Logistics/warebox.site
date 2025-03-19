@@ -273,6 +273,7 @@ const ModelComponent = () => {
         <form onSubmit={isEditMode ? handleUpdateModel : handleAddModel}>
           <Row gutter={[16, 16]}>
             <Col xs={24}>
+              <Typography.Text style={{ color: "#949494 " }}>Name</Typography.Text>
               <Input
                 name="name"
                 placeholder="Name"
@@ -282,6 +283,7 @@ const ModelComponent = () => {
               />
             </Col>
             <Col xs={24}>
+              <Typography.Text style={{ color: "#949494 " }}>Brand</Typography.Text>
               <Select
                 placeholder="Brand"
                 style={{ width: "100%" }}
@@ -294,6 +296,7 @@ const ModelComponent = () => {
               />
             </Col>
             <Col xs={24}>
+              <Typography.Text style={{ color: "#949494 " }}>Year</Typography.Text>
               <Input
                 name="year"
                 placeholder="Year"

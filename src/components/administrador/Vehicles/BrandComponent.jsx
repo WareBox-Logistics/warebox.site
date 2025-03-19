@@ -216,6 +216,7 @@ const BrandComponent = () => {
         <form onSubmit={isEditMode ? handleUpdateBrand : handleAddBrand}>
           <Row gutter={[16, 16]}>
             <Col xs={24}>
+              <Typography.Text style={{ color: "#949494" }}>Name</Typography.Text>
               <Input
                 name="name"
                 placeholder="Name"

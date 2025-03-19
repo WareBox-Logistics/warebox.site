@@ -306,71 +306,82 @@ const VehicleComponent = () => {
       >
         <form onSubmit={isEditMode ? handleUpdateVehicle : handleAddVehicle}>
           <Row gutter={[16, 16]}>
-            <Col xs={24}>
-              <Input
-                name="plates"
-                placeholder="Plates"
-                value={formData.plates}
-                onChange={handleChange}
-                style={{ width: "100%" }}
-              />
-            </Col>
-            <Col xs={24}>
-              <Input
-                name="vin"
-                placeholder="VIN"
-                value={formData.vin}
-                onChange={handleChange}
-                style={{ width: "100%" }}
-              />
-            </Col>
-            <Col xs={24}>
-                <Select
-                    placeholder="Brand"
-                    style={{ width: "100%" }}
-                    value={selectedBrand}
-                    onChange={(value) => {
-                        setSelectedBrand(value);
-                        setFormData({ ...formData, model_id: null }); // Reinicia el modelo seleccionado
-                    }}
-                    options={brands.map((brand) => ({
-                    label: brand.name,
-                    value: brand.id,
-                    }))}
-                />
-            </Col>
-            <Col xs={24}>
-                <Select
-                    placeholder="Model"
-                    style={{ width: "100%" }}
-                    value={formData.model_id}
-                    onChange={handleSelectChange}
-                    options={models
-                    .filter((model) => model.brand_id === selectedBrand)
-                    .map((model) => ({
-                        label: model.name,
-                        value: model.id,
-                    }))}
-                />
-            </Col>
-            <Col xs={24}>
-                <Input
-                    name="type"
-                    placeholder="Type"
-                    value={formData.type ? formData.type === "trailer" ? "Trailer" : "Semi Truck" : undefined}
-                    readonly
-                    style={{ width: "100%" }}
-                />
-            </Col>
-            <Col xs={24}>
-              <Input
-                name="volume"
-                placeholder="Volume"
-                value={formData.volume}
-                onChange={handleChange}
-                style={{ width: "100%" }}
-              />
-            </Col>
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>Plates</Typography.Text>
+            <Input
+              name="plates"
+              placeholder="Plates"
+              value={formData.plates}
+              onChange={handleChange}
+              style={{ width: "100%" }}
+            />
+          </Col>
+
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>VIN</Typography.Text>
+            <Input
+              name="vin"
+              placeholder="VIN"
+              value={formData.vin}
+              onChange={handleChange}
+              style={{ width: "100%" }}
+            />
+          </Col>
+
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>Brand</Typography.Text>
+            <Select
+              placeholder="Brand"
+              style={{ width: "100%" }}
+              value={selectedBrand}
+              onChange={(value) => {
+                setSelectedBrand(value);
+                setFormData({ ...formData, model_id: null }); // Reinicia el modelo seleccionado
+              }}
+              options={brands.map((brand) => ({
+                label: brand.name,
+                value: brand.id,
+              }))}
+            />
+          </Col>
+
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>Model</Typography.Text>
+            <Select
+              placeholder="Model"
+              style={{ width: "100%" }}
+              value={formData.model_id}
+              onChange={handleSelectChange}
+              options={models
+                .filter((model) => model.brand_id === selectedBrand)
+                .map((model) => ({
+                  label: model.name,
+                  value: model.id,
+                }))}
+            />
+          </Col>
+
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>Type</Typography.Text>
+            <Input
+              name="type"
+              placeholder="Type"
+              value={formData.type ? (formData.type === "trailer" ? "Trailer" : "Semi Truck") : undefined}
+              disabled
+              style={{ width: "100%" }}
+            />
+          </Col>
+
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>Volume</Typography.Text>
+            <Input
+              name="volume"
+              placeholder="Volume"
+              value={formData.volume}
+              onChange={handleChange}
+              style={{ width: "100%" }}
+            />
+          </Col>
             <Col xs={24}>
               <Button
                 type="primary"
