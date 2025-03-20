@@ -83,10 +83,11 @@ const Routes = () => {
   const extractPoints = (locations, warehouses) => {
     const locationPoints = [];
     const warehousePoints = [];
+
     locations.forEach((location) => {
       locationPoints.push({
         name: location.name,
-        companyName: location.company,
+        companyName: location.company?.name || "Unknown",
         id: location.id,
         coords: { lat: parseFloat(location.latitude), lng: parseFloat(location.longitude) },
         id_routing_net: location.id_routing_net,
@@ -351,17 +352,17 @@ const Routes = () => {
 
                 {/* Render Polyline */}
                 {polylinePath.length > 0 &&
-  polylinePath.map((path, index) => (
-    <Polyline
-      key={index}
-      path={path} // Pass each segment separately
-      options={{
-        strokeColor: "#FF0000",
-        strokeOpacity: 1.0,
-        strokeWeight: 3,
-      }}
-    />
-  ))}
+                polylinePath.map((path, index) => (
+                  <Polyline
+                    key={index}
+                    path={path} // Pass each segment separately
+                    options={{
+                      strokeColor: "#FF0000",
+                      strokeOpacity: 1.0,
+                      strokeWeight: 3,
+                    }}
+                  />
+                ))}
 
               </GoogleMap>
             </div>

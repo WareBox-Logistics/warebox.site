@@ -17,6 +17,9 @@ const Locations = () => {
     latitude: "",
     longitude: "",
     company: null,
+    id_routing_net: null,
+    source: null,         
+    target: null, 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -44,7 +47,7 @@ const Locations = () => {
       setLocations(response.data.locations || []);
     } catch (error) {
       console.error('Error fetching locations:', error);
-      setLocations([]); // Set locations to an empty array in case of error
+      setLocations([]);
     } finally {
       setIsLoading(false);
     }
@@ -69,8 +72,12 @@ const Locations = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await axios.post(API_URL_LOCATION,
-        formData,
+      const response = await axios.post(API_URL_LOCATION, {
+        ...formData,
+        id_routing_net: formData.id_routing_net || null,
+        source: formData.source || null,
+        target: formData.target || null,
+      },
         {
           headers: {
             'Authorization': authToken,
@@ -80,11 +87,11 @@ const Locations = () => {
       );
       const selectedCompany = companies.find(company => company.id === formData.company);
       setLocations([...locations, { ...response.data.location, company: selectedCompany }]);
-      message.success("Ubicación agregada correctamente");
+      message.success("Location added successfully");
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
-      message.error("Error al agregar ubicación");
+      message.error("Error adding location");
       console.error("Error adding location:", error);
     } finally {
       setIsSubmitting(false);
@@ -113,6 +120,9 @@ const Locations = () => {
       latitude: location.latitude || "",
       longitude: location.longitude || "",
       company: location.company ? location.company.id : null,
+      id_routing_net: location.id_routing_net || null,
+      source: location.source || null,
+      target: location.target || null, 
     });
     setIsEditMode(true);
     setIsModalVisible(true);
@@ -121,26 +131,32 @@ const Locations = () => {
   const handleUpdateLocation = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    // console.log("Data being sent:", formData);
     try {
-      const response = await axios.put(`${API_URL_LOCATION}/${currentLocation.id}`,
-        formData,
-        {
-          headers: {
-            'Authorization': authToken,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await axios.put(`${API_URL_LOCATION}/${currentLocation.id}`, {
+        ...formData,
+        id_routing_net: formData.id_routing_net || null,
+        source: formData.source || null,
+        target: formData.target || null,
+      },
+      {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json',
+        },
+      });
       const updatedLocations = locations.map(location =>
-        location.id === currentLocation.id ? { ...response.data.location, company: companies.find(company => company.id === formData.company) } : location
+        location.id === currentLocation.id
+          ? { ...response.data.location, company: companies.find(company => company.id === formData.company) }
+          : location
       );
       setLocations(updatedLocations);
-      message.success("Ubicación actualizada correctamente");
+      message.success("Location updated successfully");
       setIsEditMode(false);
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
-      message.error("Error al actualizar ubicación");
+      message.error("Error updating location");
       console.error("Error updating location:", error);
     } finally {
       setIsSubmitting(false);
@@ -187,12 +203,14 @@ const Locations = () => {
     location.name ? location.name.toLowerCase().includes(searchText.toLowerCase()) : false
   );
 
-  // Columnas de la tabla
   const columns = [
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "Latitude", dataIndex: "latitude", key: "latitude" },
     { title: "Longitude", dataIndex: "longitude", key: "longitude" },
     { title: "Company", dataIndex: ["company", "name"], key: "company" },
+    { title: "Routing Net ID", dataIndex: "id_routing_net", key: "id_routing_net" },
+    { title: "Source", dataIndex: "source", key: "source" },
+    { title: "Target", dataIndex: "target", key: "target" },
     {
       title: "Actions",
       key: "actions",
@@ -200,7 +218,6 @@ const Locations = () => {
         <span>
           <Button icon={<EditOutlined />} onClick={() => handleEditLocation(record)}>Edit</Button>
           <Button icon={<DeleteOutlined />} onClick={() => handleDeleteLocation(record)} style={{ marginLeft: 8 }}>Delete</Button>
-          <Button icon={<EnvironmentOutlined />} onClick={() => handleViewMap(record)} style={{ marginLeft: 8 }}>View Map</Button>
         </span>
       ),
     },
@@ -224,9 +241,6 @@ const Locations = () => {
             <Button 
               type="primary" 
               onClick={() => { setIsModalVisible(true); setIsEditMode(false); }}
-              // style={{ backgroundColor: '#FF731D', borderColor: '#FF731D' }}
-              // onMouseEnter={(e) => e.target.style.backgroundColor = '#FF4500'}
-              // onMouseLeave={(e) => e.target.style.backgroundColor = '#FF731D' }}
             >
               Add Location
             </Button>
@@ -329,29 +343,6 @@ const Locations = () => {
           <p>
             ¿Are you sure you want to delete "<Text strong>{currentLocation?.name}</Text>"?
           </p>
-        </Modal>
-
-        {/* Modal de mapa */}
-        <Modal
-          title="Location Map"
-          visible={isMapModalVisible}
-          onCancel={() => setIsMapModalVisible(false)}
-          footer={null}
-          width={800}
-        >
-          <div style={{ height: '400px' }}>
-            {currentLocation && (
-              // eslint-disable-next-line jsx-a11y/iframe-has-title
-              <iframe
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                style={{ border: 0 }}
-                src={`https://www.google.com/maps/embed/v1/view?key=${api_key}&center=${currentLocation.latitude},${currentLocation.longitude}&zoom=14`}
-                allowFullScreen
-              ></iframe>
-            )}
-          </div>
         </Modal>
       </MainCard>
     </Paper>
