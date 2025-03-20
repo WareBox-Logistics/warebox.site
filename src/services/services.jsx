@@ -62,3 +62,8 @@ export const API_URL_PRODUCT = BASE_API_URL + '/product';
 export const API_URL_TRAILER = BASE_API_URL + '/trailer';
 //Truck
 export const API_URL_TRUCK = BASE_API_URL + '/truck';
+
+//TESTING URLS
+export const BASE_API_TEST = 'http://127.0.0.1:8000/api';
+export const API_TEST_WAREHOUSE = BASE_API_TEST + '/warehouse';
+export const API_TEST_LOCATION = BASE_API_TEST + '/location';

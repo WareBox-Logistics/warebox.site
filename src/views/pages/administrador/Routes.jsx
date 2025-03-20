@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { GoogleMap, Marker, InfoWindow, Polyline, useLoadScript } from '@react-google-maps/api';
-import {Row, Col, Button, Typography } from 'antd'; 
+import {Row, Col, Button, Typography, Spin } from 'antd'; 
 import axios from 'axios';
 import { Paper } from '@mui/material';
 import MainCard from "ui-component/cards/MainCard";
-import { API_URL_WAREHOUSE, API_URL_LOCATION, authToken, GEOAPIFY_BASE_API_URL } from 'services/services';
+import { API_URL_WAREHOUSE, API_URL_LOCATION, authToken, GEOAPIFY_BASE_API_URL,API_TEST_WAREHOUSE, API_TEST_LOCATION } from 'services/services';
 import warehouseIcon from '../../../assets/images/icons/warehouse.png';
 import shopIcon from '../../../assets/images/icons/shops.png';
 import RouteInfo from '../../../components/administrador/RouteInfo';
 import RouteForm from '../../../components/administrador/RouteForm';
+import {transformGeoapifyResponse} from '../../../utils/routeConversion'
 
 const { Title, Text } = Typography;
 
@@ -27,8 +28,14 @@ const Routes = () => {
   const [points, setPoints] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [waypoints, setWaypoints] = useState([]);
-  const [route, setRoute] = useState(null);
   const [polylinePath, setPolylinePath] = useState([]);
+  const [calculatedRoute, setCalculatedRoute] = useState(null);
+  const [routeDetails, setRouteDetails] = useState(null);
+  const [routeDirections, setRouteDirections] = useState(null);
+  const [fullNavigation, setFullNavigation] = useState(null);
+  const [transformedRoute, setTransformedRoute] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+  
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -44,38 +51,32 @@ const Routes = () => {
   }, [locations, warehouses]);
 
   const fetchLocations = async () => {
-    setIsLoading(true);
     try {
-      const response = await axios.get(API_URL_LOCATION, {
+      const response = await axios.get(API_TEST_LOCATION, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',
         },
       });
       setLocations(response.data.locations || []);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching locations:', error);
       setLocations([]);
-      setIsLoading(false);
     }
   };
 
   const fetchWarehouses = async () => {
-    setIsLoading(true);
     try {
-      const response = await axios.get(API_URL_WAREHOUSE, {
+      const response = await axios.get(API_TEST_WAREHOUSE, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',
         },
       });
       setWarehouses(response.data.warehouses || []);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching warehouses:', error);
       setWarehouses([]);
-      setIsLoading(false);
     }
   };
 
@@ -88,6 +89,9 @@ const Routes = () => {
         companyName: location.company,
         id: location.id,
         coords: { lat: parseFloat(location.latitude), lng: parseFloat(location.longitude) },
+        id_routing_net: location.id_routing_net,
+        source: location.source,
+        target: location.target,
       });
     });
 
@@ -96,22 +100,24 @@ const Routes = () => {
         name: warehouse.name,
         id: warehouse.id,
         coords: { lat: parseFloat(warehouse.latitude), lng: parseFloat(warehouse.longitude) },
+        id_routing_net: warehouse.id_routing_net,
+        source: warehouse.source,
+        target: warehouse.target,
       });
     });
 
-    setPoints([{ warehouses: warehousePoints }, { shops: locationPoints }]);
-  };
+    setPoints([{ warehouses: warehousePoints }, { shops: locationPoints }]);  };
 
-  const handleMarkerClick = (point, name, id) => {
-    setSelectedPoint([point, name, id]);
+  const handleMarkerClick = (point, name, id, id_routing_net, source, target) => {
+    setSelectedPoint([point, name, id, id_routing_net, source, target]);
   };
 
   const handleCloseInfoWindow = () => {
     setSelectedPoint(null);
   };
 
-  const addWaypoint = (point, name, id) => {
-    setWaypoints([...waypoints, { point, name, id }]);
+  const addWaypoint = (point, name, id, id_routing_net, source, target) => {
+    setWaypoints([...waypoints, { point, name, id, id_routing_net, source, target }]);
   };
 
   const removeWaypoint = (point) => {
@@ -120,32 +126,172 @@ const Routes = () => {
 
   const handleRouteGeneration = async () => {
     try {
+      setIsLoading(true);
       const waypointString = `waypoints=${waypoints
         .map((waypoint) => `${waypoint.point.lat},${waypoint.point.lng}`)
         .join('|')}`;
-
+  
       const response = await axios.get(
         `${GEOAPIFY_BASE_API_URL + waypointString}&format=json&mode=heavy_truck&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`
       );
-      setRoute(response.data);
-      console.log('Route:', response.data);
+  
+      setRouteInfo(response.data.results[0])
+      const transformedResponse = transformGeoapifyResponse(response.data);
+      setTransformedRoute(transformedResponse);
+      setPolylinePath(transformedResponse.PolylinePath);
+      setIsLoading(false);
+      console.log('Transformed Route:', transformedResponse);
     } catch (error) {
       console.error('Error generating route:', error);
     }
   };
+  
+  const calculateRoute = async () => {
+    const url = 'http://127.0.0.1:8000/api/proxy/optima'; // Laravel proxy endpoint (will move it to services once its on the changes are in the server)
+    if (
+      waypoints[0].id_routing_net == null ||
+      waypoints.at(-1).id_routing_net == null
+    ) {
+      handleRouteGeneration();
+      return;
+    }
+   
+    const payload = {
+      id_i: waypoints[0].id_routing_net,
+      source_i: waypoints[0].source,
+      target_i: waypoints[0].target,
+      id_f: waypoints.at(-1).id_routing_net,
+      source_f: waypoints.at(-1).source,
+      target_f: waypoints.at(-1).target,
+      v: 8,
+      type: 'json',
+      proj: 'GRS80',
+      key: import.meta.env.VITE_SAKBE_API_KEY,
+    };
+  
+    try {
+      setIsLoading(true);
+      const response = await axios.post(url, payload);
+      setCalculatedRoute(response.data.data);
+      getRouteDetails();
+      console.log('CalculatedRoute:', response.data.data);
+    } catch (error) {
+      console.error('Error calculating route:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getRouteDetails = async () => {
+    const url = 'http://127.0.0.1:8000/api/proxy/optima/details'; // Laravel proxy endpoint
+    const payload = {
+      id_i: waypoints[0].id_routing_net,
+      source_i: waypoints[0].source,
+      target_i: waypoints[0].target,
+      id_f: waypoints.at(-1).id_routing_net,
+      source_f: waypoints.at(-1).source,
+      target_f: waypoints.at(-1).target,
+      v: 8,
+      type: 'json',
+      proj: 'GRS80',
+      key: import.meta.env.VITE_SAKBE_API_KEY,
+    };
+  
+    try {
+      setIsLoading(true);
+      const response = await axios.post(url, payload);
+      setRouteDetails(response.data.data);
+      console.log('RouteDetails:', response.data.data);
+    } catch (error) {
+      console.error('Error retrieving route details:', error);
+      return null;
+    }finally{
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (route && route.results && route.results[0] && route.results[0].geometry && route.results[0].geometry[0]) {
-      const path = route.results[0].geometry[0].map((coord) => ({
-        lat: coord.lat,
-        lng: coord.lon,
-      }));
-      setPolylinePath(path);
+    if (routeDetails && routeDetails.length > 0) {
+      try {
+        const transformedDirections = routeDetails.map((route) => {
+          if (route.geojson) {
+            const geojson = JSON.parse(route.geojson);
+    
+            if (geojson.type === "Point") {
+              const [lng, lat] = geojson.coordinates;
+              return { ...route, point: { lat, lng } };
+            } else {
+              console.error("Invalid GeoJSON type:", geojson.type);
+            }
+          }
+          return route; // Return unchanged if no geojson
+        });
+    
+        setRouteDirections(transformedDirections);
+        console.log("RouteDirections:", transformedDirections);
+      } catch (error) {
+        console.error("Error parsing geojson:", error);
+      }
     } else {
-      console.log('path not here');
+      console.log("No valid route found");
     }
-  }, [route]);
+  }, [routeDetails]);
 
+  useEffect(() => {
+    if (calculatedRoute && calculatedRoute.geojson) {
+      try {
+        const geojson = JSON.parse(calculatedRoute.geojson);
+  
+        if (geojson.type === "MultiLineString") {
+          const coordinates = geojson.coordinates;
+  
+          const paths = coordinates.map(segment =>
+            segment.map(coord => ({
+              lat: parseFloat(coord[1]), 
+              lng: parseFloat(coord[0]),
+            }))
+          );
+  
+          setPolylinePath(paths);
+          console.log("PolylinePath:", paths);
+        } else {
+          console.error("Invalid GeoJSON type:", geojson.type);
+        }
+      } catch (error) {
+        console.error("Error parsing geojson:", error);
+      }
+    } else {
+      console.log("No valid route found");
+    }
+  }, [calculatedRoute]);
+
+  useEffect(() => {
+    if (polylinePath && routeDirections) {
+      handleFullNavigation();
+    }
+  }, [polylinePath, routeDirections]);
+  
+  const handleFullNavigation = () => {
+    setFullNavigation({
+      PolylinePath: polylinePath,
+      RouteDirections: routeDirections,
+    });
+    console.log({
+      PolylinePath: polylinePath,
+      RouteDirections: routeDirections,
+    })
+  }
+
+  const cleanRoute = () => {
+    setPolylinePath([]);
+    setCalculatedRoute(null);
+    setRouteDetails(null);
+    setRouteInfo(null);
+    setRouteDirections([]);
+    setFullNavigation(null);
+    setWaypoints([]);
+  };
+  
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading Maps...</div>;
 
@@ -156,9 +302,15 @@ const Routes = () => {
           Generate a route
         </Title>
 
-        <Row>
+        {isLoading && (
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 1000 }}>
+            <Spin size="large" tip="Calculating route..." />
+          </div>
+        )}
+
+        <Row >
           <Col span={12}>
-            <div style={{ height: '75vh', width: '100%', pointerEvents: 'auto', overflow: 'hidden', borderRadius: '10px' }}>
+            <div style={{ flex: 1, width: '100%', height: '100%' , borderRadius: '10px' }}>
               <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 zoom={11}
@@ -175,7 +327,7 @@ const Routes = () => {
                       <Marker
                         key={`${categoryIndex}-${index}`}
                         position={{ lat: point.coords.lat, lng: point.coords.lng }}
-                        onClick={() => handleMarkerClick({ lat: point.coords.lat, lng: point.coords.lng }, point.name, point.id)}
+                        onClick={() => handleMarkerClick({ lat: point.coords.lat, lng: point.coords.lng }, point.name, point.id, point.id_routing_net, point.source, point.target)}
                         icon={{
                           url: type === 'warehouses' ? warehouseIcon : shopIcon,
                           scaledSize: new window.google.maps.Size(32, 32),
@@ -190,7 +342,7 @@ const Routes = () => {
                   <InfoWindow position={selectedPoint[0]} onCloseClick={handleCloseInfoWindow}>
                     <div>
                       <h3>{selectedPoint[1]}</h3>
-                      <Button type="primary" onClick={() => addWaypoint(selectedPoint[0], selectedPoint[1], selectedPoint[2])}>
+                      <Button type="primary" onClick={() => addWaypoint(selectedPoint[0], selectedPoint[1], selectedPoint[2], selectedPoint[3], selectedPoint[4], selectedPoint[5])}>
                         Add to route
                       </Button>
                     </div>
@@ -198,20 +350,23 @@ const Routes = () => {
                 )}
 
                 {/* Render Polyline */}
-                {polylinePath.length > 0 && (
-                  <Polyline
-                    path={polylinePath}
-                    options={{
-                      strokeColor: '#FF0000',
-                      strokeOpacity: 1.0,
-                      strokeWeight: 3,
-                    }}
-                  />
-                )}
+                {polylinePath.length > 0 &&
+  polylinePath.map((path, index) => (
+    <Polyline
+      key={index}
+      path={path} // Pass each segment separately
+      options={{
+        strokeColor: "#FF0000",
+        strokeOpacity: 1.0,
+        strokeWeight: 3,
+      }}
+    />
+  ))}
+
               </GoogleMap>
             </div>
           </Col>
-          <Col span={12}>
+          <Col span={12} style={{  overflowY: 'auto', height: '75vh', }}>
             <div style={{ paddingLeft: '30px', borderRadius: '10px' }}>
               <Row gutter={8}>
                 <Title level={4}>Waypoints</Title>
@@ -254,16 +409,31 @@ const Routes = () => {
                 <Button
                   type="primary"
                   style={{ marginTop: '10px', width: '100%' }}
-                  onClick={handleRouteGeneration}
-                  disabled={waypoints.length < 2}
+                  onClick={calculateRoute}
+                  disabled={waypoints.length != 2 }
                 >
                   Generate Route
                 </Button>
+                <Button
+                  type="primary"
+                  style={{ marginTop: '10px', width: '100%' }}
+                  onClick={cleanRoute}
+                  disabled={!polylinePath.length && !calculatedRoute && !routeInfo}
+                >
+                  Clean Route
+                </Button>
               </Row>
             </div>
-            <RouteInfo path={route} />
-          {route &&
-            (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)}/>)}
+            {/* For the INGI API */}
+            {calculatedRoute &&
+              (<RouteInfo path={calculatedRoute} />)}
+            {calculatedRoute &&
+              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)}/>)}
+            {/* For the Geopaify API */}
+            {routeInfo &&
+              (<RouteInfo path={routeInfo} />)}
+            {routeInfo &&
+              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)}/>)}
           </Col>
         </Row>
       </MainCard>
