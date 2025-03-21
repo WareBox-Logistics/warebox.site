@@ -1,6 +1,8 @@
-import { IconDashboard, IconUser, IconPaperclip, IconMap2 } from '@tabler/icons-react';
+import { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse, IconTruckLoading, 
+    IconPackageExport, IconPackage, IconBrandDatabricks } from '@tabler/icons-react';
 
-const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
+const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2, IconBuildingWarehouse, IconTruckLoading, 
+    IconPackageExport, IconPackage, IconBrandDatabricks};
 
 const almacenista = {
     id: 'almacenista',
@@ -8,11 +10,19 @@ const almacenista = {
     type: 'group',
     children: [
         {
-            id: 'ubicaciones_productos',
-            title: 'Ubicaciones de productos',
+            id: 'Gestion-Almacenamiento',
+            title: 'Gestión de almacenamiento',
             type: 'item',
-            url: '/ubicaciones-productos',
-            icon: icons.IconUser,
+            url: '/gestion-racks',
+            icon: icons.IconBrandDatabricks,
+            breadcrumbs: false
+        },
+        {
+            id: 'Gestion-Pallets',
+            title: 'Localización y transferencia de pallets',
+            type: 'item',
+            url: '/gestion-pallets',
+            icon: icons.IconTruckLoading,
             breadcrumbs: false
         },
         {
@@ -25,7 +35,7 @@ const almacenista = {
         },
         {
             id: 'edi',
-            title: 'Edi Config',
+            title: 'EDI Config',
             type: 'item',
             url: '/edi',
             icon: icons.IconMap2,
@@ -36,10 +46,27 @@ const almacenista = {
             title: 'Cajas',
             type: 'item',
             url: '/cajas',
-            icon: icons.IconPaperclip,
+            icon: icons.IconPackageExport,
+            breadcrumbs: false
+        },
+        {
+            id: 'registrar_sede',
+            title: 'Sedes',
+            type: 'item',
+            url: '/Sedes',
+            icon: icons.IconBuildingWarehouse,
+            breadcrumbs: false
+        },
+        {
+            id: 'muelle',
+            title: 'Muelles',
+            type: 'item',
+            url: '/Muelles',
+            icon: icons.IconTruckLoading,
             breadcrumbs: false
         }
     ]
 };
 
 export default almacenista;
+

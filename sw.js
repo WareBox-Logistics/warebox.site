@@ -1,6 +1,6 @@
 //shell cache 
-const shellCache = 'shell-cache-v1';
-const dynamicCache = 'dynamic-cache-v1';
+const shellCache = 'shell-cache-v2';
+const dynamicCache = 'dynamic-cache-v2';
 const shellAssets = [
     '/',
     '/index.html',
@@ -22,6 +22,7 @@ self.addEventListener('install', event => {
              cache.addAll(shellAssets);
         })
     );
+    self.skipWaiting();
 })
 
 //activate event
@@ -35,11 +36,14 @@ self.addEventListener('activate', event => {
                 .map(key => caches.delete(key))
             )
         })
-    )
+    );
+    self.clients.claim();
 })
 
 //fetch
 self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+
     event.respondWith(
         caches.match(event.request).then(cacheResponse => {
             return cacheResponse || fetch(event.request).then(fetchResponse => {
