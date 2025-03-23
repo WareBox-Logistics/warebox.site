@@ -10,7 +10,8 @@ import {
     IconDeviceAirtag, 
     IconRoute,
     IconBuildingWarehouse,
-    IconTruck
+    IconTruck,
+    IconLayoutGrid
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -24,7 +25,8 @@ const icons = {
     IconDeviceAirtag,
     IconRoute,
     IconBuildingWarehouse,
-    IconTruck
+    IconTruck,
+    IconLayoutGrid
 };
 
 const administrador = {
@@ -55,6 +57,14 @@ const administrador = {
             url: '/locations',
             icon: icons.IconMap2,
             breadcrumbs: true
+        },
+        {
+            id: 'parking-lots',
+            title: 'Parking Lots',
+            type: 'item',
+            url: '/parking-lots',
+            icon: icons.IconLayoutGrid,
+            breadcrumbs: false
         },
         {
             id: 'products',

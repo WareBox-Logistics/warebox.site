@@ -38,6 +38,8 @@ export const API_URL_BRAND = BASE_API_URL + '/brand';
 export const API_URL_MODEL = BASE_API_URL + '/model';
 //Warehouse
 export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
+// Parking Lot
+export const API_URL_PARKING_LOT = BASE_API_URL + '/parking-lot';
 
 
 export const API_URL_BOX_INVENTORY = BASE_API_URL + '/box-inventory';
