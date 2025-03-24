@@ -77,7 +77,7 @@ const MainLayout = () => {
       <CssBaseline />
       {/* header */}
       <AppBar
-        style={{zIndex: 0 }}
+        style={{zIndex: 1 }}
         enableColorOnDark
         position="fixed"
         color="inherit"
