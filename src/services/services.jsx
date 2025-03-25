@@ -37,14 +37,12 @@ export const API_URL_BRAND = BASE_API_URL + '/brand';
 //Model
 export const API_URL_MODEL = BASE_API_URL + '/model';
 //Warehouse
-export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
-// Parking Lot
-export const API_URL_PARKING_LOT = BASE_API_URL + '/parking-lot';
+//export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
+
 
 
 export const API_URL_BOX_INVENTORY = BASE_API_URL + '/box-inventory';
 export const API_URL_PALLET = BASE_API_URL + '/pallet';
-export const API_URL_DOCK = BASE_API_URL + '/dock';
 export const API_URL_DOCK_ASSIGNMENT = BASE_API_URL + '/dock-assignment';
 export const API_URL_RACK = BASE_API_URL + '/rack';
 export const API_URL_STORAGE_RACK_PALLET = BASE_API_URL + '/storage-rack-pallet';
@@ -69,3 +67,17 @@ export const API_URL_TRUCK = BASE_API_URL + '/truck';
 export const BASE_API_TEST = 'http://127.0.0.1:8000/api';
 export const API_TEST_WAREHOUSE = BASE_API_TEST + '/warehouse';
 export const API_TEST_LOCATION = BASE_API_TEST + '/location';
+
+//Ingegi SAKABE
+export const API_SAKABE_COORDS = BASE_API_TEST + '/proxy/coordsID';
+
+// Parking Lot
+export const API_URL_PARKING_LOT = BASE_API_TEST + '/parking-lots';
+export const API_URL_GENERATE_LOTS = BASE_API_TEST + '/generate-parking-lot';
+export const API_URL_WAREHOUSE = BASE_API_TEST + '/warehouse';
+export const API_URL_WHOLE_PARKINGLOTS = BASE_API_TEST + '/get-parkinglot-with-lots';
+export const API_URL_FREE_TRAILERS = BASE_API_TEST + '/vehicles/available-trailers';
+export const API_URL_FREE_TRUCKS = BASE_API_TEST + '/vehicles/available-trucks';
+export const API_URL_ASSIGN_LOT = BASE_API_TEST + '/lots/assign-vehicle';
+export const API_URL_FREE_LOT = BASE_API_TEST + '/lots/free';
+export const API_URL_DOCK = BASE_API_TEST + '/dock';
