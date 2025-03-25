@@ -10,58 +10,50 @@ const almacenista = {
     type: 'group',
     children: [
         {
-            id: 'Gestion-Almacenamiento',
+            id: 'gestion-racks',
             title: 'Gestión de almacenamiento',
             type: 'item',
-            url: '/gestion-racks',
+            url: '/warehouseman/gestion-racks',
             icon: icons.IconBrandDatabricks,
             breadcrumbs: false
         },
         {
-            id: 'Gestion-Pallets',
+            id: 'gestion-pallets',
             title: 'Localización y transferencia de pallets',
             type: 'item',
-            url: '/gestion-pallets',
+            url: '/warehouseman/gestion-pallets',
             icon: icons.IconTruckLoading,
             breadcrumbs: false
         },
+        // {
+        //     id: 'productos',
+        //     title: 'Productos',
+        //     type: 'item',
+        //     url: '/warehouseman/productos',
+        //     icon: icons.IconDashboard,
+        //     breadcrumbs: false
+        // },
         {
-            id: 'productos',
-            title: 'Productos',
-            type: 'item',
-            url: '/productos',
-            icon: icons.IconDashboard,
-            breadcrumbs: false
-        },
-        {
-            id: 'edi',
-            title: 'EDI Config',
-            type: 'item',
-            url: '/edi',
-            icon: icons.IconMap2,
-            breadcrumbs: false
-        },
-        {
-            id: 'registrar_cajas',
+            id: 'cajas',
             title: 'Cajas',
             type: 'item',
-            url: '/cajas',
+            url: '/warehouseman/cajas',
             icon: icons.IconPackageExport,
             breadcrumbs: false
         },
         {
-            id: 'registrar_sede',
+            id: 'sedes',
             title: 'Sedes',
             type: 'item',
-            url: '/Sedes',
+            url: '/warehouseman/sedes',
             icon: icons.IconBuildingWarehouse,
             breadcrumbs: false
         },
         {
-            id: 'muelle',
+            id: 'muelles',
             title: 'Muelles',
             type: 'item',
-            url: '/Muelles',
+            url: '/warehouseman/muelles',
             icon: icons.IconTruckLoading,
             breadcrumbs: false
         }

@@ -14,7 +14,6 @@ const shellAssets = [
 
 //install
 self.addEventListener('install', event => {
-    
     console.log('Service worker installed', event);
     //pre cache shell assets
     console.log('App shell cache')

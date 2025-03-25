@@ -15,11 +15,7 @@ const PrivateRoute = ({ adminOnly }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} />;
   }
-
-  if (adminOnly && !isAdmin) {
-    return <Navigate to="/dashboard" />;
-  }
-
+  
   return <Outlet />;
 };
 

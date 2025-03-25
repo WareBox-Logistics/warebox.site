@@ -239,11 +239,11 @@ const Employees = () => {
                             }
                             options={[
                               { value: "1", label: "Administrador" },
-                              { value: "2", label: "Operador" },
+                              { value: "2", label: "Almacenista" },
                               { value: "3", label: "Chofer" },
-                              { value: "4", label: "Supervisor" },
-                              { value: "5", label: "Almacenista" },
-                              { value: "6", label: "Monito (Despacho)" },
+                              { value: "4", label: "Monitor (despacho)" },
+                              { value: "5", label: "Operador" },
+                              { value: "6", label: "Supervisor" },
                             ]}
                           />
                         )}

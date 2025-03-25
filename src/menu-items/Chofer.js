@@ -3,7 +3,7 @@ import { IconDashboard, IconUser, IconPaperclip, IconMap2 } from '@tabler/icons-
 const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
 
 const chofer = {
-    id: 'chofer',
+    id: 'driver',
     title: 'Chofer',
     type: 'group',
     children: [
@@ -11,7 +11,7 @@ const chofer = {
             id: 'viajes',
             title: 'Viajes',
             type: 'item',
-            url: '/viajes',
+            url: '/driver/viajes',
             icon: icons.IconUser,
             breadcrumbs: false
         },
@@ -19,7 +19,7 @@ const chofer = {
             id: 'mapas',
             title: 'Mapas',
             type: 'item',
-            url: '/mapas',
+            url: '/driver/mapas',
             icon: icons.IconDashboard,
             breadcrumbs: false
         },
@@ -27,7 +27,7 @@ const chofer = {
             id: 'notificaciones',
             title: 'Notificaciones',
             type: 'item',
-            url: '/notificaciones',
+            url: '/driver/notificaciones',
             icon: icons.IconMap2,
             breadcrumbs: false
         },
@@ -35,7 +35,7 @@ const chofer = {
             id: 'perfil',
             title: 'Perfil',
             type: 'item',
-            url: '/perfil',
+            url: '/driver/perfil',
             icon: icons.IconPaperclip,
             breadcrumbs: false
         }

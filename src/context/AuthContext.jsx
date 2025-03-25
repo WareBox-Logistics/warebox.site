@@ -40,10 +40,12 @@ export const AuthProvider = ({ children }) => {
       email: data.employee_by_pk.email,
       customer_id: userId,
     };
+    const role  = data.employee_by_pk.role_table.name
 
     localStorage.setItem('token', token);
     localStorage.setItem('user_id', userId);
     localStorage.setItem('customer_id', userId);
+    localStorage.setItem('role', role);
     // localStorage.setItem('role', role);
     // localStorage.setItem('permisos', JSON.stringify(permisos));
     localStorage.setItem('userData', JSON.stringify(userData));
@@ -53,21 +55,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('user_id');
     if (token) {
-      updateSessionStatus({ variables: { id: userId, is_session_active: false } })
-        .finally(() => {
-          closeWebSocket();
           localStorage.removeItem('token');
           localStorage.removeItem('user_id');
           localStorage.removeItem('customer_id');
+          localStorage.removeItem('userData');
           localStorage.removeItem('role');
-          localStorage.removeItem('permisos');
           setIsAuthenticated(false);
           setUser(null);
           setIsAdmin(false);
           setAuthChecked(true);
-        });
     } else {
       closeWebSocket();
       localStorage.removeItem('token');
