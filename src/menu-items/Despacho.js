@@ -8,34 +8,34 @@ const despacho = {
     type: 'group',
     children: [
         {
-            id: 'Dashboard',
+            id: 'dashboard-despacho',
             title: 'Monitoreo de Reportes',
             type: 'item',
-            url: '/dashboard-despacho',
+            url: '/dispatch/dashboard-despacho',
             icon: icons.IconLayoutDashboard,
             breadcrumbs: false
         },
         {
-            id: 'Reporte',
+            id: 'report-despacho',
             title: 'Reportes',
             type: 'item',
-            url: '/report-despacho',
+            url: '/dispatch/report-despacho',
             icon: icons.IconReport,
             breadcrumbs: false
         },
         {
-            id: 'Issue',
+            id: 'issue-despacho',
             title: 'Issue',
             type: 'item',
-            url: '/issue-despacho',
+            url: '/dispatch/issue-despacho',
             icon: icons.IconTimelineEventExclamation,
             breadcrumbs: false
         },
         {
-            id: 'Support',
+            id: 'support-despacho',
             title: 'Support',
             type: 'item',
-            url: '/support-despacho',
+            url: '/dispatch/support-despacho',
             icon: icons.IconFlag3,
             breadcrumbs: false
         }

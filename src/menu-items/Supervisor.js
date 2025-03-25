@@ -8,26 +8,26 @@ const supervisor = {
     type: 'group',
     children: [
         {
-            id: 'monitorear_viajes',
+            id: 'monitorear-viajes',
             title: 'Monitorear Viajes',
             type: 'item',
-            url: '/viajes-despacho',
+            url: '/supervisor/viajes-despacho',
             icon: icons.IconUser,
             breadcrumbs: false
         },
         {
-            id: 'historial_desempeno',
+            id: 'historial-desempeno',
             title: 'Historial Desempeño',
             type: 'item',
-            url: '/historial-desempeno',
+            url: '/supervisor/historial-desempeno',
             icon: icons.IconDashboard,
             breadcrumbs: false
         },
         {
-            id: 'supervisar_capacidad',
+            id: 'supervisar-capacidad',
             title: 'Supervisar Capacidad',
             type: 'item',
-            url: '/supervisar-capacidad',
+            url: '/supervisor/supervisar-capacidad',
             icon: icons.IconPaperclip,
             breadcrumbs: false
         }

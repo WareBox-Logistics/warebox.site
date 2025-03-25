@@ -10,7 +10,8 @@ import {
     IconDeviceAirtag, 
     IconRoute,
     IconBuildingWarehouse,
-    IconTruck
+    IconTruck,
+    IconLayoutGrid
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -24,7 +25,8 @@ const icons = {
     IconDeviceAirtag,
     IconRoute,
     IconBuildingWarehouse,
-    IconTruck
+    IconTruck,
+    IconLayoutGrid
 };
 
 const administrador = {
@@ -36,7 +38,7 @@ const administrador = {
             id: 'companies',
             title: 'Companies',
             type: 'item',
-            url: '/companies',
+            url: '/admin/companies',
             icon: icons.IconBuilding,
             breadcrumbs: false
         },
@@ -44,7 +46,7 @@ const administrador = {
             id: 'dashboard',
             title: 'Dashboard',
             type: 'item',
-            url: '/dashboard',
+            url: '/admin/dashboard',
             icon: icons.IconChartBar,
             breadcrumbs: true
         },
@@ -52,15 +54,23 @@ const administrador = {
             id: 'locations',
             title: 'Locations',
             type: 'item',
-            url: '/locations',
+            url: '/admin/locations',
             icon: icons.IconMap2,
             breadcrumbs: true
+        },
+        {
+            id: 'parking-lots',
+            title: 'Parking Lots',
+            type: 'item',
+            url: '/admin/parking-lots',
+            icon: icons.IconLayoutGrid,
+            breadcrumbs: false
         },
         {
             id: 'products',
             title: 'Products',
             type: 'item',
-            url: '/products',
+            url: '/admin/products',
             icon: icons.IconShoppingCart,
             breadcrumbs: false
         },
@@ -68,7 +78,7 @@ const administrador = {
             id: 'routes',
             title: 'Routes',
             type: 'item',
-            url: '/routes',
+            url: '/admin/routes',
             icon: icons.IconRoute,
             breadcrumbs: false
         },
@@ -76,7 +86,7 @@ const administrador = {
             id: 'services',
             title: 'Services',
             type: 'item',
-            url: '/services',
+            url: '/admin/services',
             icon: icons.IconDeviceAirtag,
             breadcrumbs: false
         },
@@ -84,7 +94,7 @@ const administrador = {
             id: 'users',
             title: 'Users',
             type: 'item',
-            url: '/users',
+            url: '/admin/users',
             icon: icons.IconUser,
             breadcrumbs: false
         },
@@ -92,7 +102,7 @@ const administrador = {
             id: 'vehicles',
             title: 'Vehicles',
             type: 'item',
-            url: '/vehicles',
+            url: '/admin/vehicles',
             icon: icons.IconTruck,
             breadcrumbs: false
         },
@@ -100,34 +110,10 @@ const administrador = {
             id: 'warehouses',
             title: 'Warehouses',
             type: 'item',
-            url: '/warehouses',
+            url: '/admin/warehouses',
             icon: icons.IconBuildingWarehouse,
             breadcrumbs: false
         },
-        {
-            id: 'reportes',
-            title: 'Generar reportes',
-            type: 'item',
-            url: '/administrador',
-            icon: icons.IconPaperclip,
-            breadcrumbs: false
-        },
-        {
-            id: 'asignar_viajes',
-            title: 'Asignar Viajes',
-            type: 'item',
-            url: '/administrador',
-            icon: icons.IconUser,
-            breadcrumbs: false
-        },
-        {
-            id: 'productos_viajes',
-            title: 'Productos Viajes',
-            type: 'item',
-            url: '/administrador',
-            icon: icons.IconDashboard,
-            breadcrumbs: false
-        }
     ]
 };
 

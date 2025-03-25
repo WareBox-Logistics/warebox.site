@@ -6,6 +6,9 @@ import PrivateRoute from '/src/components/PrivateRoute';
 import { element } from 'prop-types';
 import Sedes from 'views/pages/almacenista/Sedes';
 import Muelles from 'views/pages/almacenista/Muelles';
+import { patch } from '@mui/system';
+import ProtectedRoute from 'components/ProtectedRoute';
+import { Outlet } from 'react-router-dom';
 
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/CustomerConfig')));
 const NotificationHistory = Loadable(lazy(() => import('views/history/NotificationHistory')));
@@ -36,6 +39,7 @@ const Services = Loadable(lazy(() => import('views/pages/administrador/Services'
 const Locations = Loadable(lazy(() => import('views/pages/administrador/Locations')));
 const Warehouses = Loadable(lazy(() => import('views/pages/administrador/Warehouses')));
 const Vehicles = Loadable(lazy(() => import('views/pages/administrador/Vehicles')));
+const ParkingLots = Loadable(lazy(() => import('views/pages/administrador/ParkingLots')));
 
 const MainRoutes = {
   path: '/',
@@ -46,127 +50,137 @@ const MainRoutes = {
       element: <PrivateRoute />,
       children: [
         {
-          path: '/companies',
-          element: <Companies />
-        },
-        {
-          path: '/locations',
-          element: <Locations />
-        },
-        {
-          path: '/products',
-          element: <Products />
-        },
-        {
-          path: '/routes',
-          element: <Routes />
-        },
-        {
-          path: '/services',
-          element: <Services />
-        },
-        {
-          path: '/usuarios',
-          element: <Users />
-        },
-        {
-          path: '/users',
-          element: <Users />
-        },
-        {
-          path: '/vehicles',
-          element: <Vehicles />
-        },
-        {
-          path: '/warehouses',
-          element: <Warehouses />
-        },
-        {
-          path: '',
-          element: <DashboardDefault />
-        },
-        {
-          path: 'dashboard',
-          element: <DashboardDefault />
-        },
-        {
-          path: 'history',
-          element: <NotificationHistory />
-        },
-        {
-          path: 'administrador',
-          element: <Administrador />
-        },
-        {
-          path: 'almacenista',
-          element: <Almacenista />
-        },
-        {
-          path: 'gestion-racks',
-          element: <AlmacenistaRacks />
-        },
-        {
-          path: 'gestion-pallets',
-          element: <AlmacenistaPallets />
-        },
-        {
-          path: 'Sedes',
-          element: <SedesPage />
-        },
-        {
-          path: 'Muelles',
-          element: <Muelles />
-        },
-        {
-          path: 'chofer',
-          element: <Chofer />
-        },
-        {
-          path: '/dashboard-despacho',
-          element: <DashboardDis />
-        },
-        {
-          path: '/report-despacho',
-          element: <Report />
-        },
-        {
-          path: '/issue-despacho',
-          element: <Issue />
-        },
-        {
-          path: '/support-despacho',
-          element: <Support />
-        },
-        {
-          path: 'operador',
-          element: <Operador />
-        },
-        {
-          path: 'supervisor',
-          element: <Supervisor />
-        },
-        {
-          path: '',
-          element: <PrivateRoute adminOnly />, // Protege la ruta de usuarios
-          children: [
+          path: '/admin',
+          element: (
+            <ProtectedRoute role="Administrador">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+            {
+              path: 'companies',
+              element: <Companies />,
+            },
+            {
+              path: 'dashboard',
+              element: <DashboardDefault />,
+            },
+            {
+              path: 'locations',
+              element: <Locations />
+            },
+            {
+              path: 'parking-lots',
+              element: <ParkingLots />
+            },
+            {
+              path: 'products',
+              element: <Products />
+            },
+            {
+              path: 'routes',
+              element: <Routes />
+            },
+            {
+              path: 'services',
+              element: <Services />
+            },
             {
               path: 'users',
-              element: <UsersPage />
+              element: <Users />
             },
             {
-              path: 'performance',
-              element: <PerformanceDashboard />
+              path: 'vehicles',
+              element: <Vehicles />
             },
             {
-              path: 'documentation',
-              element: <Documentation />
+              path: 'warehouses',
+              element: <Warehouses />
             },
-            {
-              path: 'edi',
-              element: <EdiConfig />
-            }
           ]
-        }
+        },
+        {
+          path: '/warehouseman',
+          element: (
+            <ProtectedRoute role="Almacenista">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+            {
+              path: 'gestion-racks',
+              element: <AlmacenistaRacks />
+            },
+            {
+              path: 'gestion-pallets',
+              element: <AlmacenistaPallets />
+            },
+            {
+              path: 'sedes',
+              element: <SedesPage />
+            },
+            {
+              path: 'muelles',
+              element: <Muelles />
+            },
+          ]
+        },
+        {
+          path: '/driver',
+          element: (
+            <ProtectedRoute role="Chofer">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+          ]
+        },
+        {
+          path: '/dispatch',
+          element: (
+            <ProtectedRoute role="Despacho">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+            {
+              path: 'dashboard-despacho',
+              element: <DashboardDis />
+            },
+            {
+              path: 'report-despacho',
+              element: <Report />
+            },
+            {
+              path: 'issue-despacho',
+              element: <Issue />
+            },
+            {
+              path: 'support-despacho',
+              element: <Support />
+            },
+          ]
+        },
+        {
+          path: '/operator',
+          element: (
+            <ProtectedRoute role="Operador">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+          ]
+        },
+        {
+          path: '/supervisor',
+          element: (
+            <ProtectedRoute role="Supervisor">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+          ]
+        },
       ]
     }
   ]

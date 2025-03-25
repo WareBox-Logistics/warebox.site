@@ -36,7 +36,7 @@ const AuthLogin = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -49,18 +49,18 @@ const AuthLogin = () => {
         password: values.password,
       });
 
-      console.log(response.data);
       
       // Estraer información del usuario
       const { data } = await fetchChatHelper({
         variables: { id: response.data.user.id },
       });
 
-      console.log(data);
       if (response.data && response.data.token) {
+        console.log(data);
+        
         localStorage.setItem("token", response.data.token);
         login(response.data.token, data);
-        navigate("/dashboard");
+        navigate("/admin/dashboard");
       } else {
         setSnackbarMessage("Invalid credentials");
         setSnackbarOpen(true);

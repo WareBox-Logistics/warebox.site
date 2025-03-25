@@ -14,7 +14,7 @@ import {
 } from "@ant-design/icons";
 import MainCard from "ui-component/cards/MainCard";
 import axios from 'axios';
-import { authToken, API_URL_LOCATION, API_URL_COMPANY, API_URL_WAREHOUSE } from '../../../services/services';
+import { authToken, API_URL_LOCATION, API_URL_COMPANY, API_URL_WAREHOUSE, API_SAKABE_COORDS } from '../../../services/services';
 import blueDot from "../../../assets/images/icons/blue-dot.png";
 import redDot from "../../../assets/images/icons/red-dot.png";
 
@@ -56,6 +56,10 @@ const Locations = () => {
   const [showWarehouses, setShowWarehouses] = useState(false);
   const [hoveredMarker, setHoveredMarker] = useState(null);
   const [isInfoWindowVisible, setIsInfoWindowVisible] = useState(false);
+  const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+  const [payload, setPayload] = useState(null);
+
+
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -185,7 +189,7 @@ const Locations = () => {
   const handleAddLocation = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const payload = {
+    const initialPayload = {
       name: formData.name,
       latitude: formData.latitude,
       longitude: formData.longitude,
@@ -195,15 +199,79 @@ const Locations = () => {
       target: formData.target || null,
     };
 
+    const sakabeValues= await getSakabeValues();
+
+    if (sakabeValues) {
+      initialPayload.id_routing_net = sakabeValues.id_routing_net;
+      initialPayload.source = sakabeValues.source;
+      initialPayload.target = sakabeValues.target;
+      setPayload(initialPayload);
+      await submitPayload(initialPayload);
+    } else {
+      setPayload(initialPayload);
+      setIsConfirmationModalVisible(true);
+    }
+  };
+
+  const getSakabeValues = async () => {
     try {
+      const payload = {
+        escala: 10,
+        x: formData.longitude,
+        y: formData.latitude,
+        type: "json",
+        key: import.meta.env.VITE_SAKBE_API_KEY
+      };
+  
+      const response = await axios.post(API_SAKABE_COORDS, payload, {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.data.response.success) {
+        console.log(response)
+        return null;
+      } else {
+        console.log(response)
+        const id_routing_net = response.data.data.id_routing_net;
+        const source = response.data.data.source;
+        const target = response.data.data.target;
+        return { id_routing_net, source, target };
+      }
+    } catch (error) {
+      message.error("Error fetching data from Sakabé");
+      console.error("Error fetching data from Sakabé:", error);
+      return null;
+    }
+  };
+
+  const handleConfirmation = async (useGeoApify) => {
+    setIsConfirmationModalVisible(false);
+  
+    if (useGeoApify) {
+      payload.id_routing_net = null;
+      payload.source = null;
+      payload.target = null;
+      await submitPayload(payload);
+    } else {
+      setIsSubmitting(false);
+    }
+  };
+
+  const submitPayload = async (payload) => {
+    try {
+      console.log("Submitting payload")
       const response = await axios.post(API_URL_LOCATION, payload, {
         headers: {
           'Authorization': authToken,
           'Content-Type': 'application/json',
         },
       });
-
+  
       const selectedCompany = companies.find(company => company.id === formData.company);
+      console.log("Response: ", response)
       setLocations([...locations, { ...response.data.location, company: selectedCompany }]);
       message.success("Location added successfully");
       resetForm();
@@ -711,6 +779,16 @@ const Locations = () => {
             Are you sure you want to delete "<Text strong>{currentLocation?.name}</Text>"?
           </p>
         </Modal>
+        {isConfirmationModalVisible && (
+          <Modal
+            title="Sakabé Data Not Available"
+            visible={isConfirmationModalVisible}
+            onOk={() => handleConfirmation(true)}
+            onCancel={() => handleConfirmation(false)}
+          >
+            <p>Sakabé does not have data on this particular location. Do you wish to continue and use GeoApify for the routing instead? If not, you can simply try another location.</p>
+          </Modal>
+        )}
       </MainCard>
     </Paper>
   );

@@ -3,42 +3,34 @@ import { IconDashboard, IconUser, IconPaperclip, IconMap2 } from '@tabler/icons-
 const icons = { IconDashboard, IconUser, IconPaperclip, IconMap2 };
 
 const operador = {
-    id: 'operador',
+    id: 'operator',
     title: 'Operador',
     type: 'group',
     children: [
         {
-            id: 'asignar_viajes',
+            id: 'asignar-viajes',
             title: 'Asignar Viajes',
             type: 'item',
-            url: '/asignar-viajes',
+            url: '/operator/asignar-viajes',
             icon: icons.IconUser,
             breadcrumbs: false
         },
         {
-            id: 'productos_viajes',
+            id: 'productos-viajes',
             title: 'Productos Viajes',
             type: 'item',
-            url: '/productos-viajes',
+            url: '/operator/productos-viajes',
             icon: icons.IconDashboard,
             breadcrumbs: false
         },
         {
-            id: 'progreso_viajes',
+            id: 'progreso-viajes',
             title: 'Progreso Viajes',
             type: 'item',
-            url: '/progreso-viajes',
+            url: '/operator/progreso-viajes',
             icon: icons.IconMap2,
             breadcrumbs: false
         },
-        {
-            id: 'documentation',
-            title: 'Documentation',
-            type: 'item',
-            url: '/documentation',
-            icon: icons.IconPaperclip,
-            breadcrumbs: false
-        }
     ]
 };
 
