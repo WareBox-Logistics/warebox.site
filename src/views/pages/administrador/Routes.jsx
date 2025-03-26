@@ -93,6 +93,7 @@ const Routes = () => {
         id_routing_net: location.id_routing_net,
         source: location.source,
         target: location.target,
+        type: 'location'
       });
     });
 
@@ -104,21 +105,22 @@ const Routes = () => {
         id_routing_net: warehouse.id_routing_net,
         source: warehouse.source,
         target: warehouse.target,
+        type:'warehouse'
       });
     });
 
     setPoints([{ warehouses: warehousePoints }, { shops: locationPoints }]);  };
 
-  const handleMarkerClick = (point, name, id, id_routing_net, source, target) => {
-    setSelectedPoint([point, name, id, id_routing_net, source, target]);
+  const handleMarkerClick = (point, name, id, id_routing_net, source, target, type) => {
+    setSelectedPoint([point, name, id, id_routing_net, source, target, type]);
   };
 
   const handleCloseInfoWindow = () => {
     setSelectedPoint(null);
   };
 
-  const addWaypoint = (point, name, id, id_routing_net, source, target) => {
-    setWaypoints([...waypoints, { point, name, id, id_routing_net, source, target }]);
+  const addWaypoint = (point, name, id, id_routing_net, source, target, type) => {
+    setWaypoints([...waypoints, { point, name, id, id_routing_net, source, target, type }]);
   };
 
   const removeWaypoint = (point) => {
@@ -328,7 +330,7 @@ const Routes = () => {
                       <Marker
                         key={`${categoryIndex}-${index}`}
                         position={{ lat: point.coords.lat, lng: point.coords.lng }}
-                        onClick={() => handleMarkerClick({ lat: point.coords.lat, lng: point.coords.lng }, point.name, point.id, point.id_routing_net, point.source, point.target)}
+                        onClick={() => handleMarkerClick({ lat: point.coords.lat, lng: point.coords.lng }, point.name, point.id, point.id_routing_net, point.source, point.target, point.type)}
                         icon={{
                           url: type === 'warehouses' ? warehouseIcon : shopIcon,
                           scaledSize: new window.google.maps.Size(32, 32),
@@ -343,7 +345,7 @@ const Routes = () => {
                   <InfoWindow position={selectedPoint[0]} onCloseClick={handleCloseInfoWindow}>
                     <div>
                       <h3>{selectedPoint[1]}</h3>
-                      <Button type="primary" onClick={() => addWaypoint(selectedPoint[0], selectedPoint[1], selectedPoint[2], selectedPoint[3], selectedPoint[4], selectedPoint[5])}>
+                      <Button type="primary" onClick={() => addWaypoint(selectedPoint[0], selectedPoint[1], selectedPoint[2], selectedPoint[3], selectedPoint[4], selectedPoint[5], selectedPoint[6])}>
                         Add to route
                       </Button>
                     </div>
@@ -428,14 +430,19 @@ const Routes = () => {
             {/* For the INGI API */}
             {calculatedRoute &&
               (<RouteInfo path={calculatedRoute} />)}
-            {calculatedRoute &&
-              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)}/>)}
+           
             {/* For the Geopaify API */}
             {routeInfo &&
               (<RouteInfo path={routeInfo} />)}
-            {routeInfo &&
-              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)}/>)}
           </Col>
+        </Row>
+        <Row>
+        {calculatedRoute &&
+              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)} route={fullNavigation}/>)}
+        
+        {routeInfo &&
+              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)} route={transformedRoute}/>)}
+
         </Row>
       </MainCard>
     </Paper>
