@@ -34,6 +34,7 @@ const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
 const Companies = Loadable(lazy(() => import('views/pages/administrador/Companies')));
 const Products = Loadable(lazy(() => import('views/pages/administrador/Products')));
+const Pallets = Loadable(lazy(() => import('views/pages/administrador/Pallets')));
 const Routes = Loadable(lazy(() => import('views/pages/administrador/Routes')));
 const Services = Loadable(lazy(() => import('views/pages/administrador/Services')));
 const Locations = Loadable(lazy(() => import('views/pages/administrador/Locations')));
@@ -68,6 +69,10 @@ const MainRoutes = {
             {
               path: 'locations',
               element: <Locations />
+            },
+            {
+              path: 'pallets',
+              element: <Pallets />
             },
             {
               path: 'parking-lots',

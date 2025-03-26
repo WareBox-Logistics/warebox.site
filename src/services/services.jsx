@@ -23,6 +23,8 @@ export const API_URL_COMPANY = BASE_API_URL + '/company';
 export const API_URL_DELIVERY_DETAIL = BASE_API_URL + '/delivery-detail';
 //Employee
 export const API_URL_EMPLOYEE = BASE_API_URL + '/employee';
+//Driver
+export const API_URL_DRIVER = BASE_API_URL + '/driver';
 //Location
 export const API_URL_LOCATION = BASE_API_URL + '/location';
 //Routes
