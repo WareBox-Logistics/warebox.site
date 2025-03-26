@@ -1,187 +1,114 @@
-import React, { useState, useEffect } from "react";
-import { IconSearch, IconEdit, IconTrash} from '@tabler/icons-react';
-import { getMuelles, saveMuelles } from "/src/api/muelles.js";
-import '../almacenista/styles/Muelles.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Card, Col, Row, Spin, message, Radio, Pagination } from 'antd';
+import { authToken, API_URL_DOCK, API_URL_DOCK_ASSIGNMENT } from '../../../services/services'; // Ensure these are correctly exported
+import { TruckOutlined } from '@ant-design/icons'; // Import Ant Design icons
+import { WarehouseOutlined } from "@mui/icons-material";
 
 const Muelles = () => {
-  const [muelles, setMuelles] = useState(getMuelles());
-  const [nuevoMuelle, setNuevoMuelle] = useState({
-    estado: "disponible", // o "ocupado"
-    warehouseId: "",
-    horario: "",
-  });
-  const [muelleEditando, setMuelleEditando] = useState(null);
-  const [busqueda, setBusqueda] = useState("");
-  const [estadoFiltro, setEstadoFiltro] = useState("todos"); // Filtro por estado
-  const [warehouseFiltro, setWarehouseFiltro] = useState(""); // Filtro por warehouse
+  const [docks, setDocks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // State for filtering
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [pageSize] = useState(6); // Number of docks per page
 
   useEffect(() => {
-    setMuelles(getMuelles());
+    fetchDocks();
   }, []);
 
-  const handleInputChange = (e) => {
-    setNuevoMuelle({
-      ...nuevoMuelle,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!nuevoMuelle.estado || !nuevoMuelle.warehouseId) {
-      alert("Por favor, ingrese todos los campos.");
-      return;
+  const fetchDocks = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(API_URL_DOCK, {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json',
+        },
+      });
+      setDocks(response.data); // Store all docks
+    } catch (error) {
+      console.error('Error fetching docks:', error);
+      message.error("Error fetching docks");
+    } finally {
+      setIsLoading(false);
     }
-    const nuevosMuelles = [...muelles, nuevoMuelle];
-    setMuelles(nuevosMuelles);
-    saveMuelles(nuevosMuelles);
-    setNuevoMuelle({
-      estado: "disponible",
-      warehouseId: "",
-      horario: "",
-    });
   };
 
-  const handleEliminarMuelle = (index) => {
-    const nuevosMuelles = muelles.filter((_, i) => i !== index);
-    setMuelles(nuevosMuelles);
-    saveMuelles(nuevosMuelles);
+  const toggleDockStatus = async (dockId, truckId, currentStatus) => {
+    const newStatus = currentStatus === 'Available' ? 'Occupied' : 'Available';
+
+    try {
+      await axios.put(`${API_URL_DOCK_ASSIGNMENT}/${dockId}/${truckId}`, {
+        status: newStatus
+      }, {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Update local state after changing the status in the database
+      setDocks(docks.map(dock => (dock.id === dockId ? { ...dock, status: newStatus } : dock)));
+    } catch (error) {
+      console.error('Error updating dock status:', error);
+      message.error("Error updating dock status");
+    }
   };
 
-  const handleEditarMuelle = (index) => {
-    setMuelleEditando(index);
-    setNuevoMuelle(muelles[index]);
-  };
-
-  const handleGuardarMuelle = (index, nuevosDatos) => {
-    const nuevosMuelles = muelles.map((muelle, i) =>
-      i === index ? nuevosDatos : muelle
-    );
-    setMuelles(nuevosMuelles);
-    saveMuelles(nuevosMuelles);
-    setMuelleEditando(null);
-    setNuevoMuelle({
-      estado: "disponible",
-      warehouseId: "",
-      horario: "",
-    });
-  };
-
-  const muellesFiltrados = muelles.filter((muelle) => {
-    const estadoCoincide = estadoFiltro === "todos" || muelle.estado === estadoFiltro;
-    const warehouseCoincide = muelle.warehouseId.toLowerCase().includes(warehouseFiltro.toLowerCase());
-    return estadoCoincide && warehouseCoincide && (
-      muelle.estado.toLowerCase().includes(busqueda.toLowerCase()) ||
-      muelle.warehouseId.toLowerCase().includes(busqueda.toLowerCase())
-    );
+  // Filter docks based on selected status
+  const filteredDocks = docks.filter(dock => {
+    if (filter === 'occupied') return dock.status === 'Occupied';
+    if (filter === 'available') return dock.status === 'Available';
+    return true; // 'all'
   });
 
+  // Pagination
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedDocks = filteredDocks.slice(startIndex, startIndex + pageSize);
+
   return (
-    <div className="muelles-container">
-      <h1>Administrar Muelles</h1>
-
-      {/* Buscador y Filtros */}
-      <div className="search-container">
-        <IconSearch className="search-icon" />
-        <input
-          type="text"
-          placeholder="Buscar muelle..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-      </div>
-
-      {/* Filtros alineados a la derecha */}
-      <div className="filters-container" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-        <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)}>
-          <option value="todos">Todos</option>
-          <option value="disponible">Disponible</option>
-          <option value="ocupado">Ocupado</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Filtrar por Warehouse ID..."
-          value={warehouseFiltro}
-          onChange={(e) => setWarehouseFiltro(e.target.value)}
-          style={{ marginLeft: '10px' }}
-        />
-      </div>
-
-      {/* Lista de Muelles */}
-      <h2>Lista de Muelles</h2>
-      <table className="muelles-list">
-        <thead>
-          <tr>
-            <th>Estado</th>
-            <th>Warehouse ID</th>
-            <th>Hora de Ocupación</th>
-            <th>Hora de Desocupación</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {muellesFiltrados.length > 0 ? (
-            muellesFiltrados.map((muelle, index) => (
-              <tr key={index}>
-                <td>{muelle.estado}</td>
-                <td>{muelle.warehouseId}</td>
-                <td>{muelle.horaOcupacion || "N/A"}</td>
-                <td>{muelle.horaDesocupacion || "N/A"}</td>
-                <td className="muelle-actions">
-                  <button onClick={() => handleEditarMuelle(index)} className="action-button">
-                    <IconEdit /> Editar
-                  </button>
-                  <button onClick={() => handleEliminarMuelle(index)} className="action-button delete">
-                    <IconTrash /> Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5">No se encontraron muelles.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {/* Formulario de edición */}
-      {muelleEditando !== null && (
-        <div className="edit-form-container">
-          <h2>Editar Muelle</h2>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handleGuardarMuelle(muelleEditando, nuevoMuelle);
-          }} className="muelle-form">
-            <div className="form-group">
-              <label>Estado</label>
-              <select name="estado" value={nuevoMuelle.estado} onChange={handleInputChange}>
-                <option value="disponible">Disponible</option>
-                <option value="ocupado">Ocupado</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Warehouse ID</label>
-              <input
-                type="text"
-                name="warehouseId"
-                value={nuevoMuelle.warehouseId}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Horario</label>
-              <input
-                type="text"
-                name="horario"
-                value={nuevoMuelle.horario}
-                onChange={handleInputChange}
-              />
-            </div>
-            <button type="submit" className="submit-button">Guardar Cambios</button>
-            <button type="button" className="cancel-button" onClick={() => setMuelleEditando(null)}>Cancelar</button>
-          </form>
-        </div>
+    <div>
+      <h1>Available Docks</h1>
+      <Radio.Group value={filter} onChange={e => setFilter(e.target.value)} style={{ marginBottom: 16 }}>
+        <Radio.Button value="all">All</Radio.Button>
+        <Radio.Button value="available">Available</Radio.Button>
+        <Radio.Button value="occupied">Occupied</Radio.Button>
+      </Radio.Group>
+      {isLoading ? (
+        <Spin />
+      ) : (
+        <>
+          <Row gutter={16}>
+            {paginatedDocks.map(dock => (
+              <Col span={4} key={dock.id}>
+                <Card
+                  title={`Dock ${dock.number}`}
+                  variant="bordered"
+                  style={{ 
+                    backgroundColor: dock.status === 'Available' ? '#d4edda' : '#f8d7da',
+                    textAlign: 'center'
+                  }}
+                  onClick={() => toggleDockStatus(dock.id, dock.truckId, dock.status)}
+                >
+                  {dock.status === 'Available' ? (
+                    <WarehouseOutlined style={{ fontSize: '40px', color: 'green' }} />
+                  ) : (
+                    <TruckOutlined style={{ fontSize: '40px', color: 'red' }} />
+                  )}
+                  <p>Status: {dock.status}</p>
+                  <p>Warehouse: {dock.warehouse.name}</p>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={filteredDocks.length}
+            onChange={page => setCurrentPage(page)}
+            style={{ marginTop: 16, textAlign: 'center' }}
+          />
+        </>
       )}
     </div>
   );
