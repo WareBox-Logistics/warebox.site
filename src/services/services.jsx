@@ -10,6 +10,9 @@ export const GEOAPIFY_BASE_API_URL = 'https://api.geoapify.com/v1/routing?';
 
 //INEGI SAKABE
 export const API_SAKABE_COORDS = BASE_API_URL + '/proxy/coordsID';
+export const API_SAKABE_COORDS_OPTIMA = BASE_API_URL + '/proxy/optima';
+export const API_SAKABE_COORDS_OPTIMA_DETAILS = BASE_API_URL + '/proxy/optima/details';
+
 
 
 
