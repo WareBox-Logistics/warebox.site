@@ -4,7 +4,7 @@ import {Row, Col, Button, Typography, Spin } from 'antd';
 import axios from 'axios';
 import { Paper } from '@mui/material';
 import MainCard from "ui-component/cards/MainCard";
-import { API_URL_WAREHOUSE, API_URL_LOCATION, authToken, GEOAPIFY_BASE_API_URL,API_TEST_WAREHOUSE, API_TEST_LOCATION } from 'services/services';
+import { API_URL_WAREHOUSE, API_URL_LOCATION, authToken, GEOAPIFY_BASE_API_URL, API_TEST_WAREHOUSE, API_TEST_LOCATION } from 'services/services';
 import warehouseIcon from '../../../assets/images/icons/warehouse.png';
 import shopIcon from '../../../assets/images/icons/shops.png';
 import RouteInfo from '../../../components/administrador/RouteInfo';
@@ -52,7 +52,7 @@ const Routes = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await axios.get(API_TEST_LOCATION, {
+      const response = await axios.get(API_URL_LOCATION, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const Routes = () => {
 
   const fetchWarehouses = async () => {
     try {
-      const response = await axios.get(API_TEST_WAREHOUSE, {
+      const response = await axios.get(API_URL_WAREHOUSE, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',

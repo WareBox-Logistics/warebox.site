@@ -88,10 +88,9 @@ export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 
 
 //TESTING URLS
-
-// export const BASE_API_TEST = 'http://127.0.0.1:8000/api';
-// export const API_TEST_WAREHOUSE = BASE_API_TEST + '/warehouse';
-// export const API_TEST_LOCATION = BASE_API_TEST + '/location';
+export const BASE_API_TEST = 'http://127.0.0.1:8000/api';
+export const API_TEST_WAREHOUSE = BASE_API_TEST + '/warehouse';
+export const API_TEST_LOCATION = BASE_API_TEST + '/location';
 
 //Inegi SAKABE
 // export const API_SAKABE_COORDS = BASE_API_TEST + '/proxy/coordsID';
