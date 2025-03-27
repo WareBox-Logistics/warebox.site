@@ -1,7 +1,7 @@
 {
     "name": "WareBox Logistics",
     "short_name": "WareBox",
-    "start_url": "/index.html",
+    "start_url": "/",
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#fff",
@@ -18,12 +18,12 @@
             "sizes": "96x96"
         },
         {
-            "src": "icons/icon-128x128.png",
+            "src": "/icons/icon-128x128.png",
             "type": "image/png",
             "sizes": "128x128"
         },
         {
-            "src": "icons/icon-144x144.png",
+            "src": "/icons/icon-144x144.png",
             "type": "image/png",
             "sizes": "144x144"
         },
