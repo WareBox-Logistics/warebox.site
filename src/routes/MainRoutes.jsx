@@ -28,6 +28,8 @@ const DashboardDis = Loadable(lazy(() => import('views/pages/despacho/DashboardD
 const Report = Loadable(lazy(() => import('views/pages/despacho/Report')))
 const Issue = Loadable(lazy(() => import('views/pages/despacho/Issue')))
 const Support = Loadable(lazy(() => import('views/pages/despacho/Support')))
+const Problem = Loadable(lazy(() => import('views/pages/despacho/Problem')))
+
 
 const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
 const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
@@ -151,6 +153,10 @@ const MainRoutes = {
             {
               path: 'dashboard-despacho',
               element: <DashboardDis />
+            },
+            {
+              path: 'problem-despacho',
+              element: <Problem />
             },
             {
               path: 'report-despacho',

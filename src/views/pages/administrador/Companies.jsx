@@ -324,7 +324,7 @@ const Companies = () => {
             </Row>
           </form>
         </Modal>
-
+        columns
         {/* Modal de eliminación */}
         <Modal
           title="Delete Company"
