@@ -11,7 +11,8 @@ import {
     IconRoute,
     IconBuildingWarehouse,
     IconTruck,
-    IconLayoutGrid
+    IconLayoutGrid,
+    IconSection
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -26,7 +27,8 @@ const icons = {
     IconRoute,
     IconBuildingWarehouse,
     IconTruck,
-    IconLayoutGrid
+    IconLayoutGrid,
+    IconSection
 };
 
 const administrador = {
@@ -56,6 +58,14 @@ const administrador = {
             type: 'item',
             url: '/admin/locations',
             icon: icons.IconMap2,
+            breadcrumbs: true
+        },
+        {
+            id: 'pallets',
+            title: 'Pallets',
+            type: 'item',
+            url: '/admin/pallets',
+            icon: icons.IconSection,
             breadcrumbs: true
         },
         {

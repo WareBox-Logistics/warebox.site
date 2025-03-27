@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Table, Button, Modal, Input, Select, Row, Col, message, Spin, Typography } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, LoadingOutlined, SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { API_URL_VEHICLE, API_URL_MODEL, API_URL_BRAND, authToken } from "services/services";
+import { API_URL_VEHICLE, API_URL_MODEL, API_URL_BRAND, API_URL_DRIVER, authToken } from "services/services";
 
 const { Text } = Typography;
 
@@ -10,6 +10,7 @@ const VehicleComponent = () => {
   const [vehicles, setVehicles] = useState([]);
   const [models, setModels] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const VehicleComponent = () => {
     vin: "",
     model_id: null,
     volume: "",
+    driver_id: null,
     type: undefined,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,6 +33,7 @@ const VehicleComponent = () => {
     fetchVehicles();
     fetchModels();
     fetchBrands();
+    fetchDrivers();
   }, []);
 
   const fetchVehicles = async () => {
@@ -88,6 +91,22 @@ const VehicleComponent = () => {
     }
   };
 
+  const fetchDrivers = async () => {
+    try {
+      const response = await axios.get(API_URL_DRIVER, {
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      setDrivers(response.data.drivers || []);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+      setDrivers([]);
+    }
+  };
+
   const handleAddVehicle = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -114,12 +133,13 @@ const VehicleComponent = () => {
 
   const handleEditVehicle = (vehicle) => {
     setCurrentVehicle(vehicle);
-    setSelectedBrand(vehicle.model?.brand_id || null); // Selecciona la marca del modelo
+    setSelectedBrand(vehicle.model?.brand_id || null);
     setFormData({
       plates: vehicle.plates || "",
       vin: vehicle.vin || "",
       model_id: vehicle.model?.id || null,
       volume: vehicle.volume || "",
+      driver_id: vehicle.driver_id || null,
       type: vehicle.type || "",
     });
     setIsEditMode(true);
@@ -136,6 +156,7 @@ const VehicleComponent = () => {
           "Content-Type": "application/json",
         },
       });
+
       const updatedModel = models.find((model) => model.id === formData.model_id);
       const updatedVehicles = vehicles.map((vehicle) =>
         vehicle.id === currentVehicle.id ? { ...response.data.vehicle, model: updatedModel } : vehicle
@@ -178,6 +199,18 @@ const VehicleComponent = () => {
     }
   };
 
+  const getAvailableDrivers = () => {
+    const assignedDriverIds = vehicles.map((vehicle) => vehicle.driver_id);
+  
+    if (isEditMode && currentVehicle?.driver_id) {
+      return drivers.filter(
+        (driver) => !assignedDriverIds.includes(driver.id) || driver.id === currentVehicle.driver_id
+      );
+    }
+  
+    return drivers.filter((driver) => !assignedDriverIds.includes(driver.id));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -201,6 +234,7 @@ const VehicleComponent = () => {
       vin: "",
       model_id: null,
       volume: "",
+      driver_id: null,
       type: "",
     });
     setSelectedBrand(null);
@@ -226,6 +260,15 @@ const VehicleComponent = () => {
       render: (_, record) => record.model?.name || "Unknown Model",
     },
     { title: "Volume (m³)", dataIndex: "volume", key: "volume" },
+    {
+      title: "Driver",
+      dataIndex: "driver_id",
+      key: "driver",
+      render: (driverId) => {
+        const driver = drivers.find((driver) => driver.id === driverId);
+        return driver ? `${driver.first_name} ${driver.last_name}` : "No Driver";
+      },
+    },
     { title: "Type", dataIndex: "type", key: "type" },
     {
       title: "Actions",
@@ -242,6 +285,7 @@ const VehicleComponent = () => {
       ),
     },
   ];
+
 
   return (
     <div>
@@ -260,7 +304,7 @@ const VehicleComponent = () => {
           />
         </Col>
         <Col>
-          <Button
+          {/* <Button
             type="default"
             // icon={<LoadingOutlined />}
             onClick={() => {
@@ -272,7 +316,7 @@ const VehicleComponent = () => {
             style={{ marginRight: 8 }}
           >
             Refresh
-          </Button>
+          </Button> */}
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -331,12 +375,12 @@ const VehicleComponent = () => {
           <Col xs={24}>
             <Typography.Text style={{ color: "#949494 " }}>Brand</Typography.Text>
             <Select
-              placeholder="Brand"
+              placeholder="Select Brand"
               style={{ width: "100%" }}
               value={selectedBrand}
               onChange={(value) => {
                 setSelectedBrand(value);
-                setFormData({ ...formData, model_id: null }); // Reinicia el modelo seleccionado
+                setFormData({ ...formData, model_id: null });
               }}
               options={brands.map((brand) => ({
                 label: brand.name,
@@ -348,7 +392,7 @@ const VehicleComponent = () => {
           <Col xs={24}>
             <Typography.Text style={{ color: "#949494 " }}>Model</Typography.Text>
             <Select
-              placeholder="Model"
+              placeholder="Select Model"
               style={{ width: "100%" }}
               value={formData.model_id}
               onChange={handleSelectChange}
@@ -358,6 +402,20 @@ const VehicleComponent = () => {
                   label: model.name,
                   value: model.id,
                 }))}
+            />
+          </Col>
+
+          <Col xs={24}>
+            <Typography.Text style={{ color: "#949494 " }}>Driver</Typography.Text>
+            <Select
+              placeholder="Select Driver"
+              style={{ width: "100%" }}
+              value={formData.driver_id}
+              onChange={(value) => setFormData({ ...formData, driver_id: value })}
+              options={getAvailableDrivers().map((driver) => ({
+                label: `${driver.first_name} ${driver.last_name}`,
+                value: driver.id,
+              }))}
             />
           </Col>
 

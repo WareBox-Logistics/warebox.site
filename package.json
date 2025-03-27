@@ -18,6 +18,7 @@
     "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "@apollo/client": "^3.10.5",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.3",
@@ -36,7 +37,7 @@
     "@reduxjs/toolkit": "^2.2.1",
     "@tabler/icons-react": "^2.47.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "antd": "^5.24.0",
+    "antd": "^5.24.4",
     "apexcharts": "^3.46.2",
     "apollo-server-express": "^3.13.0",
     "axios": "^1.7.2",
@@ -122,7 +123,7 @@
     "immutable": "^4.3.5",
     "prettier": "^3.2.5",
     "react-error-overlay": "6.0.11",
-    "sass": "^1.85.1"
+    "sass": "^1.86.0"
   },
   "packageManager": "yarn@4.5.1+sha512.341db9396b6e289fecc30cd7ab3af65060e05ebff4b3b47547b278b9e67b08f485ecd8c79006b405446262142c7a38154445ef7f17c1d5d1de7d90bf9ce7054d"
 }

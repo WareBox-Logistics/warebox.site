@@ -3,6 +3,7 @@ export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 //TOKEN
 export const authToken = `Bearer ${localStorage.getItem('token')}`;
+export const userID = localStorage.getItem('user_id');
 
 //GEOAPIFY
 export const GEOAPIFY_BASE_API_URL = 'https://api.geoapify.com/v1/routing?';
@@ -19,10 +20,11 @@ export const API_URL_ROLE = BASE_API_URL + '/role';
 //Company
 export const API_URL_COMPANY = BASE_API_URL + '/company';
 //Delivery
-export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 export const API_URL_DELIVERY_DETAIL = BASE_API_URL + '/delivery-detail';
 //Employee
 export const API_URL_EMPLOYEE = BASE_API_URL + '/employee';
+//Driver
+export const API_URL_DRIVER = BASE_API_URL + '/driver';
 //Location
 export const API_URL_LOCATION = BASE_API_URL + '/location';
 //Routes
@@ -31,7 +33,6 @@ export const API_URL_ROUTES_DELIVERY = BASE_API_URL + '/routes-delivery';
 //Service
 export const API_URL_SERVICE = BASE_API_URL + '/service';
 //Vehicle
-export const API_URL_VEHICLE = BASE_API_URL + '/vehicle';
 //Brand
 export const API_URL_BRAND = BASE_API_URL + '/brand';
 //Model
@@ -81,3 +82,6 @@ export const API_URL_FREE_TRUCKS = BASE_API_TEST + '/vehicles/available-trucks';
 export const API_URL_ASSIGN_LOT = BASE_API_TEST + '/lots/assign-vehicle';
 export const API_URL_FREE_LOT = BASE_API_TEST + '/lots/free';
 export const API_URL_DOCK = BASE_API_TEST + '/dock';
+export const API_URL_PALLET_CWS = BASE_API_TEST + '/pallet/warehouse-company'; //company warehouse status
+export const API_URL_VEHICLE = BASE_API_TEST + '/vehicle';
+export const API_URL_DELIVERY = BASE_API_TEST + '/delivery';
