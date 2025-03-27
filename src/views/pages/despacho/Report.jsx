@@ -96,12 +96,12 @@ const { Text } = Typography;
         const selectedDriver = drivers.find(dri => dri.id === formData.driver);
 
         setReports([...reports, { ...response.data.report, driver: selectedDriver }]);
-        message.success("Empresa agregada correctamente");
+        message.success("Problema agregado correctamente");
 
         resetForm();
         setIsModalVisible(false);
       } catch (error) {
-        message.error("Error al agregar empresa");
+        message.error("Error al agregar Problema");
         console.error("Error adding company:", error);
       } finally {
         setIsSubmitting(false);
@@ -153,12 +153,12 @@ const { Text } = Typography;
           company.id === currentCompany.id ? { ...response.data.company, service: reports.find(service => service.id === formData.service) } : company
         );
         setReports(updatedCompanies);
-        message.success("Empresa actualizada correctamente");
+        message.success("Problema actualizado correctamente");
         setIsEditMode(false);
         resetForm();
         setIsModalVisible(false);
       } catch (error) {
-        message.error("Error al actualizar empresa");
+        message.error("Error al actualizar Problema");
         console.error("Error updating company:", error);
       } finally {
         setIsSubmitting(false);
@@ -179,11 +179,11 @@ const { Text } = Typography;
           }
         });
         setReports(reports.filter(company => company.id !== currentCompany.id));
-        message.success("Empresa eliminada correctamente");
+        message.success("Problema eliminado correctamente");
         setIsDeleteModalVisible(false);
       } catch (error) {
-        message.error("Error al eliminar empresa");
-        console.error("Error deleting company:", error);
+        message.error("Error al eliminar Problema");
+        console.error("Error deleting problem:", error);
       }
     };
   
@@ -259,7 +259,7 @@ const { Text } = Typography;
       
               {/* Modal de registro/edición */}
               <Modal
-                title={isEditMode ? "Update Company" : "Add New Company"}
+                title={isEditMode ? "Update Problem" : "Add New Problem"}
                 visible={isModalVisible}
                 onCancel={() => { setIsModalVisible(false); resetForm(); }}
                 footer={null}
@@ -362,7 +362,7 @@ const { Text } = Typography;
       
               {/* Modal de eliminación */}
               <Modal
-                title="Delete Company"
+                title="Delete Problem"
                 visible={isDeleteModalVisible}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 onOk={handleConfirmDelete}
