@@ -16,18 +16,18 @@ const despacho = {
             breadcrumbs: false
         },
         {
-            id: 'problem-despacho',
-            title: 'Problemas',
-            type: 'item',
-            url: '/dispatch/problem-despacho',
-            icon: icons.IconReport,
-            breadcrumbs: false
-        },
-        {
             id: 'report-despacho',
             title: 'Reportes',
             type: 'item',
             url: '/dispatch/report-despacho',
+            icon: icons.IconReport,
+            breadcrumbs: false
+        },
+        {
+            id: 'problem-despacho',
+            title: 'Problemas',
+            type: 'item',
+            url: '/dispatch/problem-despacho',
             icon: icons.IconReport,
             breadcrumbs: false
         },
