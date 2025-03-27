@@ -12,7 +12,8 @@ import {
     IconBuildingWarehouse,
     IconTruck,
     IconLayoutGrid,
-    IconSection
+    IconSection,
+    IconUsers
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -28,7 +29,8 @@ const icons = {
     IconBuildingWarehouse,
     IconTruck,
     IconLayoutGrid,
-    IconSection
+    IconSection,
+    IconUsers
 };
 
 const administrador = {
@@ -82,6 +84,14 @@ const administrador = {
             type: 'item',
             url: '/admin/products',
             icon: icons.IconShoppingCart,
+            breadcrumbs: false
+        },
+        {
+            id: 'roles',
+            title: 'Roles',
+            type: 'item',
+            url: '/admin/roles',
+            icon: icons.IconUsers,
             breadcrumbs: false
         },
         {
