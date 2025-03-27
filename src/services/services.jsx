@@ -1,5 +1,5 @@
 //BACKEND VARIABLE
-export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
+export const BASE_API_URL = process.env.VITE_BASE_API_URL;
 
 //TOKEN
 export const authToken = `Bearer ${localStorage.getItem('token')}`;
