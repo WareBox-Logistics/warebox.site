@@ -244,6 +244,7 @@ const Employees = () => {
                               { value: "4", label: "Monitor (despacho)" },
                               { value: "5", label: "Operador" },
                               { value: "6", label: "Supervisor" },
+                              { value: "7", label: "Cliente" },
                             ]}
                           />
                         )}
