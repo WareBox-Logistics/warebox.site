@@ -44,6 +44,7 @@ const Locations = Loadable(lazy(() => import('views/pages/administrador/Location
 const Warehouses = Loadable(lazy(() => import('views/pages/administrador/Warehouses')));
 const Vehicles = Loadable(lazy(() => import('views/pages/administrador/Vehicles')));
 const ParkingLots = Loadable(lazy(() => import('views/pages/administrador/ParkingLots')));
+const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
 
 const MainRoutes = {
   path: '/',
@@ -195,6 +196,20 @@ const MainRoutes = {
             </ProtectedRoute>
           ),
           children : [
+          ]
+        },
+        {
+          path: '/client',
+          element: (
+            <ProtectedRoute role="Cliente">
+              <Outlet />
+            </ProtectedRoute>
+          ),
+          children : [
+            {
+              path: 'company',
+              element: <Client/>
+            },
           ]
         },
       ]
