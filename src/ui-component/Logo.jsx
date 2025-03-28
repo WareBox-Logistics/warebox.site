@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
  * if you want to use image instead of <svg> uncomment following.
  *
  * import logoDark from 'assets/images/logo-dark.svg'; */
-  import logo from 'assets/images/logo_bali_blue.jpeg';
+  import logo from 'assets/images/warebox_logo.png';
  
 
 
@@ -17,7 +17,7 @@ const Logo = () => {
   return (
     //  if you want to use image instead of svg uncomment following, and comment out <svg> element.
      
-      <img src={logo} alt="Bali" width="50"/>
+      <img src={logo} alt="Bali" width="170" style={{ marginTop: "-30px", marginBottom: '-30px' }}/>
 
     // <svg width="92" height="32" viewBox="0 0 92 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     //   <path
