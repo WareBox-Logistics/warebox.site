@@ -367,7 +367,7 @@ const Routes = () => {
               </GoogleMap>
             </div>
           </Col>
-          <Col span={12} style={{  overflowY: 'auto', height: '75vh', }}>
+          <Col span={12} style={{ overflowX: 'hidden', overflowY: 'auto', height: '75vh' }}>
             <div style={{ paddingLeft: '30px', borderRadius: '10px' }}>
               <Row gutter={8}>
                 <Title level={4}>Waypoints</Title>
