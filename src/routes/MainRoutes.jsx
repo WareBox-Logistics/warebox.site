@@ -44,7 +44,11 @@ const Locations = Loadable(lazy(() => import('views/pages/administrador/Location
 const Warehouses = Loadable(lazy(() => import('views/pages/administrador/Warehouses')));
 const Vehicles = Loadable(lazy(() => import('views/pages/administrador/Vehicles')));
 const ParkingLots = Loadable(lazy(() => import('views/pages/administrador/ParkingLots')));
+
+
 const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
+const ClientPallets = Loadable(lazy(() => import('views/pages/cliente/ClientPallets')));
+const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
 
 const MainRoutes = {
   path: '/',
@@ -207,8 +211,12 @@ const MainRoutes = {
           ),
           children : [
             {
-              path: 'company',
-              element: <Client/>
+              path: 'client-dashboard',
+              element: <ClientDashboard />
+            },
+            {
+              path: 'client-pallets',
+              element: <ClientPallets />
             },
           ]
         },
