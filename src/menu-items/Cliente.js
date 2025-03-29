@@ -1,25 +1,17 @@
 import { 
     IconDashboard, 
-    IconUser, 
-    IconPaperclip, 
-    IconMap2, 
-    IconBuildingWarehouse, 
-    IconTruckLoading, 
-    IconPackageExport, 
-    IconPackage, 
-    IconBrandDatabricks 
+    IconPackageExport,
+    IconChartBar,
+    IconSection,
+    IconLayoutGrid
 } from '@tabler/icons-react';
 
 const icons = { 
     IconDashboard, 
-    IconUser, 
-    IconPaperclip, 
-    IconMap2, 
-    IconBuildingWarehouse, 
-    IconTruckLoading, 
-    IconPackageExport, 
-    IconPackage, 
-    IconBrandDatabricks
+    IconPackageExport,
+    IconChartBar,
+    IconSection,
+    IconLayoutGrid
 };
 
 const cliente = {
@@ -32,7 +24,7 @@ const cliente = {
             title: 'Dashboard',
             type: 'item',
             url: '/client/client-dashboard',
-            icon: icons.IconDashboard,
+            icon: icons.IconChartBar,
             breadcrumbs: false
         },
         {
@@ -40,7 +32,7 @@ const cliente = {
             title: 'Pallets',
             type: 'item',
             url: '/client/client-pallets',
-            icon: icons.IconPackageExport,
+            icon: icons.IconLayoutGrid,
             breadcrumbs: false
         }
     ]
