@@ -44,6 +44,7 @@ const Locations = Loadable(lazy(() => import('views/pages/administrador/Location
 const Warehouses = Loadable(lazy(() => import('views/pages/administrador/Warehouses')));
 const Vehicles = Loadable(lazy(() => import('views/pages/administrador/Vehicles')));
 const ParkingLots = Loadable(lazy(() => import('views/pages/administrador/ParkingLots')));
+const Tracker = Loadable(lazy(() => import('views/pages/administrador/Tracker')));
 
 
 const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
@@ -101,6 +102,10 @@ const MainRoutes = {
             {
               path: 'services',
               element: <Services />
+            },
+            {
+              path: 'tracker',
+              element: <Tracker />
             },
             {
               path: 'users',

@@ -13,6 +13,7 @@ import {
     IconTruck,
     IconLayoutGrid,
     IconSection,
+    IconNavigation,
     IconUsers
 } from '@tabler/icons-react';
 
@@ -30,6 +31,7 @@ const icons = {
     IconTruck,
     IconLayoutGrid,
     IconSection,
+    IconNavigation,
     IconUsers
 };
 
@@ -108,6 +110,14 @@ const administrador = {
             type: 'item',
             url: '/admin/services',
             icon: icons.IconDeviceAirtag,
+            breadcrumbs: false
+        },
+        {
+            id: 'tracker',
+            title: 'Tracker',
+            type: 'item',
+            url: '/admin/tracker',
+            icon: icons.IconNavigation,
             breadcrumbs: false
         },
         {
