@@ -90,6 +90,7 @@ const { Text } = Typography;
 
     const handleEditProblem = (problem) => {
     setCurrentProblem(problem);
+  console.log('currentProblem: ', {currentProblem});
     setFormData({
         name: problem.name || "",
         level: problem.level || "",
@@ -215,7 +216,7 @@ const { Text } = Typography;
                   {/* Modal de registro/edición */}
                   <Modal
                     title={isEditMode ? "Update problem" : "Add New Problem"}
-                    visible={isModalVisible}
+                    open={isModalVisible}
                     onCancel={() => { setIsModalVisible(false); resetForm(); }}
                     footer={null}
                     width={400}
@@ -274,7 +275,7 @@ const { Text } = Typography;
                   {/* Modal de eliminación */}
                   <Modal
                     title="Delete problem"
-                    visible={isDeleteModalVisible}
+                    open={isDeleteModalVisible}
                     onCancel={() => setIsDeleteModalVisible(false)}
                     onOk={handleConfirmDelete}
                     confirmLoading={isSubmitting}

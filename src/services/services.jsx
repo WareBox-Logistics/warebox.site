@@ -1,5 +1,6 @@
 //BACKEND VARIABLE
 export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
+// export const BASE_API_URL = 'http://127.0.0.1:8000/api'
 
 //TOKEN
 export const authToken = `Bearer ${localStorage.getItem('token')}`;
