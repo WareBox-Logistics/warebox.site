@@ -11,24 +11,21 @@ const { Panel } = Collapse;
 
 const Vehicles = () => {
   return (
-    <Paper elevation={3} sx={{ padding: "16px", margin: "16px" }}>
+    <Paper sx={{ padding: "16px", margin: "16px" }}>
       <MainCard title="Vehicles Management">
         
         <VehicleComponent />
 
-        <Collapse defaultActiveKey={[]} style={{ marginTop: "16px" }}>
-            <Panel
-                header={<Typography.Text strong>Models Management</Typography.Text>}
-                key="1"
-            >
+        <Collapse defaultActiveKey={[]} style={{ marginTop: "55px" }}>
+
+            <Panel header={<Typography.Text strong>Models Management</Typography.Text>} key="1">
                 <ModelComponent />
             </Panel>
-            <Panel
-                header={<Typography.Text strong>Brands Management</Typography.Text>}
-                key="2"
-            >
+
+            <Panel header={<Typography.Text strong>Brands Management</Typography.Text>} key="2">
                 <BrandComponent />
             </Panel>
+            
         </Collapse>
       </MainCard>
     </Paper>
