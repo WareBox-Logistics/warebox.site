@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
+import { authToken,API_URL_WAREHOUSE } from '../../../services/services';
 import * as Yup from "yup";
 import {
   Card,
@@ -24,9 +25,8 @@ import MetricCard from "components/administrador/EmployeesMetrics";
 import { GET_EMPLOYES } from "graphql/queries";
 import { useQuery } from "@apollo/client";
 import axios from "axios";
-import { color } from "framer-motion";
 
-// Validación con Yup
+
 const EmployeeSchema = Yup.object().shape({
   first_name: Yup.string().required("El nombre es obligatorio"),
   last_name: Yup.string().required("El apellido es obligatorio"),
@@ -37,12 +37,28 @@ const EmployeeSchema = Yup.object().shape({
     .min(6, "Mínimo 6 caracteres")
     .required("La contraseña es obligatoria"),
   role: Yup.string().required("El rol es obligatorio"),
+
+
+  // Se requiere warehouse SÓLO si role = "2".
+  warehouse: Yup.string().when("role", (roleValue, schema) => {
+    if (roleValue === "2") {
+      return schema.required("Selecciona un warehouse");
+    }
+    return schema.nullable();
+  }),
 });
 
 const Employees = () => {
   const [searchText, setSearchText] = useState("");
   const [employees, setEmployees] = useState([]);
-  const { data, loading: loadingUsers, error, refetch } = useQuery(GET_EMPLOYES, {
+  const [warehouses, setWarehouses] = useState([]);
+
+  const {
+    data,
+    loading: loadingUsers,
+    error,
+    refetch,
+  } = useQuery(GET_EMPLOYES, {
     notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
       if (data && data.employee) {
@@ -52,7 +68,7 @@ const Employees = () => {
             first_name: emp.first_name,
             last_name: emp.last_name,
             email: emp.email,
-            role: emp.role_table ? emp.role_table.name : "Sin rol", // Verifica si existe el rol
+            role: emp.role_table ? emp.role_table.name : "Sin rol",
           }))
         );
       }
@@ -61,21 +77,39 @@ const Employees = () => {
 
   useEffect(() => {
     refetch();
-  },[])
+
+    const fetchWarehouses = async () => {
+      try {
+        const response = await axios.get(API_URL_WAREHOUSE, {
+          headers: {
+          'Authorization': authToken,
+          "Content-Type": "application/json",
+        }
+        });
+        if (response.data.warehouses) {
+          setWarehouses(response.data.warehouses);
+        }
+      } catch (err) {
+        message.error("No se pudieron cargar los Warehouses");
+      }
+    };
+
+    fetchWarehouses();
+  }, [refetch]);
 
   if (error) {
     message.error("Error al cargar empleados");
     return null;
   }
 
-  // Filtrar empleados según el texto de búsqueda
+
   const filteredEmployees = employees.filter((employee) =>
     `${employee.first_name} ${employee.last_name}`
       .toLowerCase()
       .includes(searchText.toLowerCase())
   );
 
-  // Columnas de la tabla
+  // Config de columnas de la tabla
   const columns = [
     { title: "Nombre", dataIndex: "first_name", key: "first_name" },
     { title: "Apellido", dataIndex: "last_name", key: "last_name" },
@@ -83,19 +117,9 @@ const Employees = () => {
     { title: "Rol", dataIndex: "role", key: "role" },
   ];
 
-  
   return (
-    <Paper
-      style={{
-        padding: 16,
-        maxWidth: "100%",
-        overflowX: "hidden",
-        height: "100%",
-      }}
-    >
-          {/* <h1>{loadingUsers ? 'Cargando usuarios' : 'Ya estan cargados los users'}</h1> */}
-
-      {/* Cards de métricas */}
+    <Paper style={{ padding: 16, maxWidth: "100%", overflowX: "hidden", height: "100%" }}>
+      {/* Métricas */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8}>
           <MetricCard
@@ -126,7 +150,7 @@ const Employees = () => {
         </Col>
       </Row>
 
-      {/* Formulario de registro */}
+
       <Card title="Registrar Nuevo Empleado" style={{ marginTop: 20 }}>
         <Formik
           initialValues={{
@@ -135,39 +159,38 @@ const Employees = () => {
             email: "",
             password: "",
             role: null,
+            warehouse: null, 
           }}
           validationSchema={EmployeeSchema}
           onSubmit={async (values, { setSubmitting, resetForm }) => {
             setSubmitting(true);
             try {
-              await axios.post(
-                "https://back.warebox.pro/api/registerEmployee",
-                {
-                  first_name: values.first_name,
-                  last_name: values.last_name,
-                  email: values.email,
-                  password: values.password,
-                  password_confirmation: values.password,
-                  role: values.role,
-                }
-              );
+              // Enviamos warehouse solo si rol=2
+              await axios.post("https://back.warebox.pro/api/registerEmployee", {
+                first_name: values.first_name,
+                last_name: values.last_name,
+                email: values.email,
+                password: values.password,
+                password_confirmation: values.password,
+                role: values.role,
+                warehouse:
+                  values.role === "2" ? Number(values.warehouse) : undefined,
+              });
 
-              setEmployees([
-                ...employees,
-                { id: employees.length + 1, ...values },
-              ]);
+              setEmployees([...employees, { id: employees.length + 1, ...values }]);
               message.success("Empleado agregado correctamente");
               resetForm();
             } catch (error) {
               message.error("Error al agregar empleado");
             } finally {
-              setSubmitting(false); // Asegura que el botón vuelva a estar activo
+              setSubmitting(false);
             }
           }}
         >
           {({ values, setFieldValue, errors, isSubmitting, touched }) => (
             <Form>
               <Row gutter={[16, 16]}>
+
                 <Col xs={24} sm={12} md={6}>
                   <Field name="first_name">
                     {({ field }) => (
@@ -180,7 +203,11 @@ const Employees = () => {
                       />
                     )}
                   </Field>
+                  {errors.first_name && touched.first_name && (
+                    <div style={{ color: "red", fontSize: 12 }}>{errors.first_name}</div>
+                  )}
                 </Col>
+
                 <Col xs={24} sm={12} md={6}>
                   <Field name="last_name">
                     {({ field }) => (
@@ -193,7 +220,12 @@ const Employees = () => {
                       />
                     )}
                   </Field>
+                  {errors.last_name && touched.last_name && (
+                    <div style={{ color: "red", fontSize: 12 }}>{errors.last_name}</div>
+                  )}
                 </Col>
+
+
                 <Col xs={24} sm={12} md={6}>
                   <Field name="email">
                     {({ field }) => (
@@ -204,7 +236,12 @@ const Employees = () => {
                       />
                     )}
                   </Field>
+                  {errors.email && touched.email && (
+                    <div style={{ color: "red", fontSize: 12 }}>{errors.email}</div>
+                  )}
                 </Col>
+
+
                 <Col xs={24} sm={12} md={6}>
                   <Field name="password">
                     {({ field }) => (
@@ -219,44 +256,62 @@ const Employees = () => {
                     )}
                   </Field>
                   {errors.password && touched.password && (
-                    <div style={{ color: "red", fontSize: 12 }}>
-                      {errors.password}
-                    </div>
+                    <div style={{ color: "red", fontSize: 12 }}>{errors.password}</div>
                   )}
                 </Col>
+
                 <Col xs={24} sm={8} md={4}>
                   <Field name="role">
                     {({ field }) => (
-                      <Field name="role">
-                        {({ field }) => (
-                          <Select
-                            {...field}
-                            placeholder="Selecciona un rol"
-                            style={{ width: "100%" }}
-                            allowClear
-                            onChange={(value) =>
-                              setFieldValue("role", value || null)
-                            }
-                            options={[
-                              { value: "1", label: "Administrador" },
-                              { value: "2", label: "Almacenista" },
-                              { value: "3", label: "Chofer" },
-                              { value: "4", label: "Monitor (despacho)" },
-                              { value: "5", label: "Operador" },
-                              { value: "6", label: "Supervisor" },
-                              { value: "7", label: "Cliente" },
-                            ]}
-                          />
-                        )}
-                      </Field>
+                      <Select
+                        {...field}
+                        placeholder="Selecciona un rol"
+                        style={{ width: "100%" }}
+                        allowClear
+                        onChange={(value) => setFieldValue("role", value || null)}
+                        options={[
+                          { value: "1", label: "Administrador" },
+                          { value: "2", label: "Almacenista" },
+                          { value: "3", label: "Chofer" },
+                          { value: "4", label: "Monitor (despacho)" },
+                          { value: "5", label: "Operador" },
+                          { value: "6", label: "Supervisor" },
+                          { value: "7", label: "Cliente" },
+                        ]}
+                      />
                     )}
                   </Field>
                   {errors.role && touched.role && (
-                    <div style={{ color: "red", fontSize: 12 }}>
-                      {errors.role}
-                    </div>
+                    <div style={{ color: "red", fontSize: 12 }}>{errors.role}</div>
                   )}
                 </Col>
+
+                {/* Campo Warehouse (solo visible si role=2) */}
+                {values.role === "2" && (
+                  <Col xs={24} sm={8} md={4}>
+                    <Field name="warehouse">
+                      {({ field }) => (
+                        <Select
+                          {...field}
+                          placeholder="Selecciona un warehouse"
+                          style={{ width: "100%" }}
+                          allowClear
+                          onChange={(value) => setFieldValue("warehouse", value || null)}
+                          options={warehouses.map((wh) => ({
+                            value: wh.id.toString(),
+                            label: wh.name,
+                          }))}
+                        />
+                      )}
+                    </Field>
+                    {errors.warehouse && touched.warehouse && (
+                      <div style={{ color: "red", fontSize: 12 }}>
+                        {errors.warehouse}
+                      </div>
+                    )}
+                  </Col>
+                )}
+
                 <Col xs={24} sm={8} md={4}>
                   <Button
                     type="primary"
@@ -265,9 +320,7 @@ const Employees = () => {
                     icon={
                       isSubmitting ? (
                         <Spin
-                          indicator={
-                            <LoadingOutlined spin style={{ color: "white" }} />
-                          }
+                          indicator={<LoadingOutlined spin style={{ color: "white" }} />}
                         />
                       ) : (
                         <UserAddOutlined />
@@ -297,13 +350,13 @@ const Employees = () => {
         onChange={(e) => setSearchText(e.target.value)}
       />
 
-      {/* Tabla */}
+
       <div style={{ overflowX: "auto" }}>
         <Table
           dataSource={filteredEmployees}
           columns={columns}
           rowKey="id"
-          pagination={{ pageSize: 20}}
+          pagination={{ pageSize: 20 }}
         />
       </div>
     </Paper>
