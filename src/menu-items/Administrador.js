@@ -13,6 +13,7 @@ import {
     IconTruck,
     IconLayoutGrid,
     IconSection,
+    IconBox,
     IconNavigation,
     IconUsers
 } from '@tabler/icons-react';
@@ -31,6 +32,7 @@ const icons = {
     IconTruck,
     IconLayoutGrid,
     IconSection,
+    IconBox,
     IconNavigation,
     IconUsers
 };
@@ -69,7 +71,7 @@ const administrador = {
             title: 'Pallets',
             type: 'item',
             url: '/admin/pallets',
-            icon: icons.IconSection,
+            icon: icons.IconBox,
             breadcrumbs: true
         },
         {

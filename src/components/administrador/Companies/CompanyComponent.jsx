@@ -7,9 +7,9 @@ import axios from 'axios';
 import { authToken, API_URL_COMPANY, API_URL_SERVICE } from '../../../services/services';
 const { Text } = Typography;
 
-const CompanyComponent = () => {
+const CompanyComponent = ({ services, updateServices }) => {
   const [companies, setCompanies] = useState([]);
-  const [services, setServices] = useState([]);
+  // const [services, setServices] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -28,8 +28,10 @@ const CompanyComponent = () => {
 
   useEffect(() => {
     fetchCompanies();
-    fetchServices();
-  }, []);
+    if (services.length === 0) {
+      fetchServices();
+    }
+  }, [services]);
 
   const fetchCompanies = async () => {
     setIsLoading(true);
@@ -43,7 +45,7 @@ const CompanyComponent = () => {
       setCompanies(response.data.companies || []);
     } catch (error) {
       console.error('Error fetching companies:', error);
-      setCompanies([]); // Set companies to an empty array in case of error
+      setCompanies([]);
     } finally {
       setIsLoading(false);
     }
@@ -57,10 +59,11 @@ const CompanyComponent = () => {
           'Content-Type': 'application/json'
         }
       });
-      setServices(response.data.services || []);
+      // setServices(response.data.services || []);
+      updateServices(response.data.services || []);
     } catch (error) {
       console.error('Error fetching services:', error);
-      setServices([]);
+      // setServices([]);
     }
   };
 
@@ -196,7 +199,15 @@ const CompanyComponent = () => {
       render: (text, record) => (
         <span>
           <Button icon={<EditOutlined />} onClick={() => handleEditCompany(record)}>Edit</Button>
-          <Button icon={<DeleteOutlined />} onClick={() => handleDeleteCompany(record)} style={{ marginLeft: 8 }}>Delete</Button>
+          <Button 
+            icon={<DeleteOutlined />} 
+            onClick={() => handleDeleteCompany(record)} 
+            style={{ marginLeft: 8 }}
+            color='red'
+            variant='outlined'
+          >
+            Delete
+          </Button>
         </span>
       ),
     },
@@ -233,7 +244,7 @@ const CompanyComponent = () => {
             dataSource={filteredCompanies}
             columns={columns}
             rowKey="id"
-            pagination={{ pageSize: 20 }}
+            pagination={{ pageSize: 7 }}
             loading={isLoading}
           />
         </div>
@@ -292,7 +303,7 @@ const CompanyComponent = () => {
                   style={{ width: '100%' }}
                   value={formData.service}
                   onChange={handleSelectChange}
-                  options={services.map(service => ({
+                  options={services.map((service) => ({
                     label: service.type,
                     value: service.id,
                   }))}

@@ -7,7 +7,7 @@ import axios from 'axios';
 import { authToken, API_URL_SERVICE } from '../../../services/services';
 const { Text } = Typography;
 
-const ServiceComponent = () => {
+const ServiceComponent = ({ updateServices }) => {
   const [services, setServices] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({
@@ -35,9 +35,10 @@ const ServiceComponent = () => {
         }
       });
       setServices(response.data.services || []);
+      updateServices(response.data.services || []);
     } catch (error) {
       console.error('Error fetching services:', error);
-      setServices([]); // Set services to an empty array in case of error
+      setServices([]);
     } finally {
       setIsLoading(false);
     }
@@ -56,12 +57,14 @@ const ServiceComponent = () => {
           }
         }
       );
-      setServices([...services, response.data.service]);
-      message.success("Servicio agregado correctamente");
+      const updatedServices = [...services, response.data.service];
+      setServices(updatedServices);
+      updateServices(updatedServices);
+      message.success("Service added successfully");
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
-      message.error("Error al agregar servicio");
+      message.error("Error adding service");
       console.error("Error adding service:", error);
     } finally {
       setIsSubmitting(false);
@@ -102,12 +105,13 @@ const ServiceComponent = () => {
         service.id === currentService.id ? response.data.service : service
       );
       setServices(updatedServices);
-      message.success("Servicio actualizado correctamente");
+      updateServices(updatedServices);
+      message.success("Service updated successfully");
       setIsEditMode(false);
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
-      message.error("Error al actualizar servicio");
+      message.error("Error updating service");
       console.error("Error updating service:", error);
     } finally {
       setIsSubmitting(false);
@@ -127,11 +131,13 @@ const ServiceComponent = () => {
           'Content-Type': 'application/json'
         }
       });
-      setServices(services.filter(service => service.id !== currentService.id));
-      message.success("Servicio eliminado correctamente");
+      const updatedServices = services.filter((service) => service.id !== currentService.id);
+      setServices(updatedServices);
+      updateServices(updatedServices);
+      message.success("Service deleted successfully");
       setIsDeleteModalVisible(false);
     } catch (error) {
-      message.error("Error al eliminar servicio");
+      message.error("Error deleting service");
       console.error("Error deleting service:", error);
     }
   };
@@ -156,7 +162,15 @@ const ServiceComponent = () => {
       render: (text, record) => (
         <span>
           <Button icon={<EditOutlined />} onClick={() => handleEditService(record)}>Edit</Button>
-          <Button icon={<DeleteOutlined />} onClick={() => handleDeleteService(record)} style={{ marginLeft: 8 }}>Delete</Button>
+          <Button 
+            icon={<DeleteOutlined />} 
+            onClick={() => handleDeleteService(record)}
+            style={{ marginLeft: 8 }}
+            color='red'
+            variant='outlined'
+          >
+            Delete
+          </Button>
         </span>
       ),
     },
@@ -198,7 +212,7 @@ const ServiceComponent = () => {
             dataSource={filteredServices}
             columns={columns}
             rowKey="id"
-            pagination={{ pageSize: 20 }}
+            pagination={{ pageSize: 8 }}
             loading={isLoading}
           />
         </div>
