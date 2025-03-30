@@ -104,14 +104,14 @@ const administrador = {
             icon: icons.IconRoute,
             breadcrumbs: false
         },
-        {
-            id: 'services',
-            title: 'Services',
-            type: 'item',
-            url: '/admin/services',
-            icon: icons.IconDeviceAirtag,
-            breadcrumbs: false
-        },
+        // {
+        //     id: 'services',
+        //     title: 'Services',
+        //     type: 'item',
+        //     url: '/admin/services',
+        //     icon: icons.IconDeviceAirtag,
+        //     breadcrumbs: false
+        // },
         {
             id: 'tracker',
             title: 'Tracker',
