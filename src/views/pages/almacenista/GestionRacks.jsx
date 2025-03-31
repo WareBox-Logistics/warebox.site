@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { Skeleton } from "antd";
+import {authToken, API_URL_PALLET, API_URL_RACK, API_URL_STORAGE_RACK_PALLET, API_URL_EMPLOYEE} from "../../../services/services";
 import { IconCubePlus } from "@tabler/icons-react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { authToken, API_URL_RACK,API_URL_PALLET, API_URL_STORAGE_RACK_PALLET, API_URL_WAREHOUSE } from '../../../services/services';
 import axios from "axios";
 import {
   Card,
@@ -14,6 +15,7 @@ import {
   message,
   Select,
   Modal,
+  Spin,
 } from "antd";
 import {
   LoadingOutlined,
@@ -22,20 +24,19 @@ import {
 } from "@ant-design/icons";
 import { Paper } from "@mui/material";
 
-// ====== Utility: determine color by percentage ======
 const getColorByPercentage = (percentage) => {
   if (percentage < 50) {
-    return "#f5222d"; // rojo
+    return "#f5222d"; 
   } else if (percentage < 90) {
-    return "#faad14"; // amarillo
+    return "#faad14"; 
   } else {
-    return "#52c41a"; // verde
+    return "#52c41a"; 
   }
 };
 const { Option } = Select;
+
 // ====== Validation Schemas (Yup) ======
 const RackSchema = Yup.object().shape({
-  warehouse: Yup.number().required("Warehouse is required"),
   section: Yup.string().required("Section is required"),
   levels: Yup.number().required("Levels are required"),
   height: Yup.number()
@@ -58,32 +59,60 @@ const StorePalletSchema = Yup.object().shape({
 });
 
 const GestionRacks = () => {
-  // ====== States ======
+  // ====== Estados ======
+  const [employee, setEmployee] = useState(null);
+  const [assignedWarehouse, setAssignedWarehouse] = useState(null);
   const [racks, setRacks] = useState([]);
   const [pallets, setPallets] = useState([]);
   const [storageRackPallet, setStorageRackPallet] = useState([]);
-  const [warehouses, setWarehouses] = useState([]); // combos
+  const [loading, setLoading] = useState(false);
 
-  // Estados para modal
+  // Estados para modal y búsqueda
   const [searchText, setSearchText] = useState("");
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [selectedRack, setSelectedRack] = useState(null);
 
-
-  // ====== useEffect: fetch data ======
+  // ====== useEffect: Obtener datos del empleado ======
   useEffect(() => {
-    fetchRacks();
-    fetchPallets();
-    fetchWarehouses();
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      axios
+        .get(`${API_URL_EMPLOYEE}/${userId}`, {
+          headers: {
+            Authorization: authToken,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          setEmployee(res.data.employee);
+          setAssignedWarehouse(res.data.employee.warehouse);
+        })
+        .catch((err) => {
+          console.error("Error fetching employee data:", err);
+          message.error("Error loading employee information");
+        });
+    }
   }, []);
 
-  // --- GET racks ---
+  // ====== useEffect: Obtener racks filtrados por el warehouse asignado ======
+  useEffect(() => {
+    if (assignedWarehouse) {
+      fetchRacks();
+    }
+  }, [assignedWarehouse]);
+
+  // --- GET racks (filtrados por warehouse asignado) ---
   const fetchRacks = async () => {
+    if (!assignedWarehouse) return;
+    setLoading(true);
     try {
       const res = await axios.get(API_URL_RACK, {
         headers: {
-          'Authorization': authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
+        },
+        params: {
+          warehouse: assignedWarehouse.id,
         },
       });
       const sortedRacks = (res.data.data || []).sort((a, b) => b.id - a.id);
@@ -91,6 +120,8 @@ const GestionRacks = () => {
     } catch (error) {
       console.error("Error fetching racks:", error);
       message.error("Error loading racks");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,23 +130,23 @@ const GestionRacks = () => {
     try {
       const res = await axios.get(API_URL_PALLET, {
         headers: {
-          'Authorization': authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       });
-      console.log("this", res.data.pallets);
       setPallets(res.data.pallets || []);
     } catch (error) {
       console.error("Error fetching pallets:", error);
       message.error("Error loading pallets");
     }
   };
-  // --- GET storagerackpallet ---
+
+  // --- GET storage rack pallets ---
   const fetchStorageRackPallets = async () => {
     try {
       const res = await axios.get(API_URL_STORAGE_RACK_PALLET, {
         headers: {
-          'Authorization': authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       });
@@ -125,25 +156,11 @@ const GestionRacks = () => {
       message.error("Error loading storage rack pallets");
     }
   };
-  
+
   useEffect(() => {
+    fetchPallets();
     fetchStorageRackPallets();
   }, []);
-  // --- GET warehouses ---
-  const fetchWarehouses = async () => {
-    try {
-      const res = await axios.get(API_URL_WAREHOUSE, {
-        headers: {
-          'Authorization': authToken,
-          "Content-Type": "application/json",
-        },
-      });
-      setWarehouses(res.data.warehouses || []);
-    } catch (error) {
-      console.error("Error fetching warehouses:", error);
-      message.error("Error loading warehouses");
-    }
-  };
 
   // ====== Modal open/close ======
   const openStoreModal = (rack) => {
@@ -159,13 +176,30 @@ const GestionRacks = () => {
   const filteredRacks = racks.filter((rack) =>
     rack.id.toString().toLowerCase().includes(searchText.toLowerCase())
   );
-  
+
   // ====== Columnas para la tabla de racks ======
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id" },
-    { title: "Warehouse", dataIndex: "warehouse", key: "warehouse" },
-    { title: "Section", dataIndex: "section", key: "section" },
-    { title: "Levels", dataIndex: "levels", key: "levels" },
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      sorter: (a, b) => a.id - b.id,
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Section",
+      dataIndex: "section",
+      key: "section",
+      sorter: (a, b) => (a.section || "").localeCompare(b.section || ""),
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Levels",
+      dataIndex: "levels",
+      key: "levels",
+      sorter: (a, b) => a.levels - b.levels,
+      sortDirections: ["ascend", "descend"],
+    },
     {
       title: "Height (m)",
       dataIndex: "height",
@@ -210,6 +244,12 @@ const GestionRacks = () => {
     {
       title: "Available Volume",
       key: "available_volume",
+      sorter: (a, b) => {
+        const avA = (a.capacity_volume - a.used_volume) || 0;
+        const avB = (b.capacity_volume - b.used_volume) || 0;
+        return avA - avB;
+      },
+      sortDirections: ["ascend", "descend"],
       render: (_, record) => {
         const available = (record.capacity_volume || 0) - (record.used_volume || 0);
         const totalCap = record.capacity_volume || 1;
@@ -221,6 +261,12 @@ const GestionRacks = () => {
     {
       title: "Available Weight",
       key: "available_weight",
+      sorter: (a, b) => {
+        const awA = (a.capacity_weight - a.used_weight) || 0;
+        const awB = (b.capacity_weight - b.used_weight) || 0;
+        return awA - awB;
+      },
+      sortDirections: ["ascend", "descend"],
       render: (_, record) => {
         const available = (record.capacity_weight || 0) - (record.used_weight || 0);
         const totalCap = record.capacity_weight || 1;
@@ -242,18 +288,20 @@ const GestionRacks = () => {
 
   // ====== POST: crear rack ======
   const handleCreateRack = async (values, { setSubmitting, resetForm }) => {
+    if (!assignedWarehouse) {
+      message.error("No warehouse assigned.");
+      setSubmitting(false);
+      return;
+    }
     setSubmitting(true);
     try {
-      // 1) Calcular volumen
       const calcVolume =
         (parseFloat(values.height) || 0) *
         (parseFloat(values.width) || 0) *
         (parseFloat(values.long) || 0);
-
-      // 2) Armar payload
       const now = new Date().toISOString();
       const payload = {
-        warehouse: values.warehouse,
+        warehouse: assignedWarehouse.id,
         section: values.section,
         levels: Number(values.levels),
         height: Number(values.height),
@@ -267,20 +315,15 @@ const GestionRacks = () => {
         created_at: now,
         updated_at: now,
       };
-
-      // 3) POST a la API
       const res = await axios.post(API_URL_RACK, payload, {
         headers: {
-          'Authorization': authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       });
-
-      // 4) Agregamos el nuevo rack al estado
       const newRack = res.data.data;
       if (!newRack.used_volume) newRack.used_volume = 0;
       if (!newRack.used_weight) newRack.used_weight = 0;
-
       setRacks((prev) => [...prev, newRack]);
       message.success("Rack created successfully.");
       resetForm();
@@ -292,17 +335,15 @@ const GestionRacks = () => {
     }
   };
 
-  // Solo pallets status = "Created" y verified = true
+  // Solo pallets con status "Created" y verified true
   const availablePallets = pallets
     .filter((p) => p.status === "Created" && p.verified === true)
     .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
-// ====== POST: almacenar pallet en un rack ======
+  // ====== POST: almacenar pallet en un rack ======
   const handleStorePalletSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       if (!selectedRack) return;
-
-      // 1) Validar posición y nivel localmente
       const isOccupied = storageRackPallet.some(
         (srp) =>
           srp.rack === selectedRack.id &&
@@ -317,16 +358,12 @@ const GestionRacks = () => {
         setSubmitting(false);
         return;
       }
-
-      // 2) Verificar que el pallet esté disponible
       const pallet = availablePallets.find((p) => p.id === values.pallet);
       if (!pallet) {
         message.error("Selected pallet does not exist or is unavailable.");
         setSubmitting(false);
         return;
       }
-
-      // 3) Validar capacidad
       const {
         used_volume = 0,
         used_weight = 0,
@@ -335,31 +372,27 @@ const GestionRacks = () => {
       } = selectedRack;
       const newUsedVolume = Number(used_volume) + Number(pallet.volume);
       const newUsedWeight = Number(used_weight) + Number(pallet.weight);
-      console.log("Rack used volume:", used_volume, "Pallet volume:", pallet.volume, "New total:", newUsedVolume);
       if (newUsedVolume > capacity_volume || newUsedWeight > capacity_weight) {
         message.error("Pallet exceeds the rack capacity (weight or volume).");
         setSubmitting(false);
         return;
       }
-
-      // 4) POST a la API
       await axios.post(
         API_URL_STORAGE_RACK_PALLET,
         {
           ...values,
-          rack: selectedRack.id, 
+          rack: selectedRack.id,
           status: "Occupied",
           position: values.position.trim(),
         },
         {
           headers: {
-            'Authorization': authToken,
+            Authorization: authToken,
             "Content-Type": "application/json",
           },
         }
       );
       await fetchRacks();
-      // 5) Actualizamos estado local (registro de "storage")
       const now = new Date().toISOString();
       const newStorageRecord = {
         rack: selectedRack.id,
@@ -370,8 +403,6 @@ const GestionRacks = () => {
         pallet: pallet.id,
       };
       setStorageRackPallet((prev) => [...prev, newStorageRecord]);
-
-      // 6) Cambiamos el pallet a "Stored"
       setPallets((prev) =>
         prev.map((p) =>
           p.id === pallet.id
@@ -384,8 +415,6 @@ const GestionRacks = () => {
             : p
         )
       );
-
-      // 7) Actualizamos rack (nuevo used_volume y used_weight)
       setRacks((prev) =>
         prev.map((r) =>
           r.id === selectedRack.id
@@ -393,7 +422,6 @@ const GestionRacks = () => {
             : r
         )
       );
-
       message.success(`Pallet ${pallet.id} stored successfully.`);
       resetForm();
       setSubmitting(false);
@@ -403,21 +431,23 @@ const GestionRacks = () => {
       message.error("Error storing the pallet.");
       console.error(error);
       setSubmitting(false);
-      console.log("Error capturado:", error);
     }
-    
   };
 
-  // ====== RENDER ======
   return (
     <Paper style={{ padding: 16, maxWidth: "100%", overflowX: "hidden" }}>
-      <h2>Racks Management</h2>
-
+   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  <h2 style={{ margin: 0 }}>Rack Management in warehouse</h2>
+  {assignedWarehouse ? (
+    <h2 style={{ margin: 0 }}>{assignedWarehouse.name}</h2>
+  ) : (
+    <Skeleton.Input active style={{ width: 100 }} />
+  )}
+</div>
       {/* FORM: Crear un Rack */}
       <Card title="Register New Rack" style={{ marginTop: 20 }}>
         <Formik
           initialValues={{
-            warehouse: "",
             section: "",
             levels: "",
             height: "",
@@ -445,48 +475,12 @@ const GestionRacks = () => {
               const lg =
                 parseFloat(fieldName === "long" ? val : values.long) || 0;
               const vol = h * w * lg;
-              // Guardar internamente el volume si quieres:
               setFieldValue("capacity_volume", vol);
             };
 
             return (
               <Form onSubmit={handleSubmit}>
                 <Row gutter={[16, 16]}>
-                  {/* Warehouse (combo) */}
-                  <Col xs={24} sm={12} md={6}>
-                    <Field name="warehouse">
-                      {({ field }) => (
-                        <Select
-                        {...field}
-                        placeholder="Select Warehouse"
-                        style={{ width: "100%" }}
-                        onChange={(val) => setFieldValue("warehouse", val)}
-                        value={values.warehouse || ""}
-                        options={[
-                          {
-                            label: "Select warehouse", // texto informativo
-                            value: "",
-                            disabled: true,
-                          },
-                          ...warehouses.map((wh) => ({
-                            label: wh.name || `WH #${wh.id}`,
-                            value: wh.id,
-                          })),
-                        ]}
-                        status={
-                          errors.warehouse && touched.warehouse ? "error" : ""
-                        }
-                      />
-                      )}
-                    </Field>
-                    {errors.warehouse && touched.warehouse && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.warehouse}
-                      </div>
-                    )}
-                  </Col>
-
-                  {/* Section (A-Z) */}
                   <Col xs={24} sm={12} md={6}>
                     <Field name="section">
                       {({ field }) => (
@@ -496,31 +490,22 @@ const GestionRacks = () => {
                           style={{ width: "100%" }}
                           onChange={(value) => setFieldValue("section", value)}
                           options={[
-                            {
-                              label: "Select section",
-                              value: "",
-                              disabled: true,
-                            },
+                            { label: "Select section", value: "", disabled: true },
                             ...Array.from({ length: 26 }, (_, i) => {
                               const letter = String.fromCharCode(65 + i);
                               return { label: letter, value: letter };
                             }),
                           ]}
                           value={values.section || ""}
-                          status={
-                            errors.section && touched.section ? "error" : ""
-                          }
+                          status={errors.section && touched.section ? "error" : ""}
                         />
                       )}
                     </Field>
                     {errors.section && touched.section && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.section}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.section}</div>
                     )}
                   </Col>
 
-                  {/* Levels (1-6) */}
                   <Col xs={24} sm={12} md={6}>
                     <Field name="levels">
                       {({ field }) => (
@@ -530,31 +515,22 @@ const GestionRacks = () => {
                           style={{ width: "100%" }}
                           onChange={(value) => setFieldValue("levels", value)}
                           options={[
-                            {
-                              label: "Select levels",
-                              value: "",
-                              disabled: true,
-                            },
+                            { label: "Select levels", value: "", disabled: true },
                             ...[1, 2, 3, 4, 5, 6].map((lvl) => ({
                               label: lvl,
                               value: lvl,
                             })),
                           ]}
                           value={values.levels || ""}
-                          status={
-                            errors.levels && touched.levels ? "error" : ""
-                          }
+                          status={errors.levels && touched.levels ? "error" : ""}
                         />
                       )}
                     </Field>
                     {errors.levels && touched.levels && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.levels}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.levels}</div>
                     )}
                   </Col>
 
-                  {/* Height (m) */}
                   <Col xs={24} sm={12} md={6}>
                     <Field name="height">
                       {({ field }) => (
@@ -563,23 +539,16 @@ const GestionRacks = () => {
                           type="number"
                           step="0.01"
                           placeholder="Height (m)"
-                          onChange={(e) =>
-                            recalcVolume("height", e.target.value)
-                          }
-                          status={
-                            errors.height && touched.height ? "error" : ""
-                          }
+                          onChange={(e) => recalcVolume("height", e.target.value)}
+                          status={errors.height && touched.height ? "error" : ""}
                         />
                       )}
                     </Field>
                     {errors.height && touched.height && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.height}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.height}</div>
                     )}
                   </Col>
 
-                  {/* Width (m) */}
                   <Col xs={24} sm={12} md={6}>
                     <Field name="width">
                       {({ field }) => (
@@ -594,13 +563,10 @@ const GestionRacks = () => {
                       )}
                     </Field>
                     {errors.width && touched.width && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.width}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.width}</div>
                     )}
                   </Col>
 
-                  {/* Long (m) */}
                   <Col xs={24} sm={12} md={6}>
                     <Field name="long">
                       {({ field }) => (
@@ -615,13 +581,10 @@ const GestionRacks = () => {
                       )}
                     </Field>
                     {errors.long && touched.long && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.long}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.long}</div>
                     )}
                   </Col>
 
-                  {/* Weight capacity */}
                   <Col xs={24} sm={12} md={6}>
                     <Field name="capacity_weight">
                       {({ field }) => (
@@ -629,22 +592,15 @@ const GestionRacks = () => {
                           {...field}
                           type="number"
                           placeholder="Weight Capacity (kg)"
-                          status={
-                            errors.capacity_weight && touched.capacity_weight
-                              ? "error"
-                              : ""
-                          }
+                          status={errors.capacity_weight && touched.capacity_weight ? "error" : ""}
                         />
                       )}
                     </Field>
                     {errors.capacity_weight && touched.capacity_weight && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.capacity_weight}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.capacity_weight}</div>
                     )}
                   </Col>
 
-                  {/* Botón Submit */}
                   <Col xs={24}>
                     <Button
                       type="primary"
@@ -671,7 +627,6 @@ const GestionRacks = () => {
 
       {/* LISTADO DE RACKS EXISTENTES */}
       <Card title="Existing Racks" style={{ marginTop: 20 }}>
-        {/* Búsqueda por ID */}
         <Input
           style={{ width: "100%", maxWidth: 300, marginBottom: 10 }}
           prefix={<SearchOutlined />}
@@ -679,14 +634,15 @@ const GestionRacks = () => {
           onChange={(e) => setSearchText(e.target.value)}
         />
 
-        {/* Tabla de racks */}
         <div style={{ overflowX: "auto" }}>
-          <Table
-            dataSource={filteredRacks}
-            columns={columns}
-            rowKey="id"
-            pagination={{ pageSize: 10 }}
-          />
+          <Spin spinning={loading}>
+            <Table
+              dataSource={filteredRacks}
+              columns={columns}
+              rowKey="id"
+              pagination={{ pageSize: 10 }}
+            />
+          </Spin>
         </div>
       </Card>
 
@@ -718,42 +674,34 @@ const GestionRacks = () => {
             }) => (
               <Form onSubmit={handleSubmit}>
                 <Row gutter={[16, 16]}>
-                  {/* Rack ID (solo lectura) */}
                   <Col span={24}>
                     <label>Rack ID:</label>
                     <Input disabled value={selectedRack.id} />
                   </Col>
-
-                 
-
-                  {/* Level */}
                   <Col span={12}>
                     <Field name="level">
                       {({ field }) => (
                         <Select
-                        {...field}
-                        placeholder="Select Level"
-                        style={{ width: "100%" }}
-                        onChange={(val) => setFieldValue("level", val)}
-                        options={[
-                          { label: "Select level", value: "", disabled: true },
-                          ...Array.from({ length: selectedRack.levels }, (_, i) => {
-                            const lvl = i + 1;
-                            return { label: `Level ${lvl}`, value: lvl };
-                          }),
-                        ]}
-                        value={values.level || ""}
-                        status={errors.level && touched.level ? "error" : ""}
-                      />
+                          {...field}
+                          placeholder="Select Level"
+                          style={{ width: "100%" }}
+                          onChange={(val) => setFieldValue("level", val)}
+                          options={[
+                            { label: "Select level", value: "", disabled: true },
+                            ...Array.from({ length: selectedRack.levels }, (_, i) => {
+                              const lvl = i + 1;
+                              return { label: `Level ${lvl}`, value: lvl };
+                            }),
+                          ]}
+                          value={values.level || ""}
+                          status={errors.level && touched.level ? "error" : ""}
+                        />
                       )}
                     </Field>
                     {errors.level && touched.level && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.level}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.level}</div>
                     )}
                   </Col>
-
                   <Col span={12}>
                     <Field name="position">
                       {({ field }) => {
@@ -765,9 +713,7 @@ const GestionRacks = () => {
                               srp.status === "Occupied"
                           )
                           .map((srp) => srp.position);
-
                         const isLevelSelected = values.level !== "";
-
                         const positionOptions = [
                           { label: "Select position", value: "", disabled: true },
                           ...["A ", "B ", "C ", "D ", "E ", "F "].map((pos) => {
@@ -783,7 +729,6 @@ const GestionRacks = () => {
                             };
                           }),
                         ];
-
                         return (
                           <Select
                             {...field}
@@ -803,43 +748,37 @@ const GestionRacks = () => {
                       <div style={{ color: "red", fontSize: 12 }}>{errors.position}</div>
                     )}
                   </Col>
-
-                  {/* Pallet combo */}
                   <Col span={24}>
                     <label>Pallet:</label>
                     <Field name="pallet">
                       {({ field }) => (
                         <Select
-                        {...field}
-                        placeholder="Select Pallet"
-                        style={{ width: "100%" }}
-                        popupMatchSelectWidth={false}
-                        dropdownStyle={{ whiteSpace: "pre-wrap" }}
-                        onChange={(val) => setFieldValue("pallet", val)}
-                        optionLabelProp="label"
-                      >
-                        {availablePallets.map((p) => (
-                          <Option key={p.id} value={p.id} label={`Pallet #${p.id}`}>
-                            <div style={{ display: "flex", flexDirection: "column", padding: "4px 8px" }}>
-                              <strong>Pallet #{p.id}</strong>
-                              <span>Warehouse Origin: {p.warehouse?.name}</span>
-                              <span>Company Pallet: {p.company?.name}</span>
-                              <span>Weight: {p.weight} kg</span>
-                              <span>Volume: {Number(p.volume)?.toFixed(2)} m³</span>
-                            </div>
-                          </Option>
-                        ))}
-                      </Select>
+                          {...field}
+                          placeholder="Select Pallet"
+                          style={{ width: "100%" }}
+                          popupMatchSelectWidth={false}
+                          dropdownStyle={{ whiteSpace: "pre-wrap" }}
+                          onChange={(val) => setFieldValue("pallet", val)}
+                          optionLabelProp="label"
+                        >
+                          {availablePallets.map((p) => (
+                            <Option key={p.id} value={p.id} label={`Pallet #${p.id}`}>
+                              <div style={{ display: "flex", flexDirection: "column", padding: "4px 8px" }}>
+                                <strong>Pallet #{p.id}</strong>
+                                <span>Warehouse Origin: {p.warehouse?.name}</span>
+                                <span>Company Pallet: {p.company?.name}</span>
+                                <span>Weight: {p.weight} kg</span>
+                                <span>Volume: {Number(p.volume)?.toFixed(2)} m³</span>
+                              </div>
+                            </Option>
+                          ))}
+                        </Select>
                       )}
                     </Field>
                     {errors.pallet && touched.pallet && (
-                      <div style={{ color: "red", fontSize: 12 }}>
-                        {errors.pallet}
-                      </div>
+                      <div style={{ color: "red", fontSize: 12 }}>{errors.pallet}</div>
                     )}
                   </Col>
-
-                  {/* Botón submit */}
                   <Col span={24}>
                     <Button
                       type="primary"
