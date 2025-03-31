@@ -6,7 +6,7 @@ import { API_URL_BRAND, authToken } from "services/services";
 
 const { Text } = Typography;
 
-const BrandComponent = () => {
+const BrandComponent = ({ updateBrands }) => {
   const [brands, setBrands] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({
@@ -33,6 +33,7 @@ const BrandComponent = () => {
         },
       });
       setBrands(response.data.brands || []);
+      updateBrands(response.data.brands || []);
     } catch (error) {
       console.error("Error fetching brands:", error);
       setBrands([]);
@@ -51,7 +52,9 @@ const BrandComponent = () => {
           "Content-Type": "application/json",
         },
       });
-      setBrands([...brands, response.data.brand]);
+      const updatedBrands = [...brands, response.data.brand];
+      setBrands(updatedBrands);
+      updateBrands(updatedBrands);
       message.success("Brand added successfully");
       resetForm();
       setIsModalVisible(false);
@@ -86,6 +89,7 @@ const BrandComponent = () => {
         brand.id === currentBrand.id ? response.data.brand : brand
       );
       setBrands(updatedBrands);
+      updateBrands(updatedBrands);
       message.success("Brand updated successfully");
       setIsEditMode(false);
       resetForm();
@@ -112,7 +116,9 @@ const BrandComponent = () => {
           "Content-Type": "application/json",
         },
       });
-      setBrands(brands.filter((b) => b.id !== currentBrand.id));
+      const updatedBrands = brands.filter((b) => b.id !== currentBrand.id);
+      setBrands(updatedBrands);
+      updateBrands(updatedBrands);
       message.success("Brand deleted successfully");
       setIsDeleteModalVisible(false);
     } catch (error) {
@@ -199,7 +205,7 @@ const BrandComponent = () => {
         dataSource={filteredBrands}
         columns={columns}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 6 }}
         loading={isLoading}
         scroll={{ x: "max-content" }}
       />

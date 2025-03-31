@@ -8,10 +8,10 @@ import trailerImage from "../../../assets/images/trailer2.png";
 
 const { Text, Title } = Typography;
 
-const VehicleComponent = () => {
+const VehicleComponent = ({ models, brands }) => {
   const [vehicles, setVehicles] = useState([]);
-  const [models, setModels] = useState([]);
-  const [brands, setBrands] = useState([]);
+  // const [models, setModels] = useState([]);
+  // const [brands, setBrands] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [searchText, setSearchText] = useState("");
@@ -35,10 +35,18 @@ const VehicleComponent = () => {
 
   useEffect(() => {
     fetchVehicles();
-    fetchModels();
-    fetchBrands();
+    // fetchModels();
+    // fetchBrands();
     fetchDrivers();
   }, []);
+
+  useEffect(() => {
+    const updatedVehicles = vehicles.map((vehicle) => {
+      const updatedModel = models.find((model) => model.id === vehicle.model?.id);
+      return updatedModel ? { ...vehicle, model: updatedModel } : vehicle;
+    });
+    setVehicles(updatedVehicles);
+  }, [models]);
 
   const fetchVehicles = async () => {
     setIsLoading(true);
@@ -58,41 +66,41 @@ const VehicleComponent = () => {
     }
   };
 
-  const fetchModels = async () => {
-    try {
-      const response = await axios.get(API_URL_MODEL, {
-        headers: {
-          Authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      });
-      setModels(response.data.models || []);
+  // const fetchModels = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL_MODEL, {
+  //       headers: {
+  //         Authorization: authToken,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     setModels(response.data.models || []);
 
-      const uniqueBrands = response.data.models
-        .map((model) => model.brand)
-        .filter((brand, index, self) => brand && self.findIndex((b) => b.id === brand.id) === index);
-      setBrands(uniqueBrands);
-    } catch (error) {
-      console.error("Error fetching models:", error);
-      setModels([]);
-      setBrands([]);
-    }
-  };
+  //     const uniqueBrands = response.data.models
+  //       .map((model) => model.brand)
+  //       .filter((brand, index, self) => brand && self.findIndex((b) => b.id === brand.id) === index);
+  //     setBrands(uniqueBrands);
+  //   } catch (error) {
+  //     console.error("Error fetching models:", error);
+  //     setModels([]);
+  //     setBrands([]);
+  //   }
+  // };
 
-  const fetchBrands = async () => {
-    try {
-      const response = await axios.get(API_URL_BRAND, {
-        headers: {
-          Authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      });
-      setBrands(response.data.brands || []);
-    } catch (error) {
-      console.error("Error fetching brands:", error);
-      setBrands([]);
-    }
-  };
+  // const fetchBrands = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL_BRAND, {
+  //       headers: {
+  //         Authorization: authToken,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     setBrands(response.data.brands || []);
+  //   } catch (error) {
+  //     console.error("Error fetching brands:", error);
+  //     setBrands([]);
+  //   }
+  // };
 
   const fetchDrivers = async () => {
     try {
@@ -216,11 +224,25 @@ const VehicleComponent = () => {
     }
   };
 
+  const getTypeStyle = (type) => {
+    if (type === "semi_truck") {
+      return { color: "#1D82FF", fontWeight: "bold" };
+    } else if (type === "trailer") {
+      return { color: "#FF731D", fontWeight: "bold" };
+    }
+    return {};
+  };
+
   const getVehicleName = (vehicle) => {
     const brand = brands.find((b) => b.id === vehicle.model?.brand_id)?.name || "Unknown Brand";
     const model = vehicle.model?.name || "Unknown Model";
     const type = vehicle.type === "semi_truck" ? "Semi-truck" : "Trailer";
-    return `${type} ${brand} ${model}`;
+  
+    return (
+      <>
+        <span style={getTypeStyle(vehicle.type)}>{type}</span> {brand} {model}
+      </>
+    );
   };
 
   const getDriverName = (driverId) => {
@@ -249,7 +271,22 @@ const VehicleComponent = () => {
         ...formData,
         [name]: validValue,
       });
-    } else {
+    } 
+    else if (name === "volume") {
+      let validValue = value.replace(/[^0-9.]/g, "");
+      if (validValue.includes(".")) {
+        const [integerPart, decimalPart] = validValue.split(".");
+        validValue = integerPart.slice(0, 2) + (decimalPart ? "." + decimalPart.slice(0, 2) : "");
+      } 
+      else if (validValue.length > 2) {
+        validValue = validValue.slice(0, 2) + "." + validValue.slice(2, 4);
+      }
+      setFormData({
+        ...formData,
+        [name]: validValue,
+      });
+    }
+    else {
       setFormData({
         ...formData,
         [name]: value,
@@ -326,7 +363,7 @@ const VehicleComponent = () => {
                   backgroundSize: "100% 100%",
                   backgroundPosition: "center 100%",
                   backgroundRepeat: "no-repeat",
-                  // border: '2px solid #FF731D'
+                  // border: '1px solid #FF731D'
                   // color: "#fff",
                   // textShadow: "1px 1px 2px rgba(0, 0, 0, 0.8)",
                 }}
@@ -552,7 +589,7 @@ const VehicleComponent = () => {
             </Col>
 
             <Col xs={24}>
-              <Typography.Text style={{ color: "#949494 " }}>Volume</Typography.Text>
+              <Typography.Text style={{ color: "#949494 " }}>Volume (m³)</Typography.Text>
               <Input
                 name="volume"
                 placeholder="Volume"
