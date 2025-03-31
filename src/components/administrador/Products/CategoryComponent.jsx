@@ -210,7 +210,7 @@ const CategoryComponent = () => {
         dataSource={filteredCategories}
         columns={columns}
         rowKey="id"
-        pagination={{ pageSize: 20 }}
+        pagination={{ pageSize: 8 }}
         loading={isLoading}
       />
 

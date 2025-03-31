@@ -85,24 +85,32 @@ const ProductComponent = () => {
     }
   };
 
+  const generateRandomSKU = (companyName) => {
+    const prefix = companyName.slice(0, 4).toUpperCase();
+    const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
+    return (prefix + randomPart).slice(0, 12);
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       const formDataToSend = new FormData();
       const companyName = companies.find(company => company.id === formData.company)?.name || "unknown";
-      const fileExtension = formData.image?.name.split('.').pop();
-      const fileName = `${formData.name}_${companyName}.${fileExtension}`.replace(/\s+/g, '_');
+      const sku = generateRandomSKU(companyName);
+      // const fileExtension = formData.image?.name.split('.').pop();
+      // const fileName = `${formData.name}_${companyName}.${fileExtension}`.replace(/\s+/g, '_');
   
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description);
-      formDataToSend.append("sku", formData.sku);
+      formDataToSend.append("sku", sku);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("company", formData.company);
       formDataToSend.append("category", formData.category);
-      if (formData.image) {
-        formDataToSend.append("image", formData.image, fileName);
-      }
+      formDataToSend.append("image", formData.image);
+      // if (formData.image) {
+      //   formDataToSend.append("image", formData.image, fileName);
+      // }
   
       const response = await axios.post(API_URL_PRODUCT, formDataToSend, {
         headers: {
@@ -148,10 +156,10 @@ const ProductComponent = () => {
     try {
       const formDataToSend = new FormData();
       const companyName = companies.find(company => company.id === formData.company)?.name || "unknown";
-      const fileExtension = formData.image?.name?.split('.').pop();
-      const fileName = formData.image && formData.image instanceof File
-        ? `${formData.name}_${companyName}.${fileExtension}`.replace(/\s+/g, '_')
-        : null;
+      // const fileExtension = formData.image?.name?.split('.').pop();
+      // const fileName = formData.image && formData.image instanceof File
+      //   ? `${formData.name}_${companyName}.${fileExtension}`.replace(/\s+/g, '_')
+      //   : null;
   
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description);
@@ -159,10 +167,10 @@ const ProductComponent = () => {
       formDataToSend.append("price", formData.price);
       formDataToSend.append("company", formData.company);
       formDataToSend.append("category", formData.category);
-  
-      if (formData.image && formData.image instanceof File) {
-        formDataToSend.append("image", formData.image, fileName);
-      }
+      formDataToSend.append("image", formData.image);
+      // if (formData.image && formData.image instanceof File) {
+      //   formDataToSend.append("image", formData.image, fileName);
+      // }
   
       const response = await axios.put(`${API_URL_PRODUCT}/${currentProduct.id}`, formDataToSend, {
         headers: {
@@ -331,21 +339,33 @@ const ProductComponent = () => {
                   style={{ width: '100%' }}
                 />
               </Col>
+              {isEditMode ? (
               <Col xs={24}>
                 <Input
-                  name="SKU"
+                  name="sku"
                   placeholder="SKU"
                   value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  disabled
                   style={{ width: '100%' }}
                 />
               </Col>
+              ) : null}
               <Col xs={24}>
                 <Input
                   name="price"
                   placeholder="Price"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*\.?\d{0,2}$/.test(value)) {
+                      setFormData({ ...formData, price: value });
+                    }
+                  }}
+                  onBlur={() => {
+                    if (formData.price && !formData.price.includes('.')) {
+                      setFormData({ ...formData, price: `${formData.price}.00` });
+                    }
+                  }}
                   style={{ width: '100%' }}
                 />
               </Col>
@@ -354,7 +374,11 @@ const ProductComponent = () => {
                   placeholder="Company"
                   style={{ width: '100%' }}
                   value={formData.company}
-                  onChange={(value) => setFormData({ ...formData, company: value })}
+                  onChange={(value) => {
+                    const companyName = companies.find(company => company.id === value)?.name || "unknown";
+                    const sku = generateRandomSKU(companyName);
+                    setFormData({ ...formData, company: value, category: null, sku });
+                  }}
                   options={companies.map(company => ({
                     label: company.name,
                     value: company.id,
@@ -367,14 +391,17 @@ const ProductComponent = () => {
                   style={{ width: '100%' }}
                   value={formData.category}
                   onChange={(value) => setFormData({ ...formData, category: value })}
-                  options={categories.map(category => ({
-                    label: category.name,
-                    value: category.id,
-                  }))}
+                  options={categories
+                    .filter(category => category.company.id === formData.company)
+                    .map(category => ({
+                      label: category.name,
+                      value: category.id,
+                    })
+                  )}
                 />
               </Col>
               <Col xs={24}>
-                <Input
+                {/* <Input
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
@@ -383,12 +410,28 @@ const ProductComponent = () => {
                     setPreviewImage(URL.createObjectURL(file));
                   }}
                   style={{ width: '100%' }}
+                /> */}
+                <Input
+                  name="image"
+                  placeholder="Image URL"
+                  value={formData.image}
+                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  style={{ width: '100%' }}
                 />
               </Col>
-              {previewImage && (
+              {/* {previewImage && (
                 <div style={{ marginTop: '10px', textAlign: 'center' }}>
                   <img
                     src={previewImage}
+                    alt="Preview"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '5px' }}
+                  />
+                </div>
+              )} */}
+              {formData.image && (
+                <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                  <img
+                    src={formData.image}
                     alt="Preview"
                     style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '5px' }}
                   />

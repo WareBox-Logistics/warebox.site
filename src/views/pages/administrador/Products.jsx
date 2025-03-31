@@ -9,7 +9,7 @@ const { Panel } = Collapse;
 
 const Products = () => {
   return (
-    <Paper sx={{ padding: "16px", margin: "16px" }}>
+    <Paper sx={{ padding: "16px", margin: "5px" }}>
       <MainCard title="Products">
 
         <ProductComponent />
