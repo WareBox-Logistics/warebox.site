@@ -52,7 +52,7 @@ const Vehicles = () => {
   };
 
   return (
-    <Paper sx={{ padding: "16px", margin: "16px" }}>
+    <Paper sx={{ padding: "16px", margin: "5px" }}>
       <MainCard title="Vehicles Management">
         
         <VehicleComponent models={models} brands={brands} />
