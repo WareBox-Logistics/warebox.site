@@ -3,26 +3,26 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoute from '/src/components/PrivateRoute';
-import { element } from 'prop-types';
-import Sedes from 'views/pages/almacenista/Sedes';
+// import { element } from 'prop-types';
+// import Sedes from 'views/pages/almacenista/Sedes';
 import Muelles from 'views/pages/almacenista/Muelles';
-import { patch } from '@mui/system';
+// import { patch } from '@mui/system';
 import ProtectedRoute from 'components/ProtectedRoute';
 import { Outlet } from 'react-router-dom';
 
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/CustomerConfig')));
-const NotificationHistory = Loadable(lazy(() => import('views/history/NotificationHistory')));
-const UsersPage = Loadable(lazy(() => import('views/users/UsersPage')));
-const PerformanceDashboard = Loadable(lazy(() => import('views/performance/PerformanceDashboard')));
-const Documentation = Loadable(lazy(() => import('views/docs/Index')));
-const EdiConfig = Loadable(lazy(() => import('views/edi-config/Index')));
-const Administrador = Loadable(lazy(() => import('views/pages/administrador/Index')));
-const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Index')));
+// const NotificationHistory = Loadable(lazy(() => import('views/history/NotificationHistory')));
+// const UsersPage = Loadable(lazy(() => import('views/users/UsersPage')));
+// const PerformanceDashboard = Loadable(lazy(() => import('views/performance/PerformanceDashboard')));
+// const Documentation = Loadable(lazy(() => import('views/docs/Index')));
+// const EdiConfig = Loadable(lazy(() => import('views/edi-config/Index')));
+// const Administrador = Loadable(lazy(() => import('views/pages/administrador/Index')));
+// const Almacenista = Loadable(lazy(() => import('views/pages/almacenista/Index')));
 const SedesPage = Loadable(lazy(() => import('views/pages/almacenista/Sedes')));
-const MuellesPage = Loadable(lazy(() => import('views/pages/almacenista/Muelles')));
+// const MuellesPage = Loadable(lazy(() => import('views/pages/almacenista/Muelles')));
 const AlmacenistaRacks = Loadable(lazy(()=> import('views/pages/almacenista/GestionRacks')));
 const AlmacenistaPallets = Loadable(lazy(()=> import('views/pages/almacenista/GestionPallets')));
-const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
+// const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
 
 const DashboardDis = Loadable(lazy(() => import('views/pages/despacho/DashboardDis')));
 const Report = Loadable(lazy(() => import('views/pages/despacho/Report')))
@@ -31,8 +31,8 @@ const Support = Loadable(lazy(() => import('views/pages/despacho/Support')))
 const Problem = Loadable(lazy(() => import('views/pages/despacho/Problem')))
 
 
-const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
-const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
+// const Operador = Loadable(lazy(() => import('views/pages/operador/Index')));
+// const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
 const Companies = Loadable(lazy(() => import('views/pages/administrador/Companies')));
 const Products = Loadable(lazy(() => import('views/pages/administrador/Products')));
@@ -47,7 +47,7 @@ const ParkingLots = Loadable(lazy(() => import('views/pages/administrador/Parkin
 const Tracker = Loadable(lazy(() => import('views/pages/administrador/Tracker')));
 
 
-const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
+// const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
 const ClientPallets = Loadable(lazy(() => import('views/pages/cliente/ClientPallets')));
 const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
 
