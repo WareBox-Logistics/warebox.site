@@ -1,688 +1,684 @@
 import React, { useEffect, useState } from "react";
+import { Skeleton } from "antd";
+import {authToken, API_URL_PALLET, API_URL_RACK, API_URL_STORAGE_RACK_PALLET, API_URL_EMPLOYEE} from "../../../services/services";
 import {
   Button,
   Card,
   Col,
   Row,
   Input,
-  Checkbox,
   Modal,
   Select,
   Tag,
   message,
+  Table,
+  Spin,
 } from "antd";
 import {
-  ExclamationCircleOutlined,
   SearchOutlined,
+  CodepenOutlined,
 } from "@ant-design/icons";
+import { IconArrowRight } from "@tabler/icons-react"; 
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Paper } from "@mui/material";
+import axios from "axios";
 
-/* ================= DATOS SIMULADOS ================= */
-// Ejemplo de almacén del usuario actual
-const USER_WAREHOUSE_ID = "WH-01";
 
-// Pallets
-const MOCK_PALLETS = [
-  {
-    id: "PAL-001",
-    company_id: "Lenovo",
-    warehouse_id: "WH-01",
-    weight: 120,
-    verified: true,
-    status: "Stored",
-    updated_at: "2025-04-10T10:15:00",
-  },
-  {
-    id: "PAL-002",
-    company_id: "Lenovo",
-    warehouse_id: "WH-01",
-    weight: 300,
-    verified: true,
-    status: "Stored",
-    updated_at: "2025-04-12T16:00:00",
-  },
-  {
-    id: "PAL-003",
-    company_id: "Samsung",
-    warehouse_id: "WH-01",
-    weight: 200,
-    verified: false, // No se mostrará (verified=false)
-    status: "Stored",
-    updated_at: "2025-04-11T14:30:00",
-  },
-  {
-    id: "PAL-004",
-    company_id: "Samsung",
-    warehouse_id: "WH-01",
-    weight: 150,
-    verified: true,
-    status: "Created", // No se muestra porque no está "Stored"
-    updated_at: "2025-04-09T09:00:00",
-  },
-  {
-    id: "PAL-005",
-    company_id: "Samsung",
-    warehouse_id: "WH-02", // Otro almacén
-    weight: 180,
-    verified: true,
-    status: "Stored",
-    updated_at: "2025-04-01T12:00:00",
-  },
-];
-
-// Racks (en metros, si manejas esa conversión) y con used_volume, used_weight
-const MOCK_RACKS = [
-  {
-    id: "RACK-A1",
-    section: "A",
-    warehouse_id: "WH-01",
-    levels: 3,
-    capacity_weight: 1000,
-    used_weight: 200,
-    capacity_volume: 1.0,
-    used_volume: 0.2,
-  },
-  {
-    id: "RACK-A2",
-    section: "A",
-    warehouse_id: "WH-01",
-    levels: 2,
-    capacity_weight: 500,
-    used_weight: 300,
-    capacity_volume: 0.8,
-    used_volume: 0.5,
-  },
-  {
-    id: "RACK-B1",
-    section: "B",
-    warehouse_id: "WH-02",
-    levels: 4,
-    capacity_weight: 2000,
-    used_weight: 600,
-    capacity_volume: 2.5,
-    used_volume: 1.5,
-  },
-];
-
-// Simulación de almacenes
-const MOCK_WAREHOUSES = [
-  { id: "WH-01", name: "Main Warehouse TJ01" },
-  { id: "WH-02", name: "Secondary Warehouse MX02" },
-  { id: "WH-03", name: "Extra Warehouse US01" },
-];
-
-// Simulación de la tabla storage_rack_pallet
-// (inicialmente vacía o con algunos registros de ejemplo)
-const INITIAL_STORAGE = [];
-
-/* ========== VALIDACIONES FORM TRANSFERENCIA LOCAL (POSICIÓN / NIVEL) ========== */
+// ========== VALIDATION ==========
 const PositionSchema = Yup.object().shape({
-  position: Yup.string()
-   .required("La posición (A-F) es obligatoria")
-    .matches(/^[A-F]$/, "Debe ser una sola letra A-F"),
-  level: Yup.number()
-    .required("Nivel requerido")
-    .min(1, "Nivel inválido"),
+  position: Yup.string().required("Position (A-F) is required"),
+  level: Yup.number().required("Level is required").min(1, "Invalid level"),
 });
 
+// ========== FUNCIÓN PARA OBTENER COLOR POR PORCENTAJE ==========
+const getColorByPercentage = (percentage) => {
+  if (percentage < 50) {
+    return "#f5222d"; // rojo
+  } else if (percentage < 90) {
+    return "#faad14"; // amarillo
+  } else {
+    return "#52c41a"; // verde
+  }
+};
+
 const GestionPallets = () => {
-  /* ================= ESTADOS PRINCIPALES ================= */
-  // Pallets del warehouse del usuario
+  // ========== STATES ==========
+  const [employee, setEmployee] = useState(null);
+  const [assignedWarehouse, setAssignedWarehouse] = useState(null);
   const [pallets, setPallets] = useState([]);
-  // Lista de racks
   const [racks, setRacks] = useState([]);
-  // Lista de almacenes
-  const [warehouses, setWarehouses] = useState([]);
-  // Simulación de storage_rack_pallet
-  const [storageRackPallet, setStorageRackPallet] = useState(INITIAL_STORAGE);
+  const [storageRackPallet, setStorageRackPallet] = useState([]);
+  // Estado para el spinner de la tabla de racks
+  const [loadingRacks, setLoadingRacks] = useState(false);
 
-  /* ================= FILTRO Y SELECCIÓN DE PALLETS ================= */
+  // Búsqueda de pallets y racks
   const [searchText, setSearchText] = useState("");
-  const [selectedPallets, setSelectedPallets] = useState([]);
+  const [rackSearch, setRackSearch] = useState("");
 
-  /* ================= MODALES PARA TRANSFERENCIAS ================= */
-  // Modal principal: "¿Local o Almacén?"
-  const [isChoiceModalVisible, setIsChoiceModalVisible] = useState(false);
-
-  // Transferencia a otro Almacén
-  const [showWarehouseTransferSection, setShowWarehouseTransferSection] =
-    useState(false);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
-  const [isWarehouseConfirmModalOpen, setIsWarehouseConfirmModalOpen] =
-    useState(false);
-
-  // Transferencia Local
-  const [showLocalRacksSection, setShowLocalRacksSection] = useState(false);
-  const [showRackPositionModal, setShowRackPositionModal] = useState(false);
+  // Pallet y Rack elegidos para transferencia
+  const [selectedPalletId, setSelectedPalletId] = useState(null);
   const [selectedRack, setSelectedRack] = useState(null);
 
-  /* ================= CARGA INICIAL DE DATOS (MOCK) ================= */
+  // Para mostrar/ocultar secciones
+  const [showLocalRacksSection, setShowLocalRacksSection] = useState(false);
+  const [showRackPositionModal, setShowRackPositionModal] = useState(false);
+
+  // Posiciones ocupadas al elegir un rack+level
+  const [occupiedPositions, setOccupiedPositions] = useState([]);
+
+  // ========== useEffect: Obtener datos del empleado ==========
   useEffect(() => {
-    // Filtrar pallets que pertenecen al warehouse del usuario,
-    // con status="Stored" y verified=true
-    const filtered = MOCK_PALLETS.filter(
-      (p) =>
-        p.warehouse_id === USER_WAREHOUSE_ID &&
-        p.status === "Stored" &&
-        p.verified === true
-    );
-    setPallets(filtered);
-
-    // Filtrar racks del warehouse del usuario
-    const filteredRacks = MOCK_RACKS.filter(
-      (r) => r.warehouse_id === USER_WAREHOUSE_ID
-    );
-    setRacks(filteredRacks);
-
-    // Cargar la lista de almacenes (todos, menos el actual si no se quiere)
-    setWarehouses(MOCK_WAREHOUSES);
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      axios
+        .get(`${API_URL_EMPLOYEE}/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          // Se espera que la respuesta tenga { employee: { ..., warehouse: { id, name, ... } } }
+          setEmployee(res.data.employee);
+          setAssignedWarehouse(res.data.employee.warehouse);
+        })
+        .catch((err) => {
+          console.error("Error fetching employee data:", err);
+          message.error("Error loading employee information");
+        });
+    }
   }, []);
 
-  /* ================= AGRUPACIÓN POR COMPANY ================= */
+  // ========== useEffect: Fetch data cuando se tiene el warehouse asignado ==========
+  useEffect(() => {
+    if (assignedWarehouse) {
+      fetchAllData();
+    }
+  }, [assignedWarehouse]);
+
+  const fetchAllData = async () => {
+    try {
+      // 1) Pallets: Filtrar solo los que pertenezcan al warehouse asignado
+      const palletRes = await axios.get(API_URL_PALLET, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const fetchedPallets = (palletRes.data.pallets || []).filter(
+        (p) =>
+          p.warehouse.id === assignedWarehouse.id &&
+          p.status === "Stored" &&
+          p.verified
+      );
+      setPallets(fetchedPallets);
+
+      // 2) Racks: Se podría filtrar en el back; si no, filtramos en el front
+      setLoadingRacks(true);
+      const rackRes = await axios.get(API_URL_RACK, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      setRacks(rackRes.data.data || []);
+      setLoadingRacks(false);
+
+      // 3) StorageRackPallet
+      const storageRes = await axios.get(API_URL_STORAGE_RACK_PALLET, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      setStorageRackPallet(storageRes.data.data || []);
+    } catch (error) {
+      console.error(error);
+      message.error("Error loading data.");
+      setLoadingRacks(false);
+    }
+  };
+
+  // ========== FILTRO: Pallets por ID ==========
   const filteredPallets = pallets.filter((p) =>
-    p.id.toLowerCase().includes(searchText.toLowerCase())
+    p.id.toString().includes(searchText.trim())
   );
+
+  // ========== Agrupar pallets por compañía ==========
   const palletsByCompany = {};
   filteredPallets.forEach((p) => {
-    if (!palletsByCompany[p.company_id]) {
-      palletsByCompany[p.company_id] = [];
+    const companyName = p.company?.name || "No Company";
+    if (!palletsByCompany[companyName]) {
+      palletsByCompany[companyName] = [];
     }
-    palletsByCompany[p.company_id].push(p);
+    palletsByCompany[companyName].push(p);
   });
 
-  /* ================= MANEJO DE SELECCIÓN ================= */
-  const handleSelectPallet = (palletId, checked) => {
-    if (checked) {
-      setSelectedPallets((prev) => [...prev, palletId]);
-    } else {
-      setSelectedPallets((prev) => prev.filter((id) => id !== palletId));
-    }
+  // ========== Seleccionar Pallet ==========
+  const handleSelectPallet = (palletId) => {
+    setSelectedPalletId((prev) => (prev === palletId ? null : palletId));
   };
 
-  const handleSelectAllInCompany = (company, checked) => {
-    const palletsInCompany = palletsByCompany[company].map((p) => p.id);
-    if (checked) {
-      setSelectedPallets((prev) => Array.from(new Set([...prev, ...palletsInCompany])));
-    } else {
-      setSelectedPallets((prev) =>
-        prev.filter((id) => !palletsInCompany.includes(id))
-      );
-    }
-  };
-
-  /* ================= ACCIÓN "TRANSFERIR" ================= */
+  // ========== Botón Transfer Pallet ==========
   const handleTransfer = () => {
-    if (selectedPallets.length === 0) {
-      message.warning("No has seleccionado ningún pallet.");
+    if (!selectedPalletId) {
+      message.warning("No pallet selected");
       return;
     }
-    setIsChoiceModalVisible(true);
-  };
-
-  /* ============= TRANSFERENCIA LOCAL ============= */
-  const chooseLocalTransfer = () => {
-    setIsChoiceModalVisible(false);
     setShowLocalRacksSection(true);
-    setShowWarehouseTransferSection(false);
     setSelectedRack(null);
   };
 
-  // Al confirmar el form de posición/nivel
-  const handleDefinePositionSubmit = (values, { setSubmitting }) => {
+  // ========== Click en una fila de Racks ==========
+  const handleRackSelection = (rack) => {
+    setSelectedRack(rack);
+    setShowRackPositionModal(true);
+  };
+
+  // ========== Submit del Form: definir position/level ==========
+  const handleDefinePositionSubmit = async (values, { setSubmitting }) => {
     try {
-      // 1) Calcular peso/volumen total de los pallets seleccionados
-      let totalWeight = 0;
-      let totalVolume = 0;
-      selectedPallets.forEach((pId) => {
-        const pal = pallets.find((x) => x.id === pId);
-        if (pal) {
-          totalWeight += pal.weight;
-          // Si no existe pal.volume, lo defines o asumes un valor
-          totalVolume += 0.05; // Ejemplo arbitrario
-        }
-      });
+      const pallet = pallets.find((p) => p.id === selectedPalletId);
+      if (!pallet) return;
 
-      // 2) Validar capacidad
-      const availableWeight =
-        selectedRack.capacity_weight - selectedRack.used_weight;
-      const availableVolume =
-        selectedRack.capacity_volume - (selectedRack.used_volume || 0);
+      const currentLocation = getCurrentLocation(selectedPalletId);
+      const isSameRack = currentLocation && currentLocation.rack === selectedRack.id;
 
-      if (totalWeight > availableWeight || totalVolume > availableVolume) {
-        message.error("El pallet(s) excede la capacidad de este rack.");
-        setSubmitting(false);
-        return;
-      }
-
-      // 3) Validar posición libre
-      const isOccupied = storageRackPallet.some(
-        (srp) =>
-          srp.rack_id === selectedRack.id &&
-          srp.level === Number(values.level) &&
-          srp.position === values.position &&
-          srp.status === "Occupied"
-      );
-      if (isOccupied) {
-        message.error(
-          `La posición ${values.position} en el nivel ${values.level} ya está ocupada.`
-        );
-        setSubmitting(false);
-        return;
-      }
-
-      // 4) Simular la "baja" previa e "insertar" nueva
-      const now = new Date().toISOString();
-
-      selectedPallets.forEach((pId) => {
-        // Marcar ubicación previa como "Released"
-        setStorageRackPallet((prev) =>
-          prev.map((srp) =>
-            srp.pallet_id === pId ? { ...srp, status: "Released" } : srp
-          )
-        );
-
-        // Insertar nuevo registro "Occupied"
-        const newStorageRecord = {
-          rack_id: selectedRack.id,
+      if (isSameRack) {
+        // ========== UPDATE en el mismo rack ==========
+        const url = `${API_URL_STORAGE_RACK_PALLET}/${selectedPalletId}/${currentLocation.rack}`;
+        const body = {
           position: values.position,
           level: Number(values.level),
-          stored_at: now,
           status: "Occupied",
-          pallet_id: pId,
         };
-        setStorageRackPallet((prev) => [...prev, newStorageRecord]);
-      });
+        await axios.put(url, body, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        message.success(
+          `Pallet ${pallet.id} updated in rack ${selectedRack.id}`
+        );
+      } else {
+        // ========== POST + DELETE si es rack distinto ==========
+        // 1) Validar capacidad
+        const { weight, volume } = pallet;
+        const availableWeight =
+          selectedRack.capacity_weight - (selectedRack.used_weight || 0);
+        const availableVolume =
+          selectedRack.capacity_volume - (selectedRack.used_volume || 0);
 
-      // Actualizar used_weight / used_volume
-      setRacks((prevRacks) =>
-        prevRacks.map((r) => {
-          if (r.id === selectedRack.id) {
-            return {
-              ...r,
-              used_weight: r.used_weight + totalWeight,
-              used_volume: (r.used_volume || 0) + totalVolume,
-            };
-          }
-          return r;
-        })
-      );
+        if (weight > availableWeight || volume > availableVolume) {
+          message.error("The pallet exceeds capacity of this rack.");
+          return;
+        }
+        // 2) POST a la nueva loc
+        const newRecord = {
+          rack: selectedRack.id,
+          position: values.position,
+          level: Number(values.level),
+          status: "Occupied",
+          pallet: selectedPalletId,
+          stored_at: new Date().toISOString(),
+        };
+        await axios.post(API_URL_STORAGE_RACK_PALLET, newRecord, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        // 3) DELETE old loc
+        if (currentLocation) {
+          const deleteUrl = `${API_URL_STORAGE_RACK_PALLET}/${selectedPalletId}/${currentLocation.rack}`;
+          await axios.delete(deleteUrl, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+        }
+      }
 
-      // Éxito + reset
-      message.success(
-        `Se transfirieron ${selectedPallets.length} pallet(s) al rack ${selectedRack.id} (Pos. ${values.position}, Nivel ${values.level}).`
-      );
+      await fetchAllData();
 
-      setSelectedPallets([]);
+      // Reset
+      setSelectedPalletId(null);
       setSelectedRack(null);
       setShowRackPositionModal(false);
       setShowLocalRacksSection(false);
     } catch (error) {
-      message.error("Error al transferir el pallet.");
+      console.error(error);
+      message.error("Error transferring pallet.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  /* ============= TRANSFERENCIA A OTRO ALMACÉN ============= */
-  const chooseWarehouseTransfer = () => {
-    setIsChoiceModalVisible(false);
-    setShowLocalRacksSection(false);
-    setShowWarehouseTransferSection(true);
-    setSelectedWarehouse(null);
-  };
-
-  const handleWarehouseSelection = (warehouseId) => {
-    const wh = warehouses.find((w) => w.id === warehouseId);
-    if (!wh) {
-      message.error("Ese almacén no está disponible.");
-      return;
-    }
-    setSelectedWarehouse(wh);
-    setIsWarehouseConfirmModalOpen(true);
-  };
-
-  const confirmWarehouseTransfer = () => {
-    message.success(
-      `Se transfirieron ${selectedPallets.length} pallets al almacén ${selectedWarehouse?.id}.`
-    );
-    setSelectedPallets([]);
-    setShowWarehouseTransferSection(false);
-    setIsWarehouseConfirmModalOpen(false);
-  };
-
-  /* ============= OBTENER LA UBICACIÓN ACTUAL DE UN PALLET ============= */
+  // ========== Ubicación actual ==========
   const getCurrentLocation = (palletId) => {
-    // Busca un registro en storageRackPallet con status=Occupied
     const location = storageRackPallet.find(
-      (srp) => srp.pallet_id === palletId && srp.status === "Occupied"
+      (srp) => srp.pallet === palletId && srp.status === "Occupied"
     );
-    if (!location) return null;
-    return location; // { rack_id, position, level, ... }
+    return location || null;
   };
 
-  /* ============= RENDER DEL COMPONENTE ============= */
+  // ========== Calcular posiciones ocupadas ==========
+  const getOccupiedPositions = (rackId, level) => {
+    return storageRackPallet
+      .filter(
+        (srp) =>
+          srp.rack === rackId &&
+          srp.level === level &&
+          srp.status === "Occupied"
+      )
+      .map((srp) => srp.position);
+  };
+
+  // ========== Columnas de Racks con ordenamiento ==========
+  const rackColumns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      sorter: (a, b) => a.id - b.id,
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Section",
+      dataIndex: "section",
+      key: "section",
+      render: (section) => section || "N/A",
+      sorter: (a, b) => {
+        const secA = (a.section || "").trim();
+        const secB = (b.section || "").trim();
+        return secA.localeCompare(secB);
+      },
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Levels",
+      dataIndex: "levels",
+      key: "levels",
+      sorter: (a, b) => a.levels - b.levels,
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Capacity (kg)",
+      dataIndex: "capacity_weight",
+      key: "capacity_weight",
+    },
+    {
+      title: "Capacity (m³)",
+      dataIndex: "capacity_volume",
+      key: "capacity_volume",
+      render: (val) => (val ? `${val} m³` : "0 m³"),
+    },
+    {
+      title: "Used (kg)",
+      dataIndex: "used_weight",
+      key: "used_weight",
+    },
+    {
+      title: "Used (m³)",
+      dataIndex: "used_volume",
+      key: "used_volume",
+      render: (val) => (val ? `${val} m³` : "0 m³"),
+    },
+    {
+      title: "Available Weight",
+      key: "available_weight",
+      sorter: (a, b) => {
+        const awA = (a.capacity_weight - a.used_weight) || 0;
+        const awB = (b.capacity_weight - b.used_weight) || 0;
+        return awA - awB;
+      },
+      sortDirections: ["ascend", "descend"],
+      render: (_, record) => {
+        const usedW = record.used_weight || 0;
+        const capacityW = record.capacity_weight || 0;
+        const available = capacityW - usedW;
+        const percentage = (available / (capacityW || 1)) * 100;
+        const color = getColorByPercentage(percentage);
+        return <span style={{ color }}>{available} kg</span>;
+      },
+    },
+    {
+      title: "Available Volume",
+      key: "available_volume",
+      sorter: (a, b) => {
+        const avA = (a.capacity_volume - a.used_volume) || 0;
+        const avB = (b.capacity_volume - b.used_volume) || 0;
+        return avA - avB;
+      },
+      sortDirections: ["ascend", "descend"],
+      render: (_, record) => {
+        const usedV = record.used_volume || 0;
+        const capacityV = record.capacity_volume || 0;
+        const available = capacityV - usedV;
+        const percentage = (available / (capacityV || 1)) * 100;
+        const color = getColorByPercentage(percentage);
+        return <span style={{ color }}>{available.toFixed(2)} m³</span>;
+      },
+    },
+  ];
+
   return (
     <Paper style={{ padding: 16, maxWidth: "100%", overflowX: "hidden" }}>
-      <h2>Localización y Transferencia de Pallets</h2>
 
-      {/* Barra de búsqueda */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" ,marginBottom: 20 }}>
+        <h2 style={{ margin: 0 }}>Location and Pallet Transfer in Warehouse </h2>
+        {assignedWarehouse ? (
+          <h2 style={{ margin: 0 }}>{assignedWarehouse.name}</h2>
+        ) : (
+          <Skeleton.Input active style={{ width: 100 }} />
+        )}
+      </div>
+
+      {/* Búsqueda de Pallets */}
       <Input
-        style={{
-          width: "100%",
-          maxWidth: 300,
-          marginBottom: 20,
-        }}
+        style={{ width: "100%", maxWidth: 300, marginBottom: 20 }}
         prefix={<SearchOutlined />}
-        placeholder="Buscar Pallet por ID"
+        placeholder="Search Pallet by ID"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
       />
 
-      {/* Listado de pallets agrupados por compañía */}
-      {Object.keys(palletsByCompany).map((company) => {
-        const companyPallets = palletsByCompany[company] || [];
-        const allSelected = companyPallets.every((p) =>
-          selectedPallets.includes(p.id)
-        );
+      {/* Lista de pallets agrupados por Compañía */}
+      {Object.keys(palletsByCompany).map((companyName) => {
+        const companyPallets = palletsByCompany[companyName] || [];
         return (
           <Card
-            key={company}
-            title={`${company} tiene ${companyPallets.length} pallets`}
+            key={companyName}
+            title={`${companyName} has ${companyPallets.length} pallets`}
             style={{ marginBottom: 12 }}
           >
-            <Row style={{ marginBottom: 8 }}>
-              <Checkbox
-                checked={allSelected}
-                onChange={(e) =>
-                  handleSelectAllInCompany(company, e.target.checked)
-                }
-              >
-                Seleccionar todos en {company}
-              </Checkbox>
+            <Row gutter={[16, 16]}>
+              {companyPallets.map((pallet) => {
+                const isSelected = selectedPalletId === pallet.id;
+                const currentLocation = getCurrentLocation(pallet.id);
+                return (
+                  <Col key={pallet.id} xs={24} sm={12} md={8} lg={6}>
+                    <Card
+                      hoverable
+                      onClick={() => handleSelectPallet(pallet.id)}
+                      style={{
+                        marginBottom: "16px",
+                        border: isSelected
+                          ? "2px solid #1890ff"
+                          : "1px solid #f0f0f0",
+                        backgroundColor: isSelected ? "#e6f7ff" : "#fff",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        height: "100%",
+                      }}
+                    >
+                      <Row gutter={[8, 8]}>
+                        <Col>
+                          <CodepenOutlined
+                            style={{
+                              fontSize: "36px",
+                              marginRight: "15px",
+                              color: "#FF731D",
+                            }}
+                          />
+                        </Col>
+                        <Col flex="auto">
+                          <strong style={{ fontSize: "18px" }}>
+                            Pallet {pallet.id}
+                          </strong>
+                          <p style={{ margin: 0 }}>
+                            <strong>Weight:</strong> {pallet.weight} kg
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Volume:</strong> {pallet.volume} m³
+                          </p>
+                          {currentLocation ? (
+                            <p style={{ margin: 0 }}>
+                              <strong>Actual ubi:</strong>{" "}
+                              Rack {currentLocation.rack}, Section{" "}
+                              {currentLocation.section}, Level{" "}
+                              {currentLocation.level}, Position{" "}
+                              {currentLocation.position}
+                            </p>
+                          ) : (
+                            <p style={{ margin: 0 }}>
+                              <strong>Actual ubi:</strong> No assigned location
+                            </p>
+                          )}
+                        </Col>
+                      </Row>
+                    </Card>
+                  </Col>
+                );
+              })}
             </Row>
-            {companyPallets.map((pallet) => {
-              const isChecked = selectedPallets.includes(pallet.id);
-              // Obtener la ubicación actual si está "Occupied"
-              const currentLocation = getCurrentLocation(pallet.id);
-
-              return (
-                <Row
-                  key={pallet.id}
-                  style={{
-                    border: "1px solid #f0f0f0",
-                    borderRadius: 4,
-                    padding: 8,
-                    marginBottom: 8,
-                    alignItems: "center",
-                  }}
-                  gutter={16}
-                >
-                  <Col span={1}>
-                    <Checkbox
-                      checked={isChecked}
-                      onChange={(e) =>
-                        handleSelectPallet(pallet.id, e.target.checked)
-                      }
-                    />
-                  </Col>
-                  <Col span={6}>
-                    <strong>{pallet.id}</strong>
-                  </Col>
-                  <Col span={4}>
-                    Peso: {pallet.weight} kg
-                  </Col>
-                  <Col span={5}>
-                    Status: <Tag color="blue">{pallet.status}</Tag>
-                  </Col>
-                  <Col span={4}>
-                    {`Últ. actualización: ${new Date(
-                      pallet.updated_at
-                    ).toLocaleString()}`}
-                  </Col>
-                  <Col span={4}>
-                    Verificado:{" "}
-                    {pallet.verified ? (
-                      <Tag color="green">Sí</Tag>
-                    ) : (
-                      <Tag color="red">No</Tag>
-                    )}
-                  </Col>
-
-                  {/* NUEVO: Bloque con la ubicación (rack_id, position, level) en 1 sola línea */}
-                  <Col span={24} style={{ marginTop: 4 }}>
-                    {currentLocation ? (
-                      <span style={{ fontSize: "0.9rem", color: "#555" }}>
-                        {`Rack: ${currentLocation.rack_id} | Posición: ${currentLocation.position} | Nivel: ${currentLocation.level}`}
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: "0.9rem", color: "#888" }}>
-                        Sin ubicación asignada
-                      </span>
-                    )}
-                  </Col>
-                </Row>
-              );
-            })}
           </Card>
         );
       })}
 
-      {/* Botón Transferir */}
+      {/* Botón Transfer Selected Pallet */}
       <Button
         type="primary"
         onClick={handleTransfer}
-        disabled={selectedPallets.length === 0}
+        disabled={!selectedPalletId}
       >
-        Transferir Pallets Seleccionados
+        Transfer Selected Pallet
       </Button>
 
-      {/* Modal principal: ¿Local o Almacén? */}
-      <Modal
-        title="Tipo de Transferencia"
-        visible={isChoiceModalVisible}
-        onCancel={() => setIsChoiceModalVisible(false)}
-        footer={null}
-        destroyOnClose
-      >
-        <p>¿Deseas hacer una transferencia local o a otro almacén?</p>
-        <Button type="primary" style={{ marginRight: 8 }} onClick={chooseLocalTransfer}>
-          Local
-        </Button>
-        <Button onClick={chooseWarehouseTransfer}>Almacén</Button>
-      </Modal>
-
-      {/* NUEVA SECCIÓN DE TRANSFERENCIA LOCAL: LISTA DE RACKS */}
+      {/* Sección de Racks en Tabla */}
       {showLocalRacksSection && (
         <Card
-          title="Transferencia Local - Selecciona un Rack"
+          title="Local Transfer - Select a Rack"
           style={{ marginTop: 20, borderColor: "#faad14" }}
         >
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-            {racks.map((rack) => {
-              const availableWeight = rack.capacity_weight - rack.used_weight;
-              const availableVolume =
-                rack.capacity_volume - (rack.used_volume || 0);
-
-              return (
-                <Card
-                  key={rack.id}
-                  style={{ width: 220, cursor: "pointer" }}
-                  onClick={() => {
-                    setSelectedRack(rack);
-                    setShowRackPositionModal(true);
-                  }}
-                >
-                  <p>
-                    <strong>ID Rack:</strong> {rack.id}
-                  </p>
-                  <p>
-                    <strong>Sección:</strong> {rack.section}
-                  </p>
-                  <p>
-                    <strong>Niveles:</strong> {rack.levels}
-                  </p>
-                  <p>
-                    <strong>Cap. Peso:</strong> {rack.capacity_weight} kg
-                  </p>
-                  <p>
-                    <strong>Cap. Volumen:</strong> {rack.capacity_volume} m³
-                  </p>
-                  <p>
-                    <strong>Disp. Peso:</strong> {availableWeight} kg
-                  </p>
-                  <p>
-                    <strong>Disp. Volumen:</strong> {availableVolume} m³
-                  </p>
-                </Card>
-              );
-            })}
-          </div>
+          <Input
+            style={{ width: "100%", maxWidth: 300, marginBottom: 10 }}
+            prefix={<SearchOutlined />}
+            placeholder="Search Racks by ID"
+            value={rackSearch}
+            onChange={(e) => setRackSearch(e.target.value)}
+          />
+          <Spin spinning={loadingRacks}>
+            <Table
+              rowKey="id"
+              columns={rackColumns}
+              dataSource={
+                racks
+                  .filter((r) => r.warehouse === assignedWarehouse.id)
+                  .filter((r) =>
+                    r.id.toString().includes(rackSearch.trim())
+                  )
+              }
+              pagination={{ pageSize: 8 }}
+              onRow={(record) => ({
+                onClick: () => handleRackSelection(record),
+              })}
+              style={{ cursor: "pointer" }}
+            />
+          </Spin>
         </Card>
       )}
 
-      {/* MODAL PARA DEFINIR POSICIÓN Y NIVEL EN EL RACK SELECCIONADO */}
+      {/* MODAL: Define new position in rack transfer */}
       <Modal
-        title="Definir Posición en el Rack"
+        title="Define new position in rack transfer"
         open={showRackPositionModal}
         onCancel={() => setShowRackPositionModal(false)}
         footer={null}
         destroyOnClose
       >
-        {selectedRack && (
-          <Formik 
-            initialValues={{
-              position: "",
-              level: "",
-            }}
-            validationSchema={PositionSchema}
-            onSubmit={handleDefinePositionSubmit}
+        {selectedPalletId && selectedRack && (
+          <Row
+            gutter={[16, 16]}
+            style={{ marginBottom: 16 }}
+            align="middle"
+            justify="space-around"
           >
-            {({
-              values,
-              errors,
-              touched,
-              isSubmitting,
-              handleSubmit,
-              setFieldValue,
-            }) => (
-              <Form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: 16 }}>
-                  <label>Posición (A-Z): </label>
-                  <Field name="position">
-                    {({ field }) => (
-                     <Select
-                     {...field}
-                     placeholder="Posición (A-F)"
-                     style={{ width: "100%" }}
-                     onChange={(value) => setFieldValue("position", value)} // para Formik
-                     options={[
-                       { label: "A", value: "A" },
-                       { label: "B", value: "B" },
-                       { label: "C", value: "C" },
-                       { label: "D", value: "D" },
-                       { label: "E", value: "E" },
-                       { label: "F", value: "F" },
-                     ]}
-                     // Opcional: manejo de error visual
-                     status={errors.position && touched.position ? "error" : ""}
-                   />
-                    )}
-                  </Field>
-                  {errors.position && touched.position && (
-                    <div style={{ color: "red", fontSize: 12 }}>
-                      {errors.position}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ marginBottom: 16 }}>
-                  <label>Nivel: </label>
-                  <Field name="level">
-                    {({ field }) => {
-                      const levelOptions = Array.from(
-                        { length: selectedRack.levels },
-                        (_, i) => i + 1
-                      );
-                      return (
-                        <Select
-                          {...field}
-                          placeholder="Selecciona Nivel"
-                          style={{ width: "100%" }}
-                          onChange={(val) => setFieldValue("level", val)}
-                          status={errors.level && touched.level ? "error" : ""}
-                        >
-                          {levelOptions.map((lvl) => (
-                            <Select.Option key={lvl} value={lvl}>
-                              Nivel {lvl}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      );
+            <Col xs={24} sm={10}>
+              {(() => {
+                const palletData = pallets.find(
+                  (p) => p.id === selectedPalletId
+                );
+                if (!palletData) return null;
+                const palletLoc = getCurrentLocation(palletData.id);
+                return (
+                  <Card
+                    title={`Pallet ${palletData.id}`}
+                    size="small"
+                    style={{
+                      border: "1px solid #f0f0f0",
+                      borderRadius: 6,
                     }}
-                  </Field>
-                  {errors.level && touched.level && (
-                    <div style={{ color: "red", fontSize: 12 }}>{errors.level}</div>
-                  )}
-                </div>
-
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  disabled={isSubmitting}
-                  style={{ marginTop: 8 }}
-                >
-                  {isSubmitting ? "Trasladando..." : "Transferir"}
-                </Button>
-              </Form>
-            )}
-          </Formik>
-        )}
-      </Modal>
-
-      {/* SECCIÓN DE TRANSFERENCIA A OTRO ALMACÉN */}
-      {showWarehouseTransferSection && (
-        <Card
-          title="Transferir a Otro Almacén"
-          style={{ marginTop: 20, borderColor: "#1890ff" }}
-        >
-          <Row gutter={[16, 16]}>
-            {warehouses.map((wh) => {
-              if (wh.id === USER_WAREHOUSE_ID) {
-                // No mostrar el almacén actual como destino
-                return null;
-              }
-              return (
-                <Col key={wh.id} xs={24} sm={8}>
-                  <Card style={{ marginBottom: 12 }}>
+                  >
                     <p>
-                      <strong>{wh.name}</strong>
+                      <strong>Company:</strong>{" "}
+                      {palletData.company?.name || "N/A"}
                     </p>
-                    <Button onClick={() => handleWarehouseSelection(wh.id)}>
-                      Seleccionar
-                    </Button>
+                    <Row gutter={[8, 8]}>
+                      <Col span={12}>
+                        <p>
+                          <strong>Weight:</strong> {palletData.weight} kg
+                        </p>
+                      </Col>
+                      <Col span={12}>
+                        <p>
+                          <strong>Volume:</strong> {palletData.volume} m³
+                        </p>
+                      </Col>
+                    </Row>
+                    {palletLoc ? (
+                      <p style={{ marginBottom: 0 }}>
+                        <strong>Ubi:</strong>{" "}
+                        Rack {palletLoc.rack}, Section {palletLoc.section}, Level{" "}
+                        {palletLoc.level}, Position {palletLoc.position}
+                      </p>
+                    ) : (
+                      <p style={{ marginBottom: 0 }}>
+                        <strong>Ubi:</strong> No assigned location
+                      </p>
+                    )}
                   </Card>
-                </Col>
-              );
-            })}
+                );
+              })()}
+            </Col>
+            <Col xs={24} sm={4} style={{ textAlign: "center" }}>
+              <IconArrowRight size={40} stroke={1.2} />
+            </Col>
+            <Col xs={24} sm={10}>
+              <Card
+                title={`Rack ${selectedRack.id}`}
+                size="small"
+                style={{
+                  border: "1px solid #f0f0f0",
+                  borderRadius: 6,
+                }}
+              >
+                <p>
+                  <strong>Section:</strong>{" "}
+                  {selectedRack.section || "N/A"}
+                </p>
+                <Row gutter={[8, 8]}>
+                  <Col span={12}>
+                    <p>
+                      <strong>Cap. Weight:</strong>{" "}
+                      {selectedRack.capacity_weight} kg
+                    </p>
+                  </Col>
+                  <Col span={12}>
+                    <p>
+                      <strong>Cap. Volume:</strong>{" "}
+                      {selectedRack.capacity_volume} m³
+                    </p>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
           </Row>
-        </Card>
-      )}
-
-      {/* MODAL PARA CONFIRMAR TRANSFERENCIA A OTRO ALMACÉN */}
-      <Modal
-        title="Confirmar Transferencia a Otro Almacén"
-        visible={isWarehouseConfirmModalOpen}
-        onCancel={() => setIsWarehouseConfirmModalOpen(false)}
-        onOk={confirmWarehouseTransfer}
-        okText="Transferir"
-        cancelText="Cancelar"
-      >
-        <ExclamationCircleOutlined style={{ marginRight: 8 }} />
-        {selectedWarehouse
-          ? `¿Confirmar la transferencia de ${selectedPallets.length} pallets al almacén ${selectedWarehouse.id}?`
-          : "No se seleccionó un almacén."}
+        )}
+        <Formik
+          initialValues={{ position: "", level: "" }}
+          validationSchema={PositionSchema}
+          onSubmit={handleDefinePositionSubmit}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            isSubmitting,
+            handleSubmit,
+            setFieldValue,
+          }) => (
+            <Form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: 16 }}>
+                <label>Level:</label>
+                <Field name="level">
+                  {({ field }) => {
+                    const levelOptions = Array.from(
+                      { length: selectedRack?.levels || 1 },
+                      (_, i) => i + 1
+                    );
+                    return (
+                      <Select
+                        {...field}
+                        placeholder="Select Level"
+                        style={{ width: "100%" }}
+                        onChange={(val) => {
+                          setFieldValue("level", val);
+                          const occupied = getOccupiedPositions(
+                            selectedRack.id,
+                            val
+                          );
+                          setOccupiedPositions(occupied);
+                          setFieldValue("position", "");
+                        }}
+                        status={
+                          errors.level && touched.level ? "error" : ""
+                        }
+                        options={levelOptions.map((lvl) => ({
+                          label: `Level ${lvl}`,
+                          value: lvl,
+                        }))}
+                      />
+                    );
+                  }}
+                </Field>
+                {errors.level && touched.level && (
+                  <div style={{ color: "red", fontSize: 12 }}>
+                    {errors.level}
+                  </div>
+                )}
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label>Position (A-F):</label>
+                <Field name="position">
+                  {({ field }) => {
+                    const positions = ["A ", "B ", "C ", "D ", "E ", "F "];
+                    return (
+                      <Select
+                        {...field}
+                        placeholder="Position (A-F)"
+                        style={{ width: "100%" }}
+                        onChange={(value) => setFieldValue("position", value)}
+                        disabled={!values.level}
+                        options={positions.map((pos) => ({
+                          label: pos.trim(),
+                          value: pos,
+                          disabled: occupiedPositions.includes(pos),
+                          style: {
+                            color: occupiedPositions.includes(pos)
+                              ? "red"
+                              : "green",
+                          },
+                        }))}
+                        status={
+                          errors.position && touched.position ? "error" : ""
+                        }
+                      />
+                    );
+                  }}
+                </Field>
+                {errors.position && touched.position && (
+                  <div style={{ color: "red", fontSize: 12 }}>
+                    {errors.position}
+                  </div>
+                )}
+              </div>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={isSubmitting}
+                style={{ marginTop: 8 }}
+              >
+                {isSubmitting ? "Transferring..." : "Transfer"}
+              </Button>
+            </Form>
+          )}
+        </Formik>
       </Modal>
     </Paper>
   );

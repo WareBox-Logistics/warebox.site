@@ -6,9 +6,9 @@ import { API_URL_MODEL, API_URL_BRAND, authToken } from "services/services";
 
 const { Text } = Typography;
 
-const ModelComponent = () => {
+const ModelComponent = ({ brands, updateModels }) => {
   const [models, setModels] = useState([]);
-  const [brands, setBrands] = useState([]);
+  // const [brands, setBrands] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({
     brand_id: null,
@@ -26,7 +26,7 @@ const ModelComponent = () => {
 
   useEffect(() => {
     fetchModels();
-    fetchBrands();
+    // fetchBrands();
   }, []);
 
   const fetchModels = async () => {
@@ -39,6 +39,7 @@ const ModelComponent = () => {
         },
       });
       setModels(response.data.models || []);
+      updateModels(response.data.models || []);
     } catch (error) {
       console.error("Error fetching models:", error);
       setModels([]);
@@ -47,20 +48,20 @@ const ModelComponent = () => {
     }
   };
 
-  const fetchBrands = async () => {
-    try {
-      const response = await axios.get(API_URL_BRAND, {
-        headers: {
-          Authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      });
-      setBrands(response.data.brands || []);
-    } catch (error) {
-      console.error("Error fetching brands:", error);
-      setBrands([]);
-    }
-  };
+  // const fetchBrands = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL_BRAND, {
+  //       headers: {
+  //         Authorization: authToken,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     setBrands(response.data.brands || []);
+  //   } catch (error) {
+  //     console.error("Error fetching brands:", error);
+  //     setBrands([]);
+  //   }
+  // };
 
   const handleAddModel = async (e) => {
     e.preventDefault();
@@ -72,8 +73,10 @@ const ModelComponent = () => {
           "Content-Type": "application/json",
         },
       });
-      const selectedBrand = brands.find((brand) => brand.id === formData.brand_id);
-      setModels([...models, { ...response.data.model, brand: selectedBrand }]);
+      // const selectedBrand = brands.find((brand) => brand.id === formData.brand_id);
+      const updatedModels = [...models, response.data.model];
+      setModels(updatedModels);
+      updateModels(updatedModels); 
       message.success("Model added successfully");
       resetForm();
       setIsModalVisible(false);
@@ -108,13 +111,13 @@ const ModelComponent = () => {
           "Content-Type": "application/json",
         },
       });
-      const updatedBrand = brands.find((brand) => brand.id === formData.brand_id);
+      // const updatedBrand = brands.find((brand) => brand.id === formData.brand_id);
       const updatedModels = models.map((model) =>
-        model.id === currentModel.id ? { ...response.data.model, brand: updatedBrand } : model
+        model.id === currentModel.id ? response.data.model : model
       );
       setModels(updatedModels);
+      updateModels(updatedModels);
       message.success("Model updated successfully");
-      setIsEditMode(false);
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
@@ -139,7 +142,9 @@ const ModelComponent = () => {
           "Content-Type": "application/json",
         },
       });
-      setModels(models.filter((m) => m.id !== currentModel.id));
+      const updatedModels = models.filter((m) => m.id !== currentModel.id);
+      setModels(updatedModels);
+      updateModels(updatedModels);
       message.success("Model deleted successfully");
       setIsDeleteModalVisible(false);
     } catch (error) {
@@ -226,19 +231,6 @@ const ModelComponent = () => {
           />
         </Col>
         <Col>
-            <Button
-                type="default"
-                // icon={<LoadingOutlined />}
-                onClick={() => {
-                    setIsLoading(true);
-                    Promise.all([fetchModels(), fetchBrands()]).finally(() => {
-                    setIsLoading(false);
-                    });
-                }}
-                style={{ marginRight: 8 }}
-            >
-                Refresh
-            </Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -256,7 +248,7 @@ const ModelComponent = () => {
         dataSource={filteredModels}
         columns={columns}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 7 }}
         loading={isLoading}
         scroll={{ x: "max-content" }}
       />

@@ -22,6 +22,9 @@ export default function NavigateWhenLogin({ typeAuth }) {
       case 'Operador':
         navigate('/operator/asignar-viajes', { replace: true });
         break;
+      case 'Cliente':
+          navigate('/client/client-dashboard');
+          break ;
       default:
         navigate('/supervisor/viajes-despacho');
         break 

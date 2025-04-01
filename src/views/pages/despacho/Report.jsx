@@ -1,43 +1,43 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Paper } from "@mui/material";
-import { Card, Col, Row, Input, Button, Table, message, Select, Spin, Modal, Typography } from "antd";
+import { Card, Col, Row, Input, Button, Table, message, Select, Spin, Modal, Typography, Flex, Radio } from "antd";
 import { UserAddOutlined, SearchOutlined, LoadingOutlined, EditOutlined, DeleteOutlined, CloseOutlined } from "@ant-design/icons";
 import MainCard from "ui-component/cards/MainCard";
 import axios from 'axios';
-import { authToken, API_URL_REPORT, API_URL_DRIVER } from '../../../services/services';
+import { authToken, API_URL_REPORT, API_URL_DRIVER, API_URL_PROBLEM } from '../../../services/services';
+import { current } from '@reduxjs/toolkit';
 const { Text } = Typography;
-
+const { TextArea } = Input;
 
   const Report = () => {
    
     const [reports, setReports] = useState([]);
     const [drivers, setDrivers] = useState([]);
+    const [problems, setProblems] = useState([]);
     const [searchText, setSearchText] = useState("");
     const [formData, setFormData] = useState({
-    ubication: "",
-    problem: "",
-    issue: "",
+    longitude: "",
+    latitude: "",
+    problem: null,
+    issue: false,
     description: "",
-    driver: "",
+    driver: null,
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-    const [currentCompany, setCurrentReport] = useState(null);
+    const [currentReport, setCurrentReport] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     // const formRef = useRef(null); //No se para que porongas es
     
 
+
     useEffect(()=>{
         fetchReport();
         fetchDriver();
-        const res = drivers.map(dri => ({
-          value: dri.id,
-          label: dri.first_name,
-        }))
-        console.log(res);
+        fetchProblem();
     }, []);
 
     const fetchReport = async () => {
@@ -46,12 +46,12 @@ const { Text } = Typography;
         try{
             const response = await axios.get(API_URL_REPORT, {
                 headers: {
-                    // 'Authorization': authToken,
+                    'Authorization': authToken,
                     'Content-Type': 'applications/json'
                 }
             });
+            console.log('fetchReport##################3333: ',response);
             setReports(response.data.reports || []);
-            console.log(response.data);
         }catch(error){
             console.error('Error fetching companies:', error);
             setReports([]);
@@ -71,18 +71,36 @@ const { Text } = Typography;
                 }
             });
             setDrivers(response.data.drivers || []);
-            console.log(response.data);
         }catch(error){
-            console.error('Error fetching companies:', error);
+            console.error('Error fetching drivers:', error);
             setDrivers([]);
         }finally{
             setIsLoading(false);
         }
     } 
 
-    const handleAddCompany = async (e) => {
+    const fetchProblem = async () => {
+      setIsLoading(true);
+      try{
+        const response = await axios.get(API_URL_PROBLEM, {
+          headers:{
+            'Authorization': authToken,
+            'Content-Type': 'applications/json'
+          }
+        });
+        setProblems(response.data.problems || []);
+      }catch(error){
+        console.error('Error fetching problems:', error);
+      }finally{
+        setIsLoading(false);
+      }
+    }
+
+    const handleAddReport = async (e) => {
       e.preventDefault();
       setIsSubmitting(true);
+      console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
+      console.log('formData: ', formData);
       try {
         const response = await axios.post(API_URL_REPORT,
           formData,
@@ -93,13 +111,21 @@ const { Text } = Typography;
             }
           }
         );
-        const selectedDriver = drivers.find(dri => dri.id === formData.driver);
+        
 
-        setReports([...reports, { ...response.data.report, driver: selectedDriver }]);
-        message.success("Problema agregado correctamente");
-
+        console.log('reports: ', reports);
+        console.log('reponse.data: ',response.data);
+        console.log('reponse.data.reports: ',response.data.reports);
+          
+        const selectedDriver = drivers.find(service => service.id === formData.driver);
+        // const selectedProblem = problems.find(service => service.id === formData.problem);
+        setReports(prevReports => [...prevReports, {...response.data.reports, driver: selectedDriver}]);
+        message.success("Reporte agregado correctamente");
+        console.log(reports);
         resetForm();
+        console.log('formData: ', formData);
         setIsModalVisible(false);
+
       } catch (error) {
         message.error("Error al agregar Problema");
         console.error("Error adding company:", error);
@@ -108,6 +134,7 @@ const { Text } = Typography;
       }
     };
 
+
     const handleChange = (e) => {
       const { name, value } = e.target;
       setFormData({
@@ -115,32 +142,56 @@ const { Text } = Typography;
         [name]: value,
       });
     };
+
+    const handleRadioChange = (e) => {
+      // Verificar si es un evento de Radio.Group
+      if (e.target && e.target.type === "radio") {
+        // Para Radio.Group, usamos un nombre fijo ya que el nombre generado no es útil
+        setFormData({
+          ...formData,
+          issue: e.target.value // 'issue' es el nombre del campo que quieres actualizar
+        });
+      } else {
+        // Para otros inputs, usar el comportamiento normal
+        const { name, value } = e.target;
+        setFormData({
+          ...formData,
+          [name]: value,
+        });
+      }
+    };
   
-    const handleSelectChange = (value) => {
+    const handleSelectChange = (value, option, fieldName) => {
       setFormData({
         ...formData,
-        service: value,
+        [fieldName]: value,
       });
     };
   
     const handleEditReport = (report) => {
       setCurrentReport(report);
+      console.log('currentReport: ', {currentReport});
+      console.log('formData: ', formData);
+      console.log('report: ', report);
       setFormData({
-        ubication: report.ubication || "",
-        problem: report.problem || "",
-        issue: report.issue || "",
+        longitude: report.longitude || "",
+        latitude: report.latitude || "",
+        problem: report.problem || null,
+        issue: report.issue || false,
         description: report.description || "",
-        driver: report.driver ? report.driver.id : null,
+        driver: report.driver || null,
       });
+      console.log('*****************formData: ', formData);
       setIsEditMode(true);
       setIsModalVisible(true);
     };
   
-    const handleUpdateCompany = async (e) => {
+    const handleUpdateReport = async (e) => {
       e.preventDefault();
       setIsSubmitting(true);
+      console.log('inicio update |||||||||||||||||||||||||||||||||||||');
       try {
-        const response = await axios.put(`${API_URL_REPORT}/${currentCompany.id}`,
+        const response = await axios.put(`${API_URL_REPORT}/${currentReport.id}`,
           formData,
           {
             headers: {
@@ -149,8 +200,14 @@ const { Text } = Typography;
             }
           }
         );
+
+        console.log('reports: ', reports);
+        console.log('reponse.data: ',response.data);
+        console.log('reponse.data.reports: ',response.data.reports);
+
+        console.log('final update----------------------------------------');
         const updatedCompanies = reports.map(company =>
-          company.id === currentCompany.id ? { ...response.data.company, service: reports.find(service => service.id === formData.service) } : company
+          company.id === currentReport.id ? { ...response.data.company, service: reports.find(service => service.id === formData.service) } : company
         );
         setReports(updatedCompanies);
         message.success("Problema actualizado correctamente");
@@ -172,13 +229,13 @@ const { Text } = Typography;
   
     const handleConfirmDelete = async () => {
       try {
-        await axios.delete(`${API_URL_REPORT}/${currentCompany.id}`, {
+        await axios.delete(`${API_URL_REPORT}/${currentReport.id}`, {
           headers: {
             'Authorization': authToken,
             'Content-Type': 'application/json'
           }
         });
-        setReports(reports.filter(company => company.id !== currentCompany.id));
+        setReports(reports.filter(company => company.id !== currentReport.id));
         message.success("Problema eliminado correctamente");
         setIsDeleteModalVisible(false);
       } catch (error) {
@@ -189,31 +246,35 @@ const { Text } = Typography;
   
     const resetForm = () => {
       setFormData({
-        name: "",
-        rfc: "",
-        email: "",
-        phone: "",
-        service: null,
+        longitude: "",
+        latitude: "",
+        problem: null,
+        issue: false,
+        description: "",
+        driver: null,
       });
     };
 
     const filteredReports = reports.filter((report) =>
-      report.description ? report.description.toLowerCase().includes(searchText.toLowerCase()) : false
+      report.description ? 
+      report.description.toLowerCase().includes(searchText.toLowerCase()) 
+      : false
     );
 
       const columns = [
-        { title: "Ubication", dataIndex: "ubication", key: "ubication" },
-        { title: "Problem", dataIndex: "problem", key: "problem" },
+        { title: "Longitude", dataIndex: "longitude", key: "longitude" },
+        { title: "Latitude", dataIndex: "latitude", key: "latitude" },
+        { title: "Problem", dataIndex: ["problem","name"], key: "problem" },
         { title: "Issue", dataIndex: "issue", key: "issue" },
         { title: "Description", dataIndex: "description", key: "description" },
-        { title: "driver", dataIndex: "driver", key: "service" },
+        { title: "Driver", dataIndex: ["driver","first_name"], key: "driver" },
         {
           title: "Actions",
           key: "actions",
           render: (text, record) => (
             <span>
               <Button icon={<EditOutlined />} onClick={() => handleEditReport(record)}>Edit</Button>
-              <Button icon={<DeleteOutlined />} onClick={() => handleDeleteCompany(record)} style={{ marginLeft: 8 }}>Delete</Button>
+              <Button color="danger" icon={<DeleteOutlined />} onClick={() => handleDeleteCompany(record)} style={{ marginLeft: 8 }}>Delete</Button>
             </span>
           ),
         },
@@ -221,7 +282,7 @@ const { Text } = Typography;
 
     return (
       <Paper sx={{ padding: '16px' }}>
-            <MainCard title="Companies">
+            <MainCard title="Reportes">
       
               {/* Buscador y botón de agregar */}
               <Row justify="space-between" align="middle" style={{ marginTop: 20, marginBottom: 10 }}>
@@ -241,7 +302,7 @@ const { Text } = Typography;
                     // onMouseEnter={(e) => e.target.style.backgroundColor = '#FF4500'}
                     // onMouseLeave={(e) => e.target.style.backgroundColor = '#FF731D' }}
                   >
-                    Add Report
+                    Add Reporte
                   </Button>
                 </Col>
               </Row>
@@ -259,59 +320,43 @@ const { Text } = Typography;
       
               {/* Modal de registro/edición */}
               <Modal
-                title={isEditMode ? "Update Problem" : "Add New Problem"}
-                visible={isModalVisible}
+                title={isEditMode ? "Update Report" : "Add New Report"}
+                open={isModalVisible}
                 onCancel={() => { setIsModalVisible(false); resetForm(); }}
                 footer={null}
                 width={400}
                 // mask={true}
                 // maskStyle={{ zIndex: 1000 }}
               >
-                <form onSubmit={isEditMode ? handleUpdateCompany : handleAddCompany}>
+                <form onSubmit={isEditMode ? handleUpdateReport : handleAddReport}>
                   <Row gutter={[16, 16]}>
                     <Col xs={24}>
                       <Input
-                        name="ubications"
-                        placeholder="Ubication"
-                        value={formData.name}
+                        name="longitude"
+                        placeholder="Longitude"
+                        value={formData.longitude}
                         onChange={handleChange}
                         style={{ width: '100%' }}
                       />
                     </Col>
                     <Col xs={24}>
                       <Input
-                        name="problem"
-                        placeholder="Problem"
-                        value={formData.rfc}
+                        name="latitude"
+                        placeholder="Latitude"
+                        value={formData.latitude}
                         onChange={handleChange}
                         style={{ width: '100%' }}
                       />
                     </Col>
                     <Col xs={24}>
-                      <Input
-                        name="issue"
-                        placeholder="Issue"
-                        value={formData.email}
-                        onChange={handleChange}
-                        style={{ width: '100%' }}
-                      />
-                    </Col>
-                    <Col xs={24}>
-                      <Input
-                        name="description"
-                        placeholder="Description"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        style={{ width: '100%' }}
-                      />
-                    </Col>
-                    <Col xs={24}>
-                      <Select
+                    <Select
                         showSearch
+                        name='problem'
                         style={{ width: '100%' }}
-                        placeholder="driver"
+                        placeholder="Problem"
+                        value={formData.problem}
                         optionFilterProp='label'
-                        onChange={handleSelectChange}
+                        onChange={(value, option) => handleSelectChange(value, option, 'problem')}
                         filterSort={(optionA, optionB) => {
                           var _a, _b;
                           return (
@@ -329,9 +374,72 @@ const { Text } = Typography;
                               ).toLowerCase(),
                             );
                         }}
-                        options={drivers.map(dri => ({
-                          value: dri.id,
-                          label: dri.first_name,
+                        options={problems.map(pro => ({
+                          value: pro.id,
+                          label: pro.name,
+                        }))}
+                      />
+                    </Col>
+                    <Col xs={24}>
+                      Issue: 
+                      <Flex vertical gap="middle">
+                        <Radio.Group
+                          block
+                          options={[
+                            { label: 'True', value: true },
+                            { label: 'False', value: false },
+                          ]}
+                          defaultValue="false"
+                          optionType="button"
+                          value={formData.issue}
+                          buttonStyle="solid"
+                          onChange={handleRadioChange}
+                        />
+                      </Flex>
+                    </Col>
+                    <Col xs={24}>
+                      <Flex vertical gap={32}>
+                        <TextArea 
+                            showCount
+                            name='description'
+                            onChange={handleChange}
+                            value={formData.description}
+                            maxLength={250}
+                            placeholder="Report Description"
+                            style={{ height: 120, resize: 'none', marginBottom: '20px'}}
+                        />
+                      </Flex>
+
+                    </Col>
+                    <Col xs={24}>
+                    <Select
+                        showSearch
+                        name='driver'
+                        style={{ width: '100%' }}
+                        placeholder="Driver"
+                        value={formData.driver}
+                        optionFilterProp='label'
+                        onChange={(value, option) => handleSelectChange(value, option, 'driver')}
+                        filterSort={(optionA, optionB) => {
+                          var _a, _b;
+                          return (
+                            (_a = optionA === null || optionA === void 0 ? void 0 : optionA.label) !== null &&
+                            _a !== void 0
+                              ? _a
+                              : ''
+                          )
+                            .toLowerCase()
+                            .localeCompare(
+                              ((_b = optionB === null || optionB === void 0 ? void 0 : optionB.label) !== null &&
+                              _b !== void 0
+                                ? _b
+                                : ''
+                              ).toLowerCase(),
+                            );
+                        }}
+                        options={drivers.map(pro => ({
+                          value: pro.id,
+                          label: pro.first_name,
                         }))}
                       />
                     </Col>
@@ -363,13 +471,13 @@ const { Text } = Typography;
               {/* Modal de eliminación */}
               <Modal
                 title="Delete Problem"
-                visible={isDeleteModalVisible}
+                open={isDeleteModalVisible}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 onOk={handleConfirmDelete}
                 confirmLoading={isSubmitting}
               >
                 <p>
-                  ¿Are you sure you want to delete "<Text strong>{currentCompany?.name}</Text>"?
+                  ¿Are you sure you want to delete "<Text strong>{currentReport?.name}</Text>"?
                 </p>
               </Modal>
             </MainCard>

@@ -12,7 +12,10 @@ import {
     IconBuildingWarehouse,
     IconTruck,
     IconLayoutGrid,
-    IconSection
+    IconSection,
+    IconBox,
+    IconNavigation,
+    IconUsers
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -28,7 +31,10 @@ const icons = {
     IconBuildingWarehouse,
     IconTruck,
     IconLayoutGrid,
-    IconSection
+    IconSection,
+    IconBox,
+    IconNavigation,
+    IconUsers
 };
 
 const administrador = {
@@ -65,7 +71,7 @@ const administrador = {
             title: 'Pallets',
             type: 'item',
             url: '/admin/pallets',
-            icon: icons.IconSection,
+            icon: icons.IconBox,
             breadcrumbs: true
         },
         {
@@ -85,6 +91,14 @@ const administrador = {
             breadcrumbs: false
         },
         {
+            id: 'roles',
+            title: 'Roles',
+            type: 'item',
+            url: '/admin/roles',
+            icon: icons.IconUsers,
+            breadcrumbs: false
+        },
+        {
             id: 'routes',
             title: 'Routes',
             type: 'item',
@@ -92,12 +106,20 @@ const administrador = {
             icon: icons.IconRoute,
             breadcrumbs: false
         },
+        // {
+        //     id: 'services',
+        //     title: 'Services',
+        //     type: 'item',
+        //     url: '/admin/services',
+        //     icon: icons.IconDeviceAirtag,
+        //     breadcrumbs: false
+        // },
         {
-            id: 'services',
-            title: 'Services',
+            id: 'tracker',
+            title: 'Tracker',
             type: 'item',
-            url: '/admin/services',
-            icon: icons.IconDeviceAirtag,
+            url: '/admin/tracker',
+            icon: icons.IconNavigation,
             breadcrumbs: false
         },
         {

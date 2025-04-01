@@ -4,7 +4,7 @@ import {Row, Col, Button, Typography, Spin } from 'antd';
 import axios from 'axios';
 import { Paper } from '@mui/material';
 import MainCard from "ui-component/cards/MainCard";
-import { API_URL_WAREHOUSE, API_URL_LOCATION, authToken, GEOAPIFY_BASE_API_URL,API_TEST_WAREHOUSE, API_TEST_LOCATION } from 'services/services';
+import { API_URL_WAREHOUSE, API_URL_LOCATION, authToken, GEOAPIFY_BASE_API_URL, API_SAKABE_COORDS_OPTIMA, API_SAKABE_COORDS_OPTIMA_DETAILS } from 'services/services';
 import warehouseIcon from '../../../assets/images/icons/warehouse.png';
 import shopIcon from '../../../assets/images/icons/shops.png';
 import RouteInfo from '../../../components/administrador/RouteInfo';
@@ -52,7 +52,7 @@ const Routes = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await axios.get(API_TEST_LOCATION, {
+      const response = await axios.get(API_URL_LOCATION, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const Routes = () => {
 
   const fetchWarehouses = async () => {
     try {
-      const response = await axios.get(API_TEST_WAREHOUSE, {
+      const response = await axios.get(API_URL_WAREHOUSE, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',
@@ -150,7 +150,6 @@ const Routes = () => {
   };
   
   const calculateRoute = async () => {
-    const url = 'http://127.0.0.1:8000/api/proxy/optima'; // Laravel proxy endpoint (will move it to services once its on the changes are in the server)
     if (
       waypoints[0].id_routing_net == null ||
       waypoints.at(-1).id_routing_net == null
@@ -174,7 +173,7 @@ const Routes = () => {
   
     try {
       setIsLoading(true);
-      const response = await axios.post(url, payload);
+      const response = await axios.post(API_SAKABE_COORDS_OPTIMA, payload);
       setCalculatedRoute(response.data.data);
       getRouteDetails();
       console.log('CalculatedRoute:', response.data.data);
@@ -186,7 +185,6 @@ const Routes = () => {
   };
 
   const getRouteDetails = async () => {
-    const url = 'http://127.0.0.1:8000/api/proxy/optima/details'; // Laravel proxy endpoint
     const payload = {
       id_i: waypoints[0].id_routing_net,
       source_i: waypoints[0].source,
@@ -202,7 +200,7 @@ const Routes = () => {
   
     try {
       setIsLoading(true);
-      const response = await axios.post(url, payload);
+      const response = await axios.post(API_SAKABE_COORDS_OPTIMA_DETAILS, payload);
       setRouteDetails(response.data.data);
       console.log('RouteDetails:', response.data.data);
     } catch (error) {
@@ -369,7 +367,7 @@ const Routes = () => {
               </GoogleMap>
             </div>
           </Col>
-          <Col span={12} style={{  overflowY: 'auto', height: '75vh', }}>
+          <Col span={12} style={{ overflowX: 'hidden', overflowY: 'auto', height: '75vh' }}>
             <div style={{ paddingLeft: '30px', borderRadius: '10px' }}>
               <Row gutter={8}>
                 <Title level={4}>Waypoints</Title>
