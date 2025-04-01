@@ -9,9 +9,9 @@ import {
       <Paper elevation={3} sx={{ padding: '16px', margin: '16px' }}>
         <MainCard title="Sample Card">
           <Typography variant="body2">
-            Dashboard Client
+            Client Dashboard Content Goes Here.
 
-            chupo
+
           </Typography>
         </MainCard>
       </Paper>

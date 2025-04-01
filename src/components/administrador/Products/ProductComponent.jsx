@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Paper } from "@mui/material";
-import { Row, Col, Input, Button, Table, message, Select, Spin, Modal, Typography, Image } from "antd";
+import { Row, Col, Input, Button, Table, message, Select, Spin, Modal, Typography, Image, Tooltip } from "antd";
 import { UserAddOutlined, SearchOutlined, LoadingOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import MainCard from "ui-component/cards/MainCard";
 import axios from 'axios';
-import { authToken, API_URL_PRODUCT, API_URL_COMPANY, API_URL_CATEGORY } from '../../../services/services';
+import { authToken, API_URL_PRODUCT, API_URL_COMPANY, API_URL_CATEGORY, API_URL_BOX_INVENTORY } from '../../../services/services';
 
 const { Text } = Typography;
 
@@ -31,6 +31,10 @@ const ProductComponent = ({ categories, updateCategories }) => {
   const [isLoading, setIsLoading] = useState(true);
   const formRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isPalletModalVisible, setIsPalletModalVisible] = useState(false);
+  const [pallets, setPallets] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isLoadingPallets, setIsLoadingPallets] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -86,6 +90,35 @@ const ProductComponent = ({ categories, updateCategories }) => {
       console.error('Error fetching categories:', error);
       setCategories([]);
     }
+  };
+
+  const fetchPalletsByProduct = async (productId) => {
+    setIsLoadingPallets(true);
+  
+    try {
+      const response = await axios.get(API_URL_BOX_INVENTORY, {
+        headers: {
+          Authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const boxes = response.data.boxes || [];
+      const filteredPallets = boxes.filter((box) => box.product.id === productId);
+  
+      setPallets(filteredPallets);
+    } catch (error) {
+      console.error("Error fetching pallets:", error);
+      setPallets([]);
+    } finally {
+      setIsLoadingPallets(false);
+    }
+  };
+
+  const handleViewPallets = (product) => {
+    setSelectedProduct(product);
+    setIsPalletModalVisible(true);
+    fetchPalletsByProduct(product.id);
   };
 
   const generateRandomSKU = (companyName) => {
@@ -157,28 +190,38 @@ const ProductComponent = ({ categories, updateCategories }) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const formDataToSend = new FormData();
-      const companyName = companies.find(company => company.id === formData.company)?.name || "unknown";
+      // const formDataToSend = new FormData();
+      // const companyName = companies.find(company => company.id === formData.company)?.name || "unknown";
       // const fileExtension = formData.image?.name?.split('.').pop();
       // const fileName = formData.image && formData.image instanceof File
       //   ? `${formData.name}_${companyName}.${fileExtension}`.replace(/\s+/g, '_')
       //   : null;
   
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("sku", formData.sku);
-      formDataToSend.append("price", formData.price);
-      formDataToSend.append("company", formData.company);
-      formDataToSend.append("category", formData.category);
-      formDataToSend.append("image", formData.image);
+      // formDataToSend.append("name", formData.name);
+      // formDataToSend.append("description", formData.description);
+      // formDataToSend.append("sku", formData.sku);
+      // formDataToSend.append("price", formData.price);
+      // formDataToSend.append("company", formData.company);
+      // formDataToSend.append("category", formData.category);
+      // formDataToSend.append("image", formData.image);
       // if (formData.image && formData.image instanceof File) {
       //   formDataToSend.append("image", formData.image, fileName);
       // }
+
+      const updatedData = {
+        name: formData.name,
+        description: formData.description,
+        sku: formData.sku,
+        price: formData.price,
+        company: formData.company,
+        category: formData.category,
+        image: formData.image,
+      };
   
-      const response = await axios.put(`${API_URL_PRODUCT}/${currentProduct.id}`, formDataToSend, {
+      const response = await axios.put(`${API_URL_PRODUCT}/${currentProduct.id}`, updatedData, {
         headers: {
           'Authorization': authToken,
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
   
@@ -284,24 +327,30 @@ const ProductComponent = ({ categories, updateCategories }) => {
       key: "actions",
       render: (text, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+          <Tooltip title="View Pallets">
             <Button
-                icon={<EditOutlined />}
-                onClick={() => handleEditProduct(record)}
-            >
-                Edit
-            </Button>
+              icon={<SearchOutlined />}
+              onClick={() => handleViewPallets(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Edit">
             <Button
-                icon={<DeleteOutlined />}
-                onClick={() => handleDeleteProduct(record)}
-                color='red'
-                variant='outlined'
-            >
-                Delete
-            </Button>
+              icon={<EditOutlined />}
+              onClick={() => handleEditProduct(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Button
+              icon={<DeleteOutlined />}
+              onClick={() => handleDeleteProduct(record)}
+              danger
+            />
+          </Tooltip>
         </div>
       ),
     },
   ];
+  const sortedProducts = [...filteredProducts].sort((a, b) => a.id - b.id);
 
   return (
     <div>
@@ -335,7 +384,7 @@ const ProductComponent = ({ categories, updateCategories }) => {
 
         <div style={{ overflowX: "auto" }}>
           <Table
-            dataSource={filteredProducts}
+            dataSource={sortedProducts}
             columns={columns}
             rowKey="id"
             pagination={{ pageSize: 10 }}
@@ -504,6 +553,29 @@ const ProductComponent = ({ categories, updateCategories }) => {
           <p>
             Are you sure you want to delete "<Text strong>{currentProduct?.name}</Text>"?
           </p>
+        </Modal>
+
+        <Modal
+          title={`Pallets with product: ${selectedProduct?.name || ""}`}
+          visible={isPalletModalVisible}
+          onCancel={() => setIsPalletModalVisible(false)}
+          footer={null}
+        >
+          {isLoadingPallets ? (
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <Spin size="small" />
+            </div>
+          ) : pallets.length > 0 ? (
+            <ul>
+              {pallets.map((pallet) => (
+                <li key={pallet.pallet.id}>
+                  Pallet {pallet.pallet.id}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>There are no pallets with this product.</p>
+          )}
         </Modal>
     </div>
   );

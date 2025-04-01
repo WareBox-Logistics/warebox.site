@@ -159,7 +159,7 @@ const ClientPallets = () => {
 
       return (
         <div key={warehouse.id} style={{ marginBottom: "30px", width: "100%" }}>
-          <Title level={4} style={{ marginBottom: "16px", paddingLeft: "16px" }}>
+          <Title level={4} style={{ marginBottom: "16px", paddingLeft: "16px", color: "#FF731D" }}>
             - {warehouse.name} -
           </Title>
 

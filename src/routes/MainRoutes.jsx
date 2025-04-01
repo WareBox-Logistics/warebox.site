@@ -50,6 +50,7 @@ const Tracker = Loadable(lazy(() => import('views/pages/administrador/Tracker'))
 // const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
 const ClientPallets = Loadable(lazy(() => import('views/pages/cliente/ClientPallets')));
 const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
+const ClientProducts = Loadable(lazy(() => import('views/pages/cliente/ClientProducts')));
 
 const MainRoutes = {
   path: '/',
@@ -222,6 +223,10 @@ const MainRoutes = {
             {
               path: 'client-pallets',
               element: <ClientPallets />
+            },
+            {
+              path: 'client-products',
+              element: <ClientProducts />
             },
           ]
         },

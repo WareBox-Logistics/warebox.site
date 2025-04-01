@@ -6,7 +6,8 @@ import {
     IconPaperclip, 
     IconMap2, 
     IconBuilding, 
-    IconShoppingCart, 
+    IconShoppingCart,
+    IconShoppingBag,
     IconDeviceAirtag, 
     IconRoute,
     IconBuildingWarehouse,
@@ -26,6 +27,7 @@ const icons = {
     IconMap2, 
     IconBuilding, 
     IconShoppingCart, 
+    IconShoppingBag,
     IconDeviceAirtag,
     IconRoute,
     IconBuildingWarehouse,
@@ -87,7 +89,7 @@ const administrador = {
             title: 'Products',
             type: 'item',
             url: '/admin/products',
-            icon: icons.IconShoppingCart,
+            icon: icons.IconShoppingBag,
             breadcrumbs: false
         },
         {
