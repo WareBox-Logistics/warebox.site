@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Paper } from "@mui/material";
-import { Row, Col, Input, Button, Table, message, Select, Spin, Modal, Typography } from "antd";
+import { Row, Col, Input, Button, Table, message, Select, Spin, Modal, Typography, Image } from "antd";
 import { UserAddOutlined, SearchOutlined, LoadingOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import MainCard from "ui-component/cards/MainCard";
 import axios from 'axios';
@@ -8,11 +8,12 @@ import { authToken, API_URL_PRODUCT, API_URL_COMPANY, API_URL_CATEGORY } from '.
 
 const { Text } = Typography;
 
-const ProductComponent = () => {
+const ProductComponent = ({ categories, updateCategories }) => {
   const [products, setProducts] = useState([]);
   const [companies, setCompanies] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [category, setCategories] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -34,8 +35,10 @@ const ProductComponent = () => {
   useEffect(() => {
     fetchProducts();
     fetchCompanies();
-    fetchCategories();
-  }, []);
+    if (categories.length === 0) {
+      fetchCategories();
+    }
+  }, [categories]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -78,7 +81,7 @@ const ProductComponent = () => {
           'Content-Type': 'application/json',
         },
       });
-      setCategories(response.data.categories || []);
+      updateCategories(response.data.categories || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
       setCategories([]);
@@ -208,6 +211,7 @@ const ProductComponent = () => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsSubmitting(true);
     try {
       await axios.delete(`${API_URL_PRODUCT}/${currentProduct.id}`, {
         headers: {
@@ -221,6 +225,8 @@ const ProductComponent = () => {
     } catch (error) {
       message.error("Error deleting product");
       console.error("Error deleting product:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -237,9 +243,11 @@ const ProductComponent = () => {
     setPreviewImage(null);
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name ? product.name.toLowerCase().includes(searchText.toLowerCase()) : false
-  );
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name ? product.name.toLowerCase().includes(searchText.toLowerCase()) : false;
+    const matchesCompany = selectedCompany ? product.company?.id === selectedCompany : true;
+    return matchesSearch && matchesCompany;
+  });
 
   const columns = [
     {
@@ -257,7 +265,18 @@ const ProductComponent = () => {
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "Description", dataIndex: "description", key: "description" },
     { title: "SKU", dataIndex: "sku", key: "sku" },
-    { title: "Price", dataIndex: "price", key: "price" },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+      render: (price) => {
+        const formattedPrice = new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(price);
+        return `$${formattedPrice}`;
+      },
+    },
     { title: "Company", dataIndex: ["company", "name"], key: "company" },
     { title: "Category", dataIndex: ["category", "name"], key: "category" },
     {
@@ -288,6 +307,18 @@ const ProductComponent = () => {
     <div>
         <Row justify="space-between" align="middle" style={{ marginTop: 20, marginBottom: 10 }}>
           <Col>
+            <Select
+              placeholder="Filter by Company"
+              style={{ width: 160 }}
+              allowClear
+              onChange={(value) => setSelectedCompany(value)}
+              options={companies.map((company) => ({
+                label: company.name,
+                value: company.id,
+              }))}
+            />
+          </Col>
+          <Col>
             <Input
               style={{ width: "100%", maxWidth: 300 }}
               prefix={<SearchOutlined />}
@@ -307,7 +338,7 @@ const ProductComponent = () => {
             dataSource={filteredProducts}
             columns={columns}
             rowKey="id"
-            pagination={{ pageSize: 20 }}
+            pagination={{ pageSize: 10 }}
             loading={isLoading}
           />
         </div>
