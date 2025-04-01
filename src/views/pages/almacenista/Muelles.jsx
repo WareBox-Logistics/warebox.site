@@ -1,115 +1,201 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Card, Col, Row, Spin, message, Radio, Pagination } from 'antd';
-import { authToken, API_URL_DOCK, API_URL_DOCK_ASSIGNMENT } from '../../../services/services'; // Ensure these are correctly exported
-import { TruckOutlined } from '@ant-design/icons'; // Import Ant Design icons
+import { Card, Col, Row, Spin, message, Radio, Modal, Select, Button, Typography } from 'antd';
+import { TruckOutlined } from '@ant-design/icons';
 import { WarehouseOutlined } from "@mui/icons-material";
+import { API_URL_DOCK, API_URL_WAREHOUSE, authToken } from '../../../services/services';
+import axios from 'axios';
+
+const { Option } = Select;
+const { Text } = Typography;
 
 const Muelles = () => {
   const [docks, setDocks] = useState([]);
+  const [warehouses, setWarehouses] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // State for filtering
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const [pageSize] = useState(6); // Number of docks per page
+  const [filter, setFilter] = useState('all');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedDock, setSelectedDock] = useState(null);
+  const [selectedPlate, setSelectedPlate] = useState('');
+
+  // Lista de placas de ejemplo
+  const availablePlates = [
+    { id: 1, plate: 'ABC-123' },
+    { id: 2, plate: 'XYZ-789' },
+    { id: 3, plate: 'DEF-456' },
+  ];
 
   useEffect(() => {
-    fetchDocks();
+    const loadData = async () => {
+      setIsLoading(true);
+      await fetchDocks();
+      await fetchWarehouses();
+      loadLocalDockStates();
+      setIsLoading(false);
+    };
+    loadData();
   }, []);
 
   const fetchDocks = async () => {
-    setIsLoading(true);
     try {
       const response = await axios.get(API_URL_DOCK, {
-        headers: {
-          'Authorization': authToken,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Authorization': authToken }
       });
-      setDocks(response.data); // Store all docks
+      setDocks(response.data);
     } catch (error) {
       console.error('Error fetching docks:', error);
       message.error("Error fetching docks");
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const toggleDockStatus = async (dockId, truckId, currentStatus) => {
-    const newStatus = currentStatus === 'Available' ? 'Occupied' : 'Available';
-
+  const fetchWarehouses = async () => {
     try {
-      await axios.put(`${API_URL_DOCK_ASSIGNMENT}/${dockId}/${truckId}`, {
-        status: newStatus
-      }, {
-        headers: {
-          'Authorization': authToken,
-          'Content-Type': 'application/json',
-        },
+      const response = await axios.get(API_URL_WAREHOUSE, {
+        headers: { 'Authorization': authToken }
       });
-
-      // Update local state after changing the status in the database
-      setDocks(docks.map(dock => (dock.id === dockId ? { ...dock, status: newStatus } : dock)));
+      setWarehouses(response.data.warehouses.reduce((map, warehouse) => {
+        map[warehouse.id] = warehouse.name;
+        return map;
+      }, {}));
     } catch (error) {
-      console.error('Error updating dock status:', error);
-      message.error("Error updating dock status");
+      console.error('Error fetching warehouses:', error);
+      message.error("Error fetching warehouses");
     }
   };
 
-  // Filter docks based on selected status
+  const loadLocalDockStates = () => {
+    const savedStates = JSON.parse(localStorage.getItem('dockStates') || '{}');
+    setDocks(prevDocks => 
+      prevDocks.map(dock => ({
+        ...dock,
+        ...savedStates[dock.id]
+      }))
+    );
+  };
+
+  const handleCardClick = (dock) => {
+    setSelectedDock(dock);
+    setSelectedPlate('');
+    setIsModalVisible(true);
+  };
+
+  const handleAssignPlate = () => {
+    if (!selectedDock) return;
+
+    const newStatus = selectedDock.status === 'Available' ? 'Occupied' : 'Available';
+    const savedStates = JSON.parse(localStorage.getItem('dockStates') || '{}');
+
+    // Actualizar estado local
+    const updatedStates = {
+      ...savedStates,
+      [selectedDock.id]: {
+        status: newStatus,
+        plate: newStatus === 'Occupied' ? selectedPlate : null
+      }
+    };
+
+    localStorage.setItem('dockStates', JSON.stringify(updatedStates));
+
+    // Actualizar estado en la aplicación
+    setDocks(prevDocks =>
+      prevDocks.map(dock =>
+        dock.id === selectedDock.id
+          ? {
+              ...dock,
+              status: newStatus,
+              plate: newStatus === 'Occupied' ? selectedPlate : null
+            }
+          : dock
+      )
+    );
+
+    message.success(`Dock ${selectedDock.number} is now ${newStatus}`);
+    setIsModalVisible(false);
+    setSelectedPlate('');
+  };
+
+  // Filtrar muelles según el estado seleccionado
   const filteredDocks = docks.filter(dock => {
     if (filter === 'occupied') return dock.status === 'Occupied';
     if (filter === 'available') return dock.status === 'Available';
-    return true; // 'all'
+    return true;
   });
-
-  // Pagination
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedDocks = filteredDocks.slice(startIndex, startIndex + pageSize);
 
   return (
     <div>
       <h1>Available Docks</h1>
-      <Radio.Group value={filter} onChange={e => setFilter(e.target.value)} style={{ marginBottom: 16 }}>
+      <Radio.Group 
+        value={filter} 
+        onChange={e => setFilter(e.target.value)}
+        style={{ marginBottom: '20px' }}
+      >
         <Radio.Button value="all">All</Radio.Button>
         <Radio.Button value="available">Available</Radio.Button>
         <Radio.Button value="occupied">Occupied</Radio.Button>
       </Radio.Group>
-      {isLoading ? (
-        <Spin />
-      ) : (
-        <>
-          <Row gutter={16}>
-            {paginatedDocks.map(dock => (
-              <Col span={4} key={dock.id}>
-                <Card
-                  title={`Dock ${dock.number}`}
-                  variant="bordered"
-                  style={{ 
-                    backgroundColor: dock.status === 'Available' ? '#d4edda' : '#f8d7da',
-                    textAlign: 'center'
-                  }}
-                  onClick={() => toggleDockStatus(dock.id, dock.truckId, dock.status)}
-                >
-                  {dock.status === 'Available' ? (
-                    <WarehouseOutlined style={{ fontSize: '40px', color: 'green' }} />
-                  ) : (
-                    <TruckOutlined style={{ fontSize: '40px', color: 'red' }} />
-                  )}
-                  <p>Status: {dock.status}</p>
-                  <p>Warehouse: {dock.warehouse.name}</p>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={filteredDocks.length}
-            onChange={page => setCurrentPage(page)}
-            style={{ marginTop: 16, textAlign: 'center' }}
-          />
-        </>
+
+      {isLoading ? <Spin /> : (
+        <Row gutter={[16, 16]}>
+          {filteredDocks.map(dock => (
+            <Col span={4} key={dock.id}>
+              <Card
+                title={`Dock ${dock.number}`}
+                style={{ 
+                  backgroundColor: dock.status === 'Available' ? '#d4edda' : '#f8d7da',
+                  cursor: 'pointer'
+                }}
+                onClick={() => handleCardClick(dock)}
+              >
+                {dock.status === 'Available' ? 
+                  <WarehouseOutlined style={{ fontSize: '40px', color: 'green' }} /> : 
+                  <TruckOutlined style={{ fontSize: '40px', color: 'red' }} />
+                }
+                <p>Status: {dock.status}</p>
+                {dock.plate && <p>Plate: {dock.plate}</p>}
+                <p>Warehouse: {warehouses[dock.warehouse] || 'Unknown'}</p>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       )}
+
+      <Modal
+        title={selectedDock?.status === 'Available' ? "Assign Truck" : "Release Dock"}
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setIsModalVisible(false)}>
+            Cancel
+          </Button>,
+          <Button 
+            key="submit" 
+            type="primary" 
+            onClick={handleAssignPlate}
+          >
+            {selectedDock?.status === 'Available' ? 'Assign' : 'Release'}
+          </Button>
+        ]}
+      >
+        {selectedDock?.status === 'Available' && (
+          <>
+            <Text>Select a plate:</Text>
+            <Select
+              style={{ width: '100%', marginTop: '10px' }}
+              value={selectedPlate}
+              onChange={setSelectedPlate}
+              placeholder="Select a plate"
+            >
+              {availablePlates.map(vehicle => (
+                <Option key={vehicle.id} value={vehicle.plate}>
+                  {vehicle.plate}
+                </Option>
+              ))}
+            </Select>
+          </>
+        )}
+        {selectedDock?.status === 'Occupied' && (
+          <p>Are you sure you want to release this dock?</p>
+        )}
+      </Modal>
     </div>
   );
 };

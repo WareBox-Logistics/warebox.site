@@ -55,9 +55,10 @@ export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
 //Inventory
 export const API_URL_BOX_INVENTORY = BASE_API_URL + '/box-inventory';
 export const API_URL_PALLET = BASE_API_URL + '/pallet';
-export const API_URL_DOCK_ASSIGNMENT = BASE_API_URL + '/dock-assignment';
+//export const API_URL_DOCK_ASSIGNMENT = BASE_API_URL + '/dock-assignment';
 export const API_URL_RACK = BASE_API_URL + '/rack';
 export const API_URL_STORAGE_RACK_PALLET = BASE_API_URL + '/storage-rack-pallet';
+export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assigmnet';
 
 //Dispatch
 export const API_URL_REPORT = BASE_API_URL + '/report';
