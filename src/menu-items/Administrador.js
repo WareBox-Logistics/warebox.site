@@ -8,6 +8,7 @@ import {
     IconBuilding, 
     IconShoppingCart,
     IconShoppingBag,
+    IconTruckDelivery,
     IconDeviceAirtag, 
     IconRoute,
     IconBuildingWarehouse,
@@ -15,6 +16,7 @@ import {
     IconLayoutGrid,
     IconSection,
     IconBox,
+    IconPackages,
     IconNavigation,
     IconUsers
 } from '@tabler/icons-react';
@@ -28,6 +30,7 @@ const icons = {
     IconBuilding, 
     IconShoppingCart, 
     IconShoppingBag,
+    IconTruckDelivery,
     IconDeviceAirtag,
     IconRoute,
     IconBuildingWarehouse,
@@ -35,6 +38,7 @@ const icons = {
     IconLayoutGrid,
     IconSection,
     IconBox,
+    IconPackages,
     IconNavigation,
     IconUsers
 };
@@ -61,6 +65,14 @@ const administrador = {
             breadcrumbs: true
         },
         {
+            id: 'deliveries',
+            title: 'Deliveries',
+            type: 'item',
+            url: '/admin/deliveries',
+            icon: icons.IconTruckDelivery,
+            breadcrumbs: true
+        },
+        {
             id: 'locations',
             title: 'Locations',
             type: 'item',
@@ -73,7 +85,7 @@ const administrador = {
             title: 'Pallets',
             type: 'item',
             url: '/admin/pallets',
-            icon: icons.IconBox,
+            icon: icons.IconPackages,
             breadcrumbs: true
         },
         {

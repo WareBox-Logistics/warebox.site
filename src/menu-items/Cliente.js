@@ -4,6 +4,7 @@ import {
     IconChartBar,
     IconSection,
     IconLayoutGrid,
+    IconPackages,
     IconShoppingBag
 } from '@tabler/icons-react';
 
@@ -13,6 +14,7 @@ const icons = {
     IconChartBar,
     IconSection,
     IconLayoutGrid,
+    IconPackages,
     IconShoppingBag
 };
 
@@ -34,7 +36,7 @@ const cliente = {
             title: 'Pallets',
             type: 'item',
             url: '/client/client-pallets',
-            icon: icons.IconLayoutGrid,
+            icon: icons.IconPackages,
             breadcrumbs: false
         },
         {
