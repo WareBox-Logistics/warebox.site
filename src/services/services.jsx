@@ -85,7 +85,6 @@ export const API_URL_FREE_TRUCKS = BASE_API_URL + '/vehicles/available-trucks';
 export const API_URL_ASSIGN_LOT = BASE_API_URL + '/lots/assign-vehicle';
 export const API_URL_FREE_LOT = BASE_API_URL + '/lots/free';
 export const API_URL_DOCK = BASE_API_URL + '/dock';
-export const API_URL_PALLET_CWS = BASE_API_URL + '/pallet/warehouse-company'; //company warehouse status
 export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 
 
@@ -96,6 +95,13 @@ export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 export const BASE_API_TEST = 'http://127.0.0.1:8000/api';
 export const API_TEST_WAREHOUSE = BASE_API_TEST + '/warehouse';
 export const API_TEST_LOCATION = BASE_API_TEST + '/location';
+export const API_URL_PALLET_CWS = BASE_API_URL + '/pallet/warehouse-company'; //company warehouse status
+export const API_URL_DOCK_BY_WAREHOUSE = BASE_API_URL + '/docks/warehouse/';
+export const API_URL_DOCK_RESERVE = BASE_API_URL + '/docks/reserve';
+export const API_URL_DOCK_CHECK_AVA = BASE_API_URL + '/docks/check-availability';
+export const API_URL_DOCK_RELEASE = BASE_API_URL + '/docks/release';
+
+
 
 //Inegi SAKABE
 // export const API_SAKABE_COORDS = BASE_API_TEST + '/proxy/coordsID';
@@ -112,4 +118,7 @@ export const API_TEST_LOCATION = BASE_API_TEST + '/location';
 // export const API_URL_DOCK = BASE_API_TEST + '/dock';
 // export const API_URL_PALLET_CWS = BASE_API_TEST + '/pallet/warehouse-company'; //company warehouse status
 // export const API_URL_VEHICLE = BASE_API_TEST + '/vehicle';
-// export const API_URL_DELIVERY = BASE_API_TEST + '/delivery';
+export const API_URL_DELIVERY_FUTURE = BASE_API_URL + '/deliveries/current-and-future';
+export const API_URL_VEHICLE_AVA = BASE_API_URL + '/vehicles/available';
+export const API_URL_VEHICLE_RESERVE = BASE_API_URL + '/vehicles/reserve';
+
