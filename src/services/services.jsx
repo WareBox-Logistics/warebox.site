@@ -34,6 +34,8 @@ export const API_URL_DELIVERY_DETAIL = BASE_API_URL + '/delivery-detail';
 export const API_URL_EMPLOYEE = BASE_API_URL + '/employee';
 //Driver
 export const API_URL_DRIVER = BASE_API_URL + '/driver';
+//Operator
+export const API_URL_OPERATOR = BASE_API_URL + '/operator';
 //Client
 export const API_URL_CLIENT = BASE_API_URL + '/client';
 //Location
@@ -62,6 +64,7 @@ export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assigmnet';
 
 //Dispatch
 export const API_URL_REPORT = BASE_API_URL + '/report';
+    export const API_URL_REPORT_WITHOUT_ISSUE = BASE_API_URL + '/report/without-issue';
 export const API_URL_PROBLEM = BASE_API_URL + '/problem';
 export const API_URL_ISSUE = BASE_API_URL + '/issue';
 export const API_URL_SUPPORT = BASE_API_URL + '/support';
