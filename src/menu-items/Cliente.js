@@ -1,3 +1,4 @@
+import { Icon } from '@mui/material';
 import { 
     IconDashboard, 
     IconPackageExport,
@@ -5,7 +6,8 @@ import {
     IconSection,
     IconLayoutGrid,
     IconPackages,
-    IconShoppingBag
+    IconShoppingBag,
+    IconTruckDelivery
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -15,7 +17,8 @@ const icons = {
     IconSection,
     IconLayoutGrid,
     IconPackages,
-    IconShoppingBag
+    IconShoppingBag,
+    IconTruckDelivery
 };
 
 const cliente = {
@@ -29,6 +32,14 @@ const cliente = {
             type: 'item',
             url: '/client/client-dashboard',
             icon: icons.IconChartBar,
+            breadcrumbs: false
+        },
+        {
+            id: 'deliveries',
+            title: 'Deliveries',
+            type: 'item',
+            url: '/client/client-deliveries',
+            icon: icons.IconTruckDelivery,
             breadcrumbs: false
         },
         {
