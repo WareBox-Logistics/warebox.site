@@ -4,7 +4,7 @@ import {
   } from "@mui/material";
   import MainCard from "ui-component/cards/MainCard";
   
-  const Suport = () => {
+  const Support = () => {
     return (
       <Paper elevation={3} sx={{ padding: '16px', margin: '16px' }}>
         <MainCard title="Sample Card">
@@ -22,5 +22,5 @@ import {
     );
   };
   
-  export default Suport;
+  export default Support;
   
