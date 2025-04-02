@@ -35,6 +35,7 @@ const Problem = Loadable(lazy(() => import('views/pages/despacho/Problem')))
 // const Supervisor = Loadable(lazy(() => import('views/pages/supervisor/Index')));
 const Users = Loadable(lazy(() => import('views/pages/administrador/Users')));
 const Companies = Loadable(lazy(() => import('views/pages/administrador/Companies')));
+const Deliveries = Loadable(lazy(() => import('views/pages/administrador/Deliveries')));
 const Products = Loadable(lazy(() => import('views/pages/administrador/Products')));
 const Pallets = Loadable(lazy(() => import('views/pages/administrador/Pallets')));
 const Roles = Loadable(lazy(() => import('views/pages/administrador/Roles')));
@@ -50,6 +51,7 @@ const Tracker = Loadable(lazy(() => import('views/pages/administrador/Tracker'))
 // const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
 const ClientPallets = Loadable(lazy(() => import('views/pages/cliente/ClientPallets')));
 const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
+const ClientProducts = Loadable(lazy(() => import('views/pages/cliente/ClientProducts')));
 
 const MainRoutes = {
   path: '/',
@@ -74,6 +76,10 @@ const MainRoutes = {
             {
               path: 'dashboard',
               element: <DashboardDefault />,
+            },
+            {
+              path: 'deliveries',
+              element: <Deliveries />,
             },
             {
               path: 'locations',
@@ -222,6 +228,10 @@ const MainRoutes = {
             {
               path: 'client-pallets',
               element: <ClientPallets />
+            },
+            {
+              path: 'client-products',
+              element: <ClientProducts />
             },
           ]
         },

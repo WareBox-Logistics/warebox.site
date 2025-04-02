@@ -156,6 +156,7 @@ const CompanyComponent = ({ services, updateServices }) => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsSubmitting(true);
     try {
       await axios.delete(`${API_URL_COMPANY}/${currentCompany.id}`, {
         headers: {
@@ -169,6 +170,8 @@ const CompanyComponent = ({ services, updateServices }) => {
     } catch (error) {
       message.error("Error al eliminar empresa");
       console.error("Error deleting company:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

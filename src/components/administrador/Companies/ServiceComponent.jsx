@@ -124,6 +124,7 @@ const ServiceComponent = ({ updateServices }) => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsSubmitting(true);
     try {
       await axios.delete(`${API_URL_SERVICE}/${currentService.id}`, {
         headers: {
@@ -139,6 +140,8 @@ const ServiceComponent = ({ updateServices }) => {
     } catch (error) {
       message.error("Error deleting service");
       console.error("Error deleting service:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

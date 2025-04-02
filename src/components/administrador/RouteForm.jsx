@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, Row, Col, Typography, Spin, Card, DatePicker, message } from 'antd';
+import { Form, Input, Button, Select, Row, Col, Typography, Spin, Card, DatePicker, message, Progress } from 'antd';
 import { ProductOutlined } from "@ant-design/icons";
 import axios from 'axios';
-import { API_URL_COMPANY, API_URL_VEHICLE, API_URL_MODEL, API_URL_BRAND, authToken, API_URL_PALLET_CWS,API_URL_DELIVERY,userID } from 'services/services';
-import dayjs from 'dayjs';
+import { API_URL_COMPANY, API_URL_MODEL, API_URL_BRAND, authToken, API_URL_PALLET_CWS,API_URL_DELIVERY,userID, API_URL_VEHICLE_AVA, API_URL_VEHICLE_RESERVE } from 'services/services';
+import dayjs from 'dayjs'; 
+import DockReservation from './DockAssignation.jsx';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -11,9 +12,9 @@ const { Option } = Select;
 const RouteForm = ({ origin, destination, route }) => {
   const [form] = Form.useForm();
   const [companies, setCompanies] = useState([]);
-  const [vehicles, setVehicles] = useState([]);
-  const [trucks, setTrucks] = useState([]);
-  const [trailers, setTrailers] = useState([]);
+  const [availableTrucks,setAvailableTrucks] = useState([]);
+  const [availableTrailers,setAvailableTrailers] = useState([]);
+  const [loadingVehicles,setLoadingVehicles] = useState(false);
   const [models, setModels] = useState([]);
   const [brands, setBrands] = useState([]);
   const [selectedTruck, setSelectedTruck] = useState(null);
@@ -24,6 +25,10 @@ const RouteForm = ({ origin, destination, route }) => {
   const [loadingPallets, setLoadingPallets] = useState(false);
   const [deliveryType, setDeliveryType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [remainingVolume, setRemainingVolume] = useState(0);
+  const [isTrailerFull, setIsTrailerFull] = useState(false);
+  const [totalVolume, setTotalVolume] = useState(0); 
+
 
   const options = [
     { value: 'warehouse_to_location', label: 'Warehouse to Location' },
@@ -39,7 +44,7 @@ const RouteForm = ({ origin, destination, route }) => {
 
   useEffect(() => {
     fetchCompanies();
-    fetchVehicles();
+   // fetchVehicles();
     fetchModels();
     fetchBrands();
     setDeliveryTypeFromOriginAndDestination();
@@ -54,12 +59,16 @@ const RouteForm = ({ origin, destination, route }) => {
   }, [selectedCompanyId, origin]);
 
   useEffect(() => {
-    // Separate trucks and trailers
-    const trucks = vehicles.filter(v => v.type === 'semi_truck');
-    const trailers = vehicles.filter(v => v.type === 'trailer');
-    setTrucks(trucks);
-    setTrailers(trailers);
-  }, [vehicles]);
+    const shippingDate = form.getFieldValue('shipping_date');
+    const estimatedArrival = form.getFieldValue('estimated_arrival');
+  
+    if (shippingDate && estimatedArrival && estimatedArrival.isAfter(shippingDate)) {
+      fetchAvailableVehicles(
+        shippingDate.format('YYYY-MM-DDTHH:mm:ssZ'),
+        estimatedArrival.format('YYYY-MM-DDTHH:mm:ssZ')
+      );
+    }
+  }, [form.getFieldValue('shipping_date'), form.getFieldValue('estimated_arrival')]);
 
   const setDeliveryTypeFromOriginAndDestination = () => {
     if(origin.type == 'warehouse' && destination.type == 'location'){
@@ -88,18 +97,55 @@ const RouteForm = ({ origin, destination, route }) => {
     }
   };
 
-  const fetchVehicles = async () => {
+  const fetchAvailableVehicles = async (startDate, endDate) => {
+    setLoadingVehicles(true);
     try {
-      const response = await axios.get(API_URL_VEHICLE, {
-        headers: {
-          Authorization: authToken,
-          'Content-Type': 'application/json',
-        },
-      });
-      setVehicles(response.data.vehicles || []);
+      console.log(startDate, endDate)
+      const truckPayload = {
+        start_date: startDate,
+        end_date: endDate,
+        type: "truck"
+      };
+
+
+      const trailerPayload = {
+        start_date: startDate,
+        end_date: endDate,
+        type: "trailer"
+      };
+
+
+
+  
+      const [trucksResponse, trailersResponse] = await Promise.all([
+        axios.post(API_URL_VEHICLE_AVA, truckPayload,{
+          headers: { Authorization: authToken }
+        }),
+        axios.post(API_URL_VEHICLE_AVA, trailerPayload,{
+          headers: { Authorization: authToken }
+        })
+      ]);
+  
+      setAvailableTrucks(trucksResponse.data.vehicles || []);
+      setAvailableTrailers(trailersResponse.data.vehicles || []);
+      
+      // Reset selections if no longer available
+      const currentTruck = form.getFieldValue('truck');
+      if (currentTruck && !trucksResponse.data.vehicles.some(v => v.id === currentTruck)) {
+        form.setFieldsValue({ truck: undefined });
+        setSelectedTruck(null);
+      }
+  
+      const currentTrailer = form.getFieldValue('trailer');
+      if (currentTrailer && !trailersResponse.data.vehicles.some(v => v.id === currentTrailer)) {
+        form.setFieldsValue({ trailer: undefined });
+        setSelectedTrailer(null);
+      }
     } catch (error) {
-      console.error('Error fetching vehicles:', error);
-      setVehicles([]);
+      console.error('Error fetching available vehicles:', error);
+      message.error('Failed to check vehicle availability');
+    } finally {
+      setLoadingVehicles(false);
     }
   };
 
@@ -156,7 +202,7 @@ const RouteForm = ({ origin, destination, route }) => {
     } catch (error) {
       console.error('Error fetching pallets:', error);
       setPallets([]);
-      message.error('Failed to load pallets');
+      message.warning('No pallets have been found');
     } finally {
       setLoadingPallets(false);
     }
@@ -167,12 +213,12 @@ const RouteForm = ({ origin, destination, route }) => {
   };
 
   const handleTruckChange = (truckId) => {
-    const truck = trucks.find((t) => t.id === truckId);
+    const truck = availableTrucks.find((t) => t.id === truckId);
     setSelectedTruck(truck);
   };
 
   const handleTrailerChange = (trailerId) => {
-    const trailer = trailers.find((t) => t.id === trailerId);
+    const trailer = availableTrailers.find((t) => t.id === trailerId);
     setSelectedTrailer(trailer);
   };
 
@@ -224,10 +270,52 @@ const RouteForm = ({ origin, destination, route }) => {
           'Content-Type': 'application/json',
         },
       });
+
+      console.log(response);
+      const payloadReserveTruck = {
+        vehicleID: values.truck,
+        start_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
+        end_date: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
+        type: 'delivery',
+        deliveryID: response.data.data.id
+      }
+
+      const payloadReserveTrailer = {
+        vehicleID: values.trailer,
+        start_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
+        end_date: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
+        type: 'delivery',
+        deliveryID: response.data.data.id
+      }
+
+      console.log(payloadReserveTruck);
+
+
+      await axios.post(API_URL_VEHICLE_RESERVE, payloadReserveTruck, {
+        headers: {
+          Authorization: authToken,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      await axios.post(API_URL_VEHICLE_RESERVE, payloadReserveTrailer, {
+        headers: {
+          Authorization: authToken,
+          'Content-Type': 'application/json',
+        },
+      });
       
       message.success('Delivery created successfully!');
       form.resetFields();
       setSelectedPallets([]);
+      setSelectedTruck(null);
+      setSelectedTrailer(null);
+      setAvailableTrucks([]);
+      setAvailableTrailers([]);
+      setPallets([]);
+      setTotalVolume(0);
+      setRemainingVolume(0);
+      setIsTrailerFull(false);
       
       // For now, just log the payload
       console.log('Delivery payload:', payload);
@@ -240,7 +328,39 @@ const RouteForm = ({ origin, destination, route }) => {
     }
   };
 
+  const updateFilledPercentage = (pallets, trailerVolume) => {
+    const volumeSum = (pallets || []).reduce((sum, pallet) => {
+      return sum + (Number(pallet?.volume) || 0);
+    }, 0);
+  
+    const safeTrailerVolume = Number(trailerVolume) || 1; 
+    
+    const filledPercentage = parseFloat(
+      Math.min((volumeSum / safeTrailerVolume) * 100, 100).toFixed(2)
+    );
+    
+    const newRemainingVolume = parseFloat(
+      Math.max(safeTrailerVolume - volumeSum, 0).toFixed(2)
+    );
+  
+    setTotalVolume(filledPercentage);
+    setRemainingVolume(newRemainingVolume);
+    setIsTrailerFull(newRemainingVolume <= 0);
+  };
+  
+  // Call this whenever selectedPallets or selectedTrailer changes
+  useEffect(() => {
+    updateFilledPercentage(selectedPallets, selectedTrailer?.volume);
+  }, [selectedPallets, selectedTrailer]);
+
   const handlePalletToggle = (pallet) => {
+    if (!selectedPallets.some(p => p.id === pallet.id)) {
+      if (remainingVolume - pallet.volume < 0) {
+        message.warning("Trailer is full, it can't take more pallets");
+        return;
+      }
+    }
+  
     setSelectedPallets(prev => {
       if (prev.some(p => p.id === pallet.id)) {
         return prev.filter(p => p.id !== pallet.id);
@@ -333,41 +453,44 @@ const RouteForm = ({ origin, destination, route }) => {
 
             {/* Truck Select */}
             <Form.Item
-              label="Truck"
-              name="truck"
-              rules={[{ required: true, message: 'Please select a truck!' }]}
-            >
-              <Select
-                placeholder="Select a truck"
-                onChange={handleTruckChange}
-                showSearch
-                optionFilterProp="children"
+                label="Truck"
+                name="truck"
+                rules={[{ required: true, message: 'Please select a truck!' }]}
               >
-                {trucks.map((truck) => {
-                  const model = getModel(truck.model_id);
-                  const brand = getBrand(model.brand_id);
-                  return (
-                    <Option key={truck.id} value={truck.id}>
-                      {`${brand.name || 'Unknown Brand'} ${model.name || 'Unknown Model'} - ${truck.plates}`}
-                    </Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
+                <Select
+                  placeholder={loadingVehicles ? "Loading available trucks..." : "Select a truck"}
+                  onChange={handleTruckChange}
+                  showSearch
+                  optionFilterProp="children"
+                  disabled={loadingVehicles}
+                  notFoundContent={loadingVehicles ? <Spin size="small" /> : "No available trucks"}
+                >
+                  {availableTrucks.map((truck) => {
+                    const model = getModel(truck.model_id);
+                    const brand = getBrand(model.brand_id);
+                    return (
+                      <Option key={truck.id} value={truck.id}>
+                        {`${brand.name || 'Unknown Brand'} ${model.name || 'Unknown Model'} - ${truck.plates}`}
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </Form.Item>
 
             {/* Trailer Select (Optional) */}
             <Form.Item
               label="Trailer"
               name="trailer"
-              rules={[{ required: true, message: 'Please select a trailer!' }]}
             >
               <Select
-                placeholder="Select a trailer"
+                placeholder={loadingVehicles ? "Loading available trailers..." : "Select a trailer"}
                 onChange={handleTrailerChange}
                 showSearch
                 optionFilterProp="children"
+                disabled={loadingVehicles}
+                notFoundContent={loadingVehicles ? <Spin size="small" /> : "No available trailers"}
               >
-                {trailers.map((trailer) => {
+                {availableTrailers.map((trailer) => {
                   const model = getModel(trailer.model_id);
                   const brand = getBrand(model.brand_id);
                   return (
@@ -381,12 +504,12 @@ const RouteForm = ({ origin, destination, route }) => {
 
             {/* Display selected truck/trailer details */}
             {(selectedTruck || selectedTrailer) && (
-              <Row gutter={16}>
+              <Row gutter={16} style={{marginBottom:'20px'}}>
                 {selectedTruck && (
                   <Col span={12}>
                     <Card size="small" title="Truck Details">
                       <p>Plates: {selectedTruck.plates}</p>
-                      <p>Volume: {selectedTruck.volume}</p>
+                      <p>Vin: {selectedTruck.vin}</p>
                     </Card>
                   </Col>
                 )}
@@ -419,6 +542,40 @@ const RouteForm = ({ origin, destination, route }) => {
               />
             </Form.Item>
 
+            <Form.Item label="Trailer Capacity">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Progress 
+                  percent={totalVolume || 0} 
+                  status={isTrailerFull ? 'exception' : 'normal'}
+                  style={{ marginBottom: 0, flex: 1 }}
+                />
+                <span>
+                  {(remainingVolume ?? 0).toFixed(2)} m³ remaining  
+                </span>
+              </div>
+              {isTrailerFull && (
+                <Alert 
+                  message="Trailer is full" 
+                  type="error" 
+                  showIcon 
+                  style={{ marginTop: 8 }}
+                />
+              )}
+            </Form.Item>
+
+            {origin?.type === 'warehouse' && 
+              form.getFieldValue('shipping_date') && 
+              form.getFieldValue('truck') && 
+              (form.getFieldValue('trailer') || true) && (
+                <DockReservation 
+                  warehouseId={origin.id}
+                  shippingDate={form.getFieldValue('shipping_date')}
+                  trailerId={form.getFieldValue('trailer')}
+                  truckId={form.getFieldValue('truck')}
+                  authToken={authToken}
+                />
+            )}
+
             {/* Submit Button */}
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
               <Button type="primary" htmlType="submit" loading={loading}>
@@ -447,29 +604,38 @@ const RouteForm = ({ origin, destination, route }) => {
                 No pallets available for selected company within the selected origin warehouse
               </div>
             ) : (
-              pallets.map((pallet) => (
+              pallets.map((pallet) => {
+                const isSelected = selectedPallets.some(p => p.id === pallet.id);
+                const cannotAdd = !isSelected && (pallet.volume > remainingVolume);
+               return ( 
                 <Card
-                  key={pallet.id}
-                  hoverable
-                  style={{
-                    marginBottom: "16px",
-                    cursor: "pointer",
-                    border: selectedPallets.find(p => p.id === pallet.id) ? '2px solid #FF731D' : '1px solid #f0f0f0',
-                  }}
-                  onClick={() => handlePalletToggle(pallet)}
-                >
-                  <Row justify="space-between" align="middle">
-                    <Col>
-                      <ProductOutlined style={{ fontSize: "36px", color: "#FF731D" }} />
-                    </Col>
-                    <Col flex="auto" style={{ paddingLeft: 16 }}>
-                      <Title level={5} style={{ margin: 0 }}>Pallet #{pallet.id}</Title>
-                      <Text>Weight: {pallet.weight} kg</Text><br />
-                      <Text>Volume: {pallet.volume} m³</Text>
-                    </Col>
-                  </Row>
-                </Card>
-              ))
+                    key={pallet.id}
+                    hoverable
+                    style={{
+                      marginBottom: "16px",
+                      cursor: cannotAdd ? 'not-allowed' : 'pointer',
+                      border: isSelected ? '2px solid #FF731D' : '1px solid #f0f0f0',
+                      opacity: cannotAdd ? 0.6 : 1,
+                    }}
+                    onClick={() => !cannotAdd && handlePalletToggle(pallet)}
+                  >
+                    <Row justify="space-between" align="middle">
+                      <Col>
+                        <ProductOutlined style={{ fontSize: "36px", color: "#FF731D" }} />
+                      </Col>
+                      <Col flex="auto" style={{ paddingLeft: 16 }}>
+                        <Title level={5} style={{ margin: 0 }}>Pallet #{pallet.id}</Title>
+                        <Text>Weight: {pallet.weight} kg</Text><br />
+                        <Text>Volume: {pallet.volume} m³</Text>
+                        {cannotAdd && (
+                          <div style={{ color: '#ff4d4f', marginTop: 4 }}>
+                            <small>Too large for remaining space</small>
+                          </div>
+                        )}
+                      </Col>
+                    </Row>
+                  </Card>)
+              })
             )}
           </div>
         </div>

@@ -6,8 +6,8 @@ import { authToken, API_URL_CATEGORY, API_URL_COMPANY } from '../../../services/
 
 const { Text } = Typography;
 
-const CategoryComponent = () => {
-  const [categories, setCategories] = useState([]);
+const CategoryComponent = ({ categories, updateCategories }) => {
+  const [category, setCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({
@@ -37,6 +37,7 @@ const CategoryComponent = () => {
         }
       });
       setCategories(response.data.categories || []);
+      updateCategories(response.data.categories || []); 
     } catch (error) {
       console.error('Error fetching categories:', error);
       setCategories([]);
@@ -71,7 +72,9 @@ const CategoryComponent = () => {
         }
       });
       const selectedCompany = companies.find(company => company.id === formData.company);
-      setCategories([...categories, { ...response.data.category, company: selectedCompany }]);
+      const updatedCategories = [...categories, { ...response.data.category, company: selectedCompany }];
+      setCategories(updatedCategories);
+      updateCategories(updatedCategories);
       message.success("Category added successfully");
       resetForm();
       setIsModalVisible(false);
@@ -110,6 +113,7 @@ const CategoryComponent = () => {
           : category
       );
       setCategories(updatedCategories);
+      updateCategories(updatedCategories);
       message.success("Category updated successfully");
       setIsEditMode(false);
       resetForm();
@@ -128,6 +132,7 @@ const CategoryComponent = () => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsSubmitting(true);
     try {
       await axios.delete(`${API_URL_CATEGORY}/${currentCategory.id}`, {
         headers: {
@@ -135,12 +140,16 @@ const CategoryComponent = () => {
           'Content-Type': 'application/json'
         }
       });
-      setCategories(categories.filter(category => category.id !== currentCategory.id));
+      const updatedCategories = categories.filter(category => category.id !== currentCategory.id);
+      setCategories(updatedCategories);
+      updateCategories(updatedCategories);
       message.success("Category deleted successfully");
       setIsDeleteModalVisible(false);
     } catch (error) {
       message.error("Error deleting category");
       console.error("Error deleting category:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
