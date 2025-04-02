@@ -44,7 +44,7 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
   }
 }));
 
-export default function TotalIncomeDarkCard({ isLoading }) {
+export default function TotalIncomeDarkCard({ isLoading , count}) {
   const theme = useTheme();
 
   return (
@@ -77,12 +77,12 @@ export default function TotalIncomeDarkCard({ isLoading }) {
                   }}
                   primary={
                     <Typography variant="h4" sx={{ color: '#fff' }}>
-                      $203k
+                      {count}
                     </Typography>
                   }
                   secondary={
                     <Typography variant="subtitle2" sx={{ color: 'primary.light', mt: 0.25 }}>
-                      Total Income
+                      Works failed today
                     </Typography>
                   }
                 />

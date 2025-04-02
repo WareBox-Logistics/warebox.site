@@ -25,19 +25,31 @@ import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
-export default function PopularCard({ isLoading }) {
+export default function PopularCard({ isLoading, reports }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  // const reports = [
+  //   {
+  //     issue: true,
+  //     id: 1,
+  //     problem_table: { name: "Police Checkpoint" },
+  //     employee_table: { first_name: "Javier", last_name: "Esparza", id: 20 }
+  //   }
+  // ];
+  const stocks = [];
 
-  const stocks = [
-    { name: 'Bajaj Finery', price: '$1839.00', change: '10% Profit', up: true },
-    { name: 'TTML', price: '$100.00', change: '10% Loss', up: false },
-    { name: 'Reliance', price: '$200.00', change: '10% Profit', up: true },
-    { name: 'TTML', price: '$189.00', change: '10% Loss', up: false },
-    { name: 'Stolon', price: '$189.00', change: '10% Loss', up: false }
-  ];
+ // Mapeo y adición de reportes a stocks
+reports.forEach(report => {
+  stocks.push({
+    name: report.problem_table.name,  // Se usa el nombre del problema como "name"
+    price: report.id,  // Puedes asignar un valor adecuado
+    change: `${report.employee_table.first_name} ${report.employee_table.last_name}`,  // Indica que es un nuevo reporte
+    up: false // O puedes establecer una condición lógica
+  });
+});
+
 
   return (
     <>
@@ -48,9 +60,9 @@ export default function PopularCard({ isLoading }) {
           <CardContent>
             <Grid container spacing={gridSpacing} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
               <Grid item>
-                <Typography variant="h4">Popular Stocks</Typography>
+                <Typography variant="h4">Type reports per Month</Typography>
               </Grid>
-              <Grid item>
+              {/* <Grid item>
                 <IconButton size="small" onClick={handleMenuOpen}>
                   <MoreHorizOutlinedIcon fontSize="small" />
                 </IconButton>
@@ -66,12 +78,12 @@ export default function PopularCard({ isLoading }) {
                   <MenuItem onClick={handleMenuClose}>This Month</MenuItem>
                   <MenuItem onClick={handleMenuClose}>This Year</MenuItem>
                 </Menu>
-              </Grid>
+              </Grid> */}
             </Grid>
 
-            <Grid item xs={12} sx={{ mt: 2, mb: 3 }}>
+            {/* <Grid item xs={12} sx={{ mt: 2, mb: 3 }}>
               <BajajAreaChartCard />
-            </Grid>
+            </Grid> */}
 
             {stocks.map((stock, index) => (
               <React.Fragment key={stock.name + index}>
