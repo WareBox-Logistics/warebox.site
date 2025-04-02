@@ -27,7 +27,7 @@ const status = [
   { value: 'year', label: 'This Year' }
 ];
 
-export default function TotalGrowthBarChart({ isLoading }) {
+export default function TotalGrowthBarChart({ isLoading , delivered}) {
   const [value, setValue] = React.useState('today');
   const theme = useTheme();
   const { mode } = useConfig();

@@ -13,6 +13,85 @@ query GeEmployes {
     }
   }
 }`
+
+export const DASHBOARD_INFO = gql `
+query Dashboard {
+  descargados_hoy:delivery_aggregate(
+    where: {
+    	_and : [
+        { completed_date: { _gte: "now()" }},
+        {status : {_in : ["Completed"]}}
+  		]
+	}) {
+    aggregate {
+      count
+    }
+  }
+    pendientes_hoy:delivery_aggregate(
+      where: {
+        _and : [
+          {status : {_in : ["Pending"]}}
+        ]
+  }) {
+      aggregate {
+        count
+      }
+  }
+  vehiculos_en_espera_para_cargar_hoy: vehicle_availability_aggregate{
+    aggregate{
+      count
+    }
+  }
+  trabajos_fallidos_hoy: failed_jobs_aggregate(
+    where : {
+      failed_at :{ _gte: "now()" }
+    }
+  ){
+    aggregate{
+      count
+    }
+  }
+  depositos_hoy: warehouse_aggregate(
+    where : {
+      created_at :{ _gte: "now()" }
+    }
+  ){
+    aggregate{
+      count
+    }
+  }
+  incidencias_hoy: support_aggregate(
+    where : {
+      created_at :{ _gte: "now()" }
+    }
+  ){
+    aggregate{
+      count
+    }
+  }
+	reportes_hoy:report_aggregate(
+    where: {
+      created_at :{_gte : "now()"}
+    }
+  ) {
+    aggregate{
+      count
+    }
+  }
+  tipos_de_reportes : report {
+    issue
+    id
+    problem_table{
+      name
+    }
+    employee_table{
+      first_name
+      last_name
+  		id
+    }
+  }
+}
+`
 export const REGISTER_USER = gql`
   mutation RegisterUser($email: String!, $password: String!, $customer_id: uuid!, $is_admin: Boolean!) {
     insert_web_services_users_one(object: { email: $email, password: $password, customer_id: $customer_id, is_admin: $is_admin }) {

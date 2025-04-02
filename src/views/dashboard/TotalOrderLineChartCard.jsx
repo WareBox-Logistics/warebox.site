@@ -14,7 +14,7 @@ import SkeletonTotalOrderCard from 'ui-component/cards/Skeleton/EarningCard';
 import LocalMallOutlinedIcon from '@mui/icons-material/LocalMallOutlined';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
-export default function TotalOrderLineChartCard({ isLoading }) {
+export default function TotalOrderLineChartCard({ isLoading, issues, report }) {
   const theme = useTheme();
   const [timeValue, setTimeValue] = React.useState(false);
   const handleChangeTime = (event, newValue) => setTimeValue(newValue);
@@ -60,7 +60,7 @@ export default function TotalOrderLineChartCard({ isLoading }) {
                     sx={{ color: 'inherit' }}
                     onClick={(e) => handleChangeTime(e, true)}
                   >
-                    Month
+                    Issues
                   </Button>
                   <Button
                     disableElevation
@@ -69,14 +69,14 @@ export default function TotalOrderLineChartCard({ isLoading }) {
                     sx={{ color: 'inherit' }}
                     onClick={(e) => handleChangeTime(e, false)}
                   >
-                    Year
+                    Report
                   </Button>
                 </Box>
               </Grid>
               <Grid container alignItems="center">
                 <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: '2rem', fontWeight: 500, mr: '0.5rem' }}>
-                    {timeValue ? '$108' : '$961'}
+                    {timeValue ? issues : report}
                   </Typography>
                   <Avatar sx={{ bgcolor: 'primary.200', color: 'primary.dark' }}>
                     <ArrowDownwardIcon fontSize="inherit" sx={{ transform: 'rotate3d(1, 1, 1, 45deg)' }} />
@@ -87,7 +87,7 @@ export default function TotalOrderLineChartCard({ isLoading }) {
                 </Grid>
               </Grid>
               <Typography sx={{ fontSize: '1rem', fontWeight: 500, color: 'primary.200' }}>
-                Total Order
+                Total Issues
               </Typography>
             </Grid>
           </Box>

@@ -27,15 +27,15 @@ const container = document.getElementById('root');
 const root = createRoot(container); // createRoot(container!) if you use TypeScript
 const store = configureStore({ reducer });
 
-console.log("register service worker");
+// console.log("register service worker");
 
-if ('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js')
-        .then(reg => {console.log('Service worker registerd', )})
-        .catch(error => {console.error(error)})
-} else {
-    console.log("service worker not supported");
-} 
+// if ('serviceWorker' in navigator){
+//     navigator.serviceWorker.register('/sw.js')
+//         .then(reg => {console.log('Service worker registerd', )})
+//         .catch(error => {console.error(error)})
+// } else {
+//     console.log("service worker not supported");
+// } 
 
 root.render(
   <Provider store={store}>
