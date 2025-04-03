@@ -60,7 +60,9 @@ export const API_URL_PALLET = BASE_API_URL + '/pallet';
 //export const API_URL_DOCK_ASSIGNMENT = BASE_API_URL + '/dock-assignment';
 export const API_URL_RACK = BASE_API_URL + '/rack';
 export const API_URL_STORAGE_RACK_PALLET = BASE_API_URL + '/storage-rack-pallet';
-export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assigmnet';
+export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assignments';
+export const API_URL_DOCK_ALL_ASS = BASE_API_URL + '/docks/reservations/';
+export const API_URL_FILTERED_DELIVERY = BASE_API_URL + '/delivery/filtered/';
 
 //Dispatch
 export const API_URL_REPORT = BASE_API_URL + '/report';

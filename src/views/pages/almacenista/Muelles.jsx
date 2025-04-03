@@ -1,64 +1,183 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Card, Col, Row, Spin, message, Radio, Pagination, Modal, Button, Select, DatePicker, TimePicker, InputNumber, Form } from 'antd';
-import { TruckOutlined } from "@ant-design/icons";
-import { WarehouseOutlined } from "@mui/icons-material";
+import { Card, Col, Row, Spin, message, Space, Modal, Button, Select, Collapse, Typography, Tag, Calendar, Badge, List, Descriptions } from 'antd';
 import moment from 'moment';
+import { Paper } from '@mui/material';
+import MainCard from "ui-component/cards/MainCard";
 import {
     authToken,
     API_URL_DOCK,
     API_URL_WAREHOUSE,
-    API_URL_FREE_TRUCKS,
-    API_URL_FREE_TRAILERS
+    API_URL_DOCK_ALL_ASS,
+    API_URL_FILTERED_DELIVERY,
+    API_URL_VEHICLE
 } from '../../../services/services';
+
+
+const { Title, Text } = Typography;
 
 const Muelles = () => {
     const [docks, setDocks] = useState([]);
     const [warehouses, setWarehouses] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState('all');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(18);
-    const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedDock, setSelectedDock] = useState(null);
-    const [freeTrucks, setFreeTrucks] = useState([]);
-    const [freeTrailers, setFreeTrailers] = useState([]);
-    const [vehiclesLoaded, setVehiclesLoaded] = useState(false);
-    const [form] = Form.useForm();
-    const [isReserving, setIsReserving] = useState(false);
+    const [warehouseFilter, setWarehouseFilter] = useState('all');
+    const [dockReservations, setDockReservations] = useState([]);
+    const [reservationsLoading, setReservationsLoading] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [dateReservations, setDateReservations] = useState([]);
+    const [deliveryModalVisible, setDeliveryModalVisible] = useState(false);
+    const [vehicles, setVehicles] = useState([]);
+    const [deliveryDetails, setDeliveryDetails] = useState(null);
+    const [assignedVehicles, setAssignedVehicles] = useState([]);
 
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
-            await fetchDocks();
             await fetchWarehouses();
+            await fetchDocks();
+            await fetchVehicles();
             setIsLoading(false);
         };
         loadData();
     }, []);
 
-    useEffect(() => {
-        if (isModalVisible) {
-            const loadVehicles = async () => {
-                setVehiclesLoaded(false);
-                await fetchFreeVehicles();
-                setVehiclesLoaded(true);
-            };
-            loadVehicles();
+    const fetchVehicles = async() => {
+        try {
+            const response = await axios.get(API_URL_VEHICLE, {
+                headers: { 'Authorization': authToken }
+            });
+            setVehicles(response.data.vehicles);
+        } catch (error) {
+            message.error("Error fetching vehicles");
+            console.error("Error fetching vehicles:", error);
+        } finally {
+            setIsLoading(false);
         }
-    }, [isModalVisible]);
+    }
+
+    const fetchReservationDetails = async (reservation) => {
+        try {
+          setIsLoading(true);
+          
+          const deliveryResponse = await axios.get(
+            `${API_URL_FILTERED_DELIVERY}${reservation.delivery_id}`,
+            { headers: { 'Authorization': authToken } }
+          );
+          
+          console.log(reservation)
+          
+          const deliveryVehicles = vehicles.filter(
+            vehicle => vehicle.id === reservation.delivery_details.truck || 
+                      vehicle.id === reservation.delivery_details.trailer
+          );
+      
+          setDeliveryDetails(deliveryResponse.data);
+          setAssignedVehicles(deliveryVehicles);
+          setDeliveryModalVisible(true);
+          
+        } catch (error) {
+          message.error("Error loading details");
+          console.error("Error:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+       
+
+    const fetchDockReservations = async(dock) => {
+        try {
+            const response = await axios.get(`${API_URL_DOCK_ALL_ASS}${dock}`, {
+                headers: { 'Authorization': authToken }
+            });
+            setDockReservations(response.data.data);
+        } catch (error) {
+            message.error("Error loading dock reservations");
+            console.error("Error:", error);
+        } finally {
+            setReservationsLoading(false);
+        }
+    }
+
+    const handleDockSelect = (dock) => {
+        setSelectedDock(dock);
+        fetchDockReservations(dock.id);
+      };
+
+      const handleDateSelect = (value) => {
+        const dateStr = value.format('YYYY-MM-DD');
+        const reservations = dockReservations.filter(res => 
+          moment(res.scheduled_time).format('YYYY-MM-DD') === dateStr
+        );
+        
+        setDateReservations(reservations);
+        setSelectedDate(value);
+      };
+    
+      const handleReservationClick = async (reservation) => {
+        await fetchReservationDetails(reservation);
+      };
+    
+      const dateCellRender = (value) => {
+        const dateStr = value.format('YYYY-MM-DD');
+        const dayReservations = dockReservations.filter(res => 
+          moment(res.scheduled_time).format('YYYY-MM-DD') === dateStr
+        );
+    
+        return (
+          <div 
+            style={{ 
+              height: '100%',
+              minHeight: '80px',
+              overflow: 'hidden'
+            }}
+            onClick={() => handleDateSelect(value)}
+          >
+            {dayReservations.map(res => (
+              <div 
+                key={res.id}
+                style={{
+                  margin: '2px',
+                  padding: '2px',
+                  background: '#f0f0f0',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleReservationClick(res);
+                }}
+              >
+                {moment(res.scheduled_time).format('HH:mm')} - {res.delivery_details?.truck || 'N/A'}
+              </div>
+            ))}
+          </div>
+        );
+      };
+
 
     const fetchDocks = async () => {
         try {
-            const response = await axios.get(API_URL_DOCK, { 
-                headers: { 'Authorization': authToken }
-            });
-            setDocks(response.data);
+          const response = await axios.get(API_URL_DOCK, { 
+            headers: { 'Authorization': authToken }
+          });
+          
+          if (!warehouses || Object.keys(warehouses).length === 0) {
+            await fetchWarehouses();
+          }
+      
+          const docksWithWHName = response.data.map(dock => ({
+            ...dock, 
+            warehouseName: warehouses[dock.warehouse] || 'Unknown Warehouse'
+          }));
+      
+          setDocks(docksWithWHName);
         } catch (error) {
-            message.error("Error fetching docks");
-            console.error("Error fetching docks:", error);
+          message.error("Error fetching docks");
+          console.error("Error fetching docks:", error);
         }
-    };
+      };
 
     const fetchWarehouses = async () => {
         try {
@@ -76,236 +195,217 @@ const Muelles = () => {
         }
     };
 
-    const fetchFreeVehicles = async () => {
-        try {
-            const [truckResponse, trailerResponse] = await Promise.all([
-                axios.get(API_URL_FREE_TRUCKS, { headers: { Authorization: authToken } }),
-                axios.get(API_URL_FREE_TRAILERS, { headers: { Authorization: authToken } })
-            ]);
-            
-            setFreeTrucks(truckResponse.data.trucks || []);
-            setFreeTrailers(trailerResponse.data.trailers || []);
-        } catch (error) {
-            message.error("Error fetching free vehicles.");
-            console.error("Error fetching free vehicles:", error);
-        }
-    };
-
-    const handleCardClick = (dock) => {
-        // Solo permite seleccionar muelles disponibles
-        if (dock.status !== 'Available') {
-            message.info("Este muelle está ocupado y no puede ser reservado");
-            return;
-        }
-        
-        setSelectedDock(dock);
-        form.resetFields(); // Reset form fields before showing the modal
-        setIsModalVisible(true);
-    };
 
     const handleCloseModal = () => {
-        setIsModalVisible(false);
+        setDeliveryModalVisible(false);
         setSelectedDock(null);
-        form.resetFields();
     };
 
-    const assignVehicleToDock = async () => {
-        try {
-            setIsReserving(true);
-            await form.validateFields();
-            const formValues = form.getFieldsValue();
-
-            const scheduledDateTime = moment(formValues.scheduledDate)
-                .hour(formValues.scheduledTime.hours())
-                .minute(formValues.scheduledTime.minutes())
-                .format('YYYY-MM-DD HH:mm:ss');
-
-            const response = await axios.post(
-                'http://127.0.0.1:8000/api/docks/reserve',
-                {
-                    dock_id: selectedDock.id,
-                    truck_id: formValues.vehicleId,
-                    start_time: scheduledDateTime,
-                    duration_minutes: formValues.durationMinutes
-                },
-                {
-                    headers: {
-                        'Authorization': authToken,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
-            if (response.status === 200 || response.status === 201) {
-                message.success("Muelle reservado correctamente.");
-                fetchDocks(); // Refresh docks after successful reservation
-                handleCloseModal();
-            } else {
-                message.error("Error al reservar el muelle.");
-            }
-        } catch (error) {
-            console.error("Error completo:", error);
-            if (error.response && error.response.status === 409) {
-                message.error("El muelle no está disponible en el horario seleccionado.");
-                console.error("Conflicto:", error.response.data.conflict);
-            } else {
-                message.error("Error al reservar el muelle: " + (error.message || 'Unknown error'));
-            }
-        } finally {
-            setIsReserving(false);
-        }
-    };
     
     const filteredDocks = docks.filter(dock => {
-        if (filter === 'occupied') return dock.status === 'Occupied';
-        if (filter === 'available') return dock.status === 'Available';
-        return true;
-    });
+        const statusMatch = 
+          filter === 'all' || 
+          (filter === 'available' && dock.status === 'Available') ||
+          (filter === 'occupied' && dock.status === 'Occupied');
+        
+        const warehouseMatch = 
+          warehouseFilter === 'all' || 
+          dock.warehouse.toString() === warehouseFilter;
+        
+        return statusMatch && warehouseMatch;
+      });
 
-    const paginatedDocks = filteredDocks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
 
     return (
-        <div>
-            <h1>Gestión de Muelles</h1>
-            <Radio.Group value={filter} onChange={e => setFilter(e.target.value)} style={{ marginBottom: 16 }}>
-                <Radio.Button value="all">Todos</Radio.Button>
-                <Radio.Button value="available">Disponibles</Radio.Button>
-                <Radio.Button value="occupied">Ocupados</Radio.Button>
-            </Radio.Group>
-
+    <Paper sx={{ padding: '16px' }}>
+        <MainCard title="Dock visualization">        
             {isLoading ? (
                 <div style={{ textAlign: 'center', padding: '50px' }}>
                     <Spin size="large" />
-                    <p>Cargando muelles...</p>
+                    <p>Loading docks...</p>
                 </div>
             ) : (
                 <>
-                    <Row gutter={[16, 16]}>
-                        {paginatedDocks.map(dock => (
-                            <Col xs={24} sm={12} md={8} lg={6} xl={4} key={dock.id}>
-                                <Card
-                                    title={`Muelle ${dock.number}`}
-                                    style={{ 
-                                        backgroundColor: dock.status === 'Available' ? '#d4edda' : '#f8d7da', 
-                                        textAlign: 'center',
-                                        cursor: dock.status === 'Available' ? 'pointer' : 'default'
-                                    }}
-                                    onClick={() => handleCardClick(dock)}
-                                >
-                                    {dock.status === 'Available' ? (
-                                        <WarehouseOutlined style={{ fontSize: '40px', color: 'green' }} />
-                                    ) : (
-                                        <TruckOutlined style={{ fontSize: '40px', color: 'red' }} />
-                                    )}
-                                    <p>Estado: {dock.status === 'Available' ? 'Disponible' : 'Ocupado'}</p>
-                                    <p>Almacén: {warehouses[dock.warehouse] || 'Desconocido'}</p>
-                                </Card>
-                            </Col>
-                        ))}
+                <Col>
+                   <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                        <Col>
+                            <Select
+                            value={warehouseFilter}
+                            onChange={setWarehouseFilter}
+                            style={{ width: 200 }}
+                            >
+                            <Select.Option value="all">All warehouses</Select.Option>
+                            {Object.entries(warehouses).map(([id, name]) => (
+                                <Select.Option key={id} value={id}>
+                                {name}
+                                </Select.Option>
+                            ))}
+                            </Select>
+                        </Col>
+                        <Col>
+                        
+                            <Select
+                            value={filter}
+                            onChange={setFilter}
+                            style={{ width: 200 }}
+                            >
+                            <Select.Option value="all">All</Select.Option>
+                            <Select.Option value="available">Available</Select.Option>
+                            <Select.Option value="occupied">Occupied</Select.Option>
+                            </Select>
+                        </Col>
                     </Row>
+                    <Row gutter={[16, 16]}>
+                    {filteredDocks.map((dock) => (
+                                <Col xs={24} sm={12} md={12} lg={6} xl={6} key={dock.id}>
+                                <Card
+                                    title={`Dock #${dock.number}`}
+                                    style={{
+                                    cursor: 'pointer',
+                                    height: '100%' 
+                                    }}
+                                    onClick={() => {
+                                        handleDockSelect(dock)
+                                    }}
+                                >
+                                    <Space direction="vertical" size="small">
+                                    <div>
+                                        <strong style={{marginRight:'10px'}}>Status:</strong> 
+                                        {dock.status == 'Available' ? (
+                                        <Tag color="green">Available</Tag>
+                                        ) : (
+                                        <Tag color="red">Occupied</Tag>
+                                        )}
+                                    </div>
+                                    {/* Add more dock information as needed */}
+                                    <div><strong>Warehouse:</strong> {dock.warehouseName || 'N/A'}</div>
+                                    <div><strong>Type:</strong> {dock.type || 'N/A'}</div>
+                                    </Space>
+                                </Card>
+                                </Col>
+                    ))}
+                    </Row>
+                    {selectedDock && (
+                        <div style={{ marginTop: 24 }}>
+                            <Title level={4} style={{ marginBottom: 16 }}>
+                            Reservations for Dock #{selectedDock.number}
+                            </Title>
+                            <Calendar
+                            dateCellRender={dateCellRender}
+                            mode="month"
+                            style={{
+                                border: '1px solid #f0f0f0',
+                                borderRadius: '8px',
+                                padding: '16px'
+                            }}
+                            />
+                        </div>
+                        )}
 
-                    <Pagination
-                        current={currentPage}
-                        pageSize={pageSize}
-                        total={filteredDocks.length}
-                        onChange={page => setCurrentPage(page)}
-                        style={{ marginTop: 16, textAlign: 'center' }}
-                    />
+                        {/* Selected Date Reservations */}
+                        {selectedDate && dateReservations.length > 0 && (
+                        <div style={{ marginTop: 24 }}>
+                            <Title level={5}>
+                            Reservations on {selectedDate.format('MMMM D, YYYY')}
+                            </Title>
+                            <List
+                            dataSource={dateReservations}
+                            renderItem={res => (
+                                <List.Item 
+                                onClick={() => handleReservationClick(res)}
+                                style={{ cursor: 'pointer' }}
+                                >
+                                <List.Item.Meta
+                                    title={`Truck: ${res.delivery_details?.truck || 'N/A'}`}
+                                    description={
+                                    <>
+                                        <div>{moment(res.scheduled_time).format('h:mm A')} - {moment(res.scheduled_time).add(res.duration_minutes, 'minutes').format('h:mm A')}</div>
+                                        <div>Status: <Tag color={res.status === 'completed' ? 'green' : 'orange'}>{res.status}</Tag></div>
+                                    </>
+                                    }
+                                />
+                                </List.Item>
+                            )}
+                            />
+                        </div>
+                        )}
+                    </Col>
                 </>
             )}
 
-            <Modal
-                title="Reservar Muelle"
-                open={isModalVisible}
-                onCancel={handleCloseModal}
-                destroyOnClose={true}
-                footer={[
-                    <Button key="cancel" onClick={handleCloseModal}>
-                        Cancelar
-                    </Button>,
-                    <Button 
-                        key="assign" 
-                        type="primary" 
-                        onClick={assignVehicleToDock}
-                        loading={isReserving}
-                    >
-                        Reservar
-                    </Button>,
-                ]}
-            >
-                {selectedDock && (
-                    <Form
-                        form={form}
-                        layout="vertical"
-                        preserve={false}
-                        initialValues={{
-                            durationMinutes: 60,
-                            scheduledDate: moment(),
-                            scheduledTime: moment(),
-                        }}
-                    >
-                        <Form.Item
-                            label="Almacén"
+                <Modal
+                title={`Delivery #${deliveryDetails?.delivery_id || ''}`}
+                open={deliveryModalVisible}
+                onCancel={() => setDeliveryModalVisible(false)}
+                width={800}
+                footer={null}
+                >
+                {isLoading ? (
+                    <Spin tip="Loading details..." />
+                ) : (
+                    <div style={{height:'65vh', overflowY:'auto'}}>
+                    {/* Delivery Information */}
+                    <Descriptions bordered column={1} style={{ marginBottom: 24 }}>
+                        <Descriptions.Item label="Status">
+                        <Tag color={
+                            deliveryDetails?.status === 'Completed' ? 'green' :
+                            deliveryDetails?.status === 'Cancelled' ? 'red' : 'orange'
+                        }>
+                            {deliveryDetails?.status}
+                        </Tag>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Origin">{deliveryDetails?.origin}</Descriptions.Item>
+                        <Descriptions.Item label="Destination">{deliveryDetails?.destination}</Descriptions.Item>
+                    </Descriptions>
+
+                    <Title level={5} style={{ marginBottom: 16 }}>Assigned Vehicles</Title>
+                    <Row gutter={16}>
+                        {assignedVehicles.map(vehicle => (
+                        <Col span={12} key={vehicle.id}>
+                            <Card size="small">
+                            <Descriptions column={1}>
+                                <Descriptions.Item label="Type">{vehicle.type}</Descriptions.Item>
+                                <Descriptions.Item label="Plates">{vehicle.plates}</Descriptions.Item>
+                                <Descriptions.Item label="Model">{vehicle.model?.name}</Descriptions.Item>
+                                <Descriptions.Item label="Volume">{vehicle.volume} m³</Descriptions.Item>
+                            </Descriptions>
+                            </Card>
+                        </Col>
+                        ))}
+                    </Row>
+
+                    <Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>Pallets</Title>
+                    <Collapse>
+                        {deliveryDetails?.pallets?.map(pallet => (
+                        <Collapse.Panel 
+                            key={pallet.pallet_id} 
+                            header={`Pallet #${pallet.pallet_id}`}
                         >
-                            <span>{warehouses[selectedDock.warehouse] || 'Desconocido'}</span>
-                        </Form.Item>
-                        
-                        <Form.Item
-                            label="Vehículo"
-                            name="vehicleId"
-                            rules={[{ required: true, message: 'Por favor selecciona un vehículo' }]}
-                        >
-                            <Select
-                                placeholder="Selecciona un vehículo"
-                                loading={!vehiclesLoaded}
-                                getPopupContainer={trigger => trigger.parentNode}
-                            >
-                                <Select.OptGroup label="Camiones">
-                                    {freeTrucks.map(truck => (
-                                        <Select.Option key={truck.id} value={truck.id}>
-                                            {truck.plates} - {truck.model}
-                                        </Select.Option>
-                                    ))}
-                                </Select.OptGroup>
-                                <Select.OptGroup label="Remolques">
-                                    {freeTrailers.map(trailer => (
-                                        <Select.Option key={trailer.id} value={trailer.id}>
-                                            {trailer.plates} - {trailer.model}
-                                        </Select.Option>
-                                    ))}
-                                </Select.OptGroup>
-                            </Select>
-                        </Form.Item>
-                        
-                        <Form.Item
-                            label="Fecha programada"
-                            name="scheduledDate"
-                            rules={[{ required: true, message: 'Por favor selecciona una fecha' }]}
-                        >
-                            <DatePicker style={{ width: '100%' }} getPopupContainer={trigger => trigger.parentNode} />
-                        </Form.Item>
-                        
-                        <Form.Item
-                            label="Hora programada"
-                            name="scheduledTime"
-                            rules={[{ required: true, message: 'Por favor selecciona una hora' }]}
-                        >
-                            <TimePicker format="HH:mm" style={{ width: '100%' }} getPopupContainer={trigger => trigger.parentNode} />
-                        </Form.Item>
-                        <Form.Item
-                            label="Duración (minutos)"
-                            name="durationMinutes"
-                            rules={[
-                                { required: true, message: 'Por favor ingresa la duración' },
-                                { type: 'number', min: 15, max: 240, message: 'La duración debe estar entre 15 y 240 minutos' }
-                            ]}
-                        >
-                            <InputNumber min={15} max={240} style={{ width: '100%' }} />
-                        </Form.Item>
-                    </Form>
+                            <List
+                            dataSource={pallet.boxes}
+                            renderItem={box => (
+                                <List.Item>
+                                <List.Item.Meta
+                                    title={box.product_name}
+                                    description={
+                                    <div>
+                                        <div>SKU: {box.product_sku}</div>
+                                        <div>Quantity: {box.quantity}</div>
+                                    </div>
+                                    }
+                                />
+                                </List.Item>
+                            )}
+                            />
+                        </Collapse.Panel>
+                        ))}
+                    </Collapse>
+                    </div>
                 )}
-            </Modal>
-        </div>
+                </Modal>
+        </MainCard>
+        </Paper>
     );
 };
 
