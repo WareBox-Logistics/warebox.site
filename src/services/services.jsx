@@ -92,6 +92,15 @@ export const API_URL_FREE_LOT = BASE_API_URL + '/lots/free';
 export const API_URL_DOCK = BASE_API_URL + '/dock';
 export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 
+//QR Code
+export const API_URL_GENERATE_QR = BASE_API_URL + '/deliveries/{delivery}/generate-code';
+export const API_URL_CONFIRM_QR = BASE_API_URL + '/deliveries/confirm-by-code';
+
+
+
+// OPTIMIZED ROUTES
+export const API_URL_ALL_DELIVERIES = BASE_API_URL + '/deliveries/all';
+export const API_URL_DELIVERIES_COMPANY = BASE_API_URL + '/deliveries/company';
 
 
 
