@@ -2,123 +2,79 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Select, Typography, Spin, Modal, Tag, Empty } from "antd";
 import { Paper } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import { HomeOutlined, CodepenOutlined } from "@ant-design/icons";
+import { CodepenOutlined } from "@ant-design/icons";
 import axios from 'axios';
-import { API_URL_PALLET, API_URL_BOX_INVENTORY, API_URL_COMPANY, API_URL_WAREHOUSE, authToken } from '../../../services/services';
+import { API_URL_ALL_PALLETS, authToken } from '../../../services/services';
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const Pallets = () => {
   const [pallets, setPallets] = useState([]);
-  const [companies, setCompanies] = useState([]);
   const [filteredPallets, setFilteredPallets] = useState([]);
-  const [selectedCompany, setSelectedCompany] = useState(null);
-  const [isLoadingPallets, setIsLoadingPallets] = useState(true);
-  const [isLoadingBoxes, setIsLoadingBoxes] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedPallet, setSelectedPallet] = useState(null);
-  const [boxInventory, setBoxInventory] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(null);
-  const [boxes, setBoxes] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [warehouseFilter, setWarehouseFilter] = useState("");
 
   useEffect(() => {
-    fetchPalletsAndCompanies();
+    fetchPallets();
   }, []);
 
-  const fetchPalletsAndCompanies = async () => {
-    setIsLoadingPallets(true);
+  const fetchPallets = async () => {
+    setIsLoading(true);
     try {
-      const [palletResponse, companyResponse, boxResponse] = await Promise.all([
-        axios.get(API_URL_PALLET, { headers: { Authorization: authToken } }),
-        axios.get(API_URL_COMPANY, { headers: { Authorization: authToken } }),
-        axios.get(API_URL_BOX_INVENTORY, { headers: { Authorization: authToken } }),
-      ]);
+      const response = await axios.get(API_URL_ALL_PALLETS, {
+        headers: { Authorization: authToken },
+      });
 
-      const fetchedPallets = palletResponse.data.pallets || [];
+      const fetchedPallets = response.data.pallets;
       setPallets(fetchedPallets);
-      setCompanies(companyResponse.data.companies || []);
-      setBoxes(boxResponse.data.boxes || []);
-
-      if (!selectedStatus && !selectedCompany) {
-        setFilteredPallets(fetchedPallets);
-      }
+      setFilteredPallets(fetchedPallets);
     } catch (error) {
-      console.error("Error fetching pallets or companies:", error);
+      console.error("Error fetching pallets:", error);
     } finally {
-      setIsLoadingPallets(false);
+      setIsLoading(false);
     }
   };
 
-  const handleFilterByCompany = (companyId) => {
-    setSelectedCompany(companyId);
-    if (companyId) {
-      const filtered = pallets.filter(pallet => pallet.company?.id === companyId);
-      setFilteredPallets(filtered);
-    } else {
-      setFilteredPallets(pallets);
-    }
+  useEffect(() => {
+    const filtered = pallets.filter((pallet) => {
+      const matchesStatus = !statusFilter || pallet.status === statusFilter;
+      const matchesWarehouse = !warehouseFilter || pallet.warehouse?.id === warehouseFilter;
+      return matchesStatus && matchesWarehouse;
+    });
+    setFilteredPallets(filtered);
+  }, [statusFilter, warehouseFilter, pallets]);
+
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
+  };
+
+  const handleWarehouseFilterChange = (value) => {
+    setWarehouseFilter(value);
+  };
+
+  const handleCardClick = (pallet) => {
+    setSelectedPallet(pallet);
+    setIsModalVisible(true);
   };
 
   const getStatusTag = (status) => {
-    // console.log("Status received:", status);
     switch (status) {
       case "Created":
         return <Tag color="processing">Created</Tag>;
       case "Stored":
         return <Tag color="default">Stored</Tag>;
       case "In Transit":
-        return <Tag color="warning" icon={<CodepenOutlined />}>In Transit</Tag>;
+        return <Tag color="warning">In Transit</Tag>;
       case "Delivered":
-        return <Tag color="success" icon={<CodepenOutlined />}>Delivered</Tag>;
+        return <Tag color="success">Delivered</Tag>;
       default:
         return <Tag color="default">Unknown</Tag>;
     }
   };
-
-  const getBoxCountForPallet = (palletId) => {
-    return boxes.filter(box => box.pallet?.id === palletId).length;
-  };
-
-  const handleCardClick = async (pallet) => {
-    setSelectedPallet(pallet);
-    setIsLoadingBoxes(true);
-    setIsModalVisible(true);
-
-    try {
-      const response = await axios.get(`${API_URL_BOX_INVENTORY}`, {
-        headers: { Authorization: authToken },
-        params: { pallet_id: pallet.id },
-      });
-
-      const filteredBoxes = response.data.boxes.filter(box => box.pallet && box.pallet.id === pallet.id);
-      setBoxInventory(filteredBoxes);
-    } catch (error) {
-      console.error("Error fetching box inventory:", error);
-    } finally {
-      setIsLoadingBoxes(false);
-    }
-  };
-
-  const getUniqueWarehouses = () => {
-    const warehouseMap = new Map();
-    filteredPallets.forEach(pallet => {
-      if (pallet.warehouse && !warehouseMap.has(pallet.warehouse.id)) {
-        warehouseMap.set(pallet.warehouse.id, pallet.warehouse);
-      }
-    });
-    return Array.from(warehouseMap.values());
-  };
-
-  const handleFilterByStatus = (status) => {
-    setSelectedStatus(status);
-    if (status) {
-      const filtered = pallets.filter(pallet => pallet.status === status);
-      setFilteredPallets(filtered);
-    } else {
-      setFilteredPallets(pallets);
-    }
-  };
-
 
   const renderPalletCards = () => {
     if (filteredPallets.length === 0) {
@@ -128,25 +84,26 @@ const Pallets = () => {
         </div>
       );
     }
-    
-    const warehouses = getUniqueWarehouses();
 
-    return warehouses.map(warehouse => {
-      const palletsInWarehouse = filteredPallets.filter(pallet =>
-        pallet.warehouse && pallet.warehouse.id === warehouse.id
+    const warehouses = Array.from(
+      new Set(filteredPallets.map((pallet) => pallet.warehouse?.name))
+    );
+
+    return warehouses.map((warehouseName) => {
+      const palletsInWarehouse = filteredPallets.filter(
+        (pallet) => pallet.warehouse?.name === warehouseName
       );
 
-      if (palletsInWarehouse.length === 0) return null;
-
       return (
-        <div key={warehouse.id} style={{ marginBottom: "30px", width: "100%" }}>
+        <div key={warehouseName} style={{ marginBottom: "30px", width: "100%" }}>
+          {/* <hr style={{ marginBottom: "-10px", borderColor: "rgba(255, 255, 255, 0.43)", borderWidth: "1px" }} /> */}
           <Title level={4} style={{ marginBottom: "16px", paddingLeft: "16px", color: "#FF731D" }}>
-            - {warehouse.name} -
+            - {warehouseName} -
           </Title>
 
           <Row gutter={[16, 16]} style={{ padding: "0 16px" }}>
-            {palletsInWarehouse.map((pallet, index) => (
-              <Col key={`${pallet.id}-${index}`} xs={24} sm={12} md={8} lg={8}>
+            {palletsInWarehouse.map((pallet) => (
+              <Col key={pallet.id} xs={24} sm={12} md={8} lg={8}>
                 <Card
                   hoverable
                   style={{
@@ -168,26 +125,17 @@ const Pallets = () => {
                         Pallet {pallet.id}
                       </Title>
                       <Text style={{ display: 'block', marginTop: '8px', fontSize: '16px' }}>
-                        <strong>Company:</strong> {pallet.company?.name || "N/A"}
-                      </Text>
-                      <Text style={{ display: 'block', fontSize: '16px' }}>
                         <strong>Weight:</strong> {pallet.weight || "0"} kg
                       </Text>
                       <Text style={{ display: 'block', fontSize: '16px' }}>
                         <strong>Volume:</strong> {pallet.volume || "0"} m³
                       </Text>
                       <Text style={{ display: 'block', fontSize: '16px' }}>
-                        <strong>Boxes:</strong> {getBoxCountForPallet(pallet.id)}
-                        {/* <Tag color="orange" style={{ marginTop: '8px' }}>
-                          {getBoxCountForPallet(pallet.id)}
-                        </Tag> */}
+                        <strong>Boxes:</strong> {pallet.box_inventories?.length || 0}
                       </Text>
                       <Text style={{ display: 'block', fontSize: '16px', marginTop: '18px', marginBottom: '-15px' }}>
                         <strong>Status:</strong> {getStatusTag(pallet.status?.trim() || "N/A")}
                       </Text>
-                      {/* <Text style={{ display: 'block', fontSize: '16px' }}>
-                        <strong>Verified:</strong> {pallet.verified ? "Yes" : "No"}
-                      </Text> */}
                     </Col>
                   </Row>
                 </Card>
@@ -199,69 +147,99 @@ const Pallets = () => {
     });
   };
 
-
   return (
     <Paper sx={{ padding: '16px' }}>
       <MainCard title="Pallets">
-        <Row justify="space-between" align="middle" style={{ marginBottom: "20px" }}>
-          <Col>
+        <Row style={{ marginBottom: "20px" }}>
+          <Col xs={24} style={{ textAlign: "right"}}>
             <Select
-              placeholder="Filter by Company"
-              style={{ width: 200 }}
+              placeholder="Filter by Warehouse"
+              style={{ width: 180, textAlign: "left", marginRight: "10px" }}
+              onChange={handleWarehouseFilterChange}
               allowClear
-              onChange={handleFilterByCompany}
-              options={companies.map(company => ({
-                label: company.name,
-                value: company.id,
-              }))}
-            />
-          </Col>
-          <Col>
+            >
+              {Array.from(
+                  pallets.reduce((uniqueWarehouses, pallet) => {
+                    if (pallet.warehouse && !uniqueWarehouses.has(pallet.warehouse.id)) {
+                      uniqueWarehouses.set(pallet.warehouse.id, pallet.warehouse);
+                    }
+                    return uniqueWarehouses;
+                  }, new Map()).values()
+                ).map((warehouse) => (
+                  <Option key={warehouse.id} value={warehouse.id}>
+                    {warehouse.name}
+                  </Option>
+                ))}
+            </Select>
+
             <Select
-              placeholder="Sort by Status"
-              style={{ width: 150 }}
+              placeholder="Filter by Status"
+              style={{ width: 150, textAlign: "left" }}
+              onChange={handleStatusFilterChange}
               allowClear
-              onChange={handleFilterByStatus}
-              options={[
-                { label: "Created", value: "Created" },
-                { label: "Stored", value: "Stored" },
-                { label: "In Transit", value: "In Transit" },
-                { label: "Delivered", value: "Delivered" },
-              ]}
-            />
+            >
+              <Option value="Created">Created</Option>
+              <Option value="Stored">Stored</Option>
+              <Option value="In Transit">In Transit</Option>
+              <Option value="Delivered">Delivered</Option>
+            </Select>
           </Col>
         </Row>
 
-        <Spin spinning={isLoadingPallets}>
-          {!isLoadingPallets && renderPalletCards()}
+        <Spin spinning={isLoading}>
+          {!isLoading && renderPalletCards()}
         </Spin>
 
         <Modal
-          title={`Boxes in Pallet ${selectedPallet?.id}`}
+          title={`Boxes in Pallet #${selectedPallet?.id}`}
           visible={isModalVisible}
           onCancel={() => setIsModalVisible(false)}
           footer={null}
-          width={800}
+          width={350}
+          style={{ marginTop: "-10px" }}
+          bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
         >
-          <Spin spinning={isLoadingBoxes} tip="Loading boxes...">
-            {boxInventory.length > 0 ? (
-              <Row gutter={[16, 16]}>
-                {boxInventory.map(box => (
-                  <Col key={box.id} xs={24} sm={12} md={8}>
-                    <Card style={{ marginBottom: '16px' }}>
-                      <Text strong>Box ID:</Text> {box.id}<br />
-                      <Text strong>Quantity:</Text> {box.qty}<br />
-                      <Text strong>Weight:</Text> {box.weight} kg<br />
-                      <Text strong>Volume:</Text> {box.volume} m³<br />
-                      <Text strong>Product:</Text> {box.product?.name || "N/A"}
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            ) : (
-              <Text>No boxes found in this pallet</Text>
-            )}
-          </Spin>
+          {selectedPallet?.box_inventories?.length > 0 ? (
+            selectedPallet.box_inventories.map((box) => (
+              <div key={box.id} style={{ marginBottom: "20px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  {box.product?.image && (
+                    <img
+                      src={box.product.image}
+                      alt={box.product.name}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                        marginRight: "15px",
+                      }}
+                    />
+                  )}
+                  <div>
+                    <Text strong>Box ID:</Text> {box.id}<br />
+                    <Text strong>Weight:</Text> {box.weight} kg<br />
+                    <Text strong>Volume:</Text> {box.volume} m³<br />
+                    <Text strong>Product:</Text> {box.product?.name || "N/A"}<br />
+                    <Text strong>SKU:</Text> {box.product?.sku || "N/A"}<br />
+                    <Text strong>Price:</Text> ${box.product?.price || "N/A"}<br />
+                    <Text strong>Quantity:</Text> {box.qty}<br />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <Text>No boxes found in this pallet</Text>
+          )}
         </Modal>
       </MainCard>
     </Paper>
