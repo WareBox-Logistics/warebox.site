@@ -101,6 +101,7 @@ export const API_URL_CONFIRM_QR = BASE_API_URL + '/deliveries/confirm-by-code';
 // OPTIMIZED ROUTES
 export const API_URL_ALL_DELIVERIES = BASE_API_URL + '/deliveries/all';
 export const API_URL_DELIVERIES_COMPANY = BASE_API_URL + '/deliveries/company';
+export const API_URL_LOCATIONS_COMPANY = BASE_API_URL + '/locations/company';
 export const API_URL_ALL_PALLETS = BASE_API_URL + '/pallets/all';
 export const API_URL_PALLETS_COMPANY = BASE_API_URL + '/pallets/company';
 // export const API_URL_ALL_PRODUCTS = BASE_API_URL + '/products/all';

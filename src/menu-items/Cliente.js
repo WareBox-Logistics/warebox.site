@@ -4,6 +4,7 @@ import {
     IconPackageExport,
     IconChartBar,
     IconSection,
+    IconMap2,
     IconLayoutGrid,
     IconPackages,
     IconShoppingBag,
@@ -15,6 +16,7 @@ const icons = {
     IconPackageExport,
     IconChartBar,
     IconSection,
+    IconMap2,
     IconLayoutGrid,
     IconPackages,
     IconShoppingBag,
@@ -40,6 +42,14 @@ const cliente = {
             type: 'item',
             url: '/client/client-deliveries',
             icon: icons.IconTruckDelivery,
+            breadcrumbs: false
+        },
+        {
+            id: 'locations',
+            title: 'Locations',
+            type: 'item',
+            url: '/client/client-locations',
+            icon: icons.IconMap2,
             breadcrumbs: false
         },
         {

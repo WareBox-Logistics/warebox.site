@@ -53,6 +53,7 @@ const ClientPallets = Loadable(lazy(() => import('views/pages/cliente/ClientPall
 const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
 const ClientProducts = Loadable(lazy(() => import('views/pages/cliente/ClientProducts')));
 const ClientDeliveries = Loadable(lazy(() => import('views/pages/cliente/ClientDeliveries')));
+const ClientLocations = Loadable(lazy(() => import('views/pages/cliente/ClientLocations')));
 
 
 const MainRoutes = {
@@ -230,6 +231,10 @@ const MainRoutes = {
             {
               path: 'client-deliveries',
               element: <ClientDeliveries />
+            },
+            {
+              path: 'client-locations',
+              element: <ClientLocations />
             },
             {
               path: 'client-pallets',
