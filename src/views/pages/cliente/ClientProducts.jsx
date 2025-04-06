@@ -155,7 +155,7 @@ const ClientProducts = () => {
 
   return (
     <Paper sx={{ padding: "16px", margin: "5px" }}>
-      <MainCard title="Products">
+      <MainCard title="Your Products">
         <Row justify="center" style={{ marginBottom: "20px" }}>
           <Col xs={24} sm={12} md={8}>
             <Input

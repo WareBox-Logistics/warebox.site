@@ -252,7 +252,7 @@ const ClientDeliveries = () => {
 
   return (
     <Paper sx={{ padding: "16px", margin: "5px" }}>
-      <MainCard title="Deliveries">
+      <MainCard title="Your Deliveries">
         <Spin spinning={isLoading}>
           <Col xs={24}>
             <Select
