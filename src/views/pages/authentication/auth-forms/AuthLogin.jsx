@@ -16,6 +16,7 @@ import AuthContext from "/src/context/AuthContext";
 import axios from "axios";
 import { useLazyQuery } from "@apollo/client";
 import { GET_INFO_USER } from "graphql/queries";
+import logo from "/src/assets/images/logo_bali_blue.jpeg"; // Asegúrate de que la ruta sea correcta
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
@@ -43,21 +44,16 @@ const AuthLogin = () => {
   const handleSubmit = async (values, { setSubmitting }) => {
     logout();
     try {
-      // Comprobar credenciales
       const response = await axios.post(import.meta.env.VITE_JWT_LOGIN, {
         email: values.email,
         password: values.password,
       });
 
-      
-      // Estraer información del usuario
       const { data } = await fetchChatHelper({
         variables: { id: response.data.user.id },
       });
 
       if (response.data && response.data.token) {
-        console.log(data);
-        
         localStorage.setItem("token", response.data.token);
         login(response.data.token, data);
         navigate("/admin/dashboard");
@@ -66,9 +62,6 @@ const AuthLogin = () => {
         setSnackbarOpen(true);
       }
     } catch (error) {
-
-      console.log(error);
-      
       if (
         error.response &&
         error.response.data &&
@@ -81,7 +74,6 @@ const AuthLogin = () => {
       setSnackbarOpen(true);
     }
     setSubmitting(false);
-
   };
 
   return (
@@ -91,12 +83,40 @@ const AuthLogin = () => {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
-        backgroundColor: "#f4f6f8",
+        background: "linear-gradient(135deg, #FF731D, #FF4500)",
+        padding: 2,
       }}
     >
-      <Paper sx={{ padding: 4, maxWidth: 400, width: "100%" }}>
-        <Typography variant="h4" gutterBottom align="center">
-          Login
+      <Paper
+        sx={{
+          padding: 4,
+          maxWidth: 400,
+          width: "100%",
+          borderRadius: 3,
+          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.2)",
+        }}
+      >
+        <Box sx={{ textAlign: "center", marginBottom: 3 }}>
+          <img
+            src={logo}
+            alt="Company Logo"
+            style={{ width: "100%", height: "150px", objectFit: "contain" }}
+          />
+        </Box>
+        <Typography
+          variant="h4"
+          gutterBottom
+          align="center"
+          sx={{ fontWeight: "bold", color: "#333" }}
+        >
+          Welcome Back
+        </Typography>
+        <Typography
+          variant="body1"
+          align="center"
+          sx={{ marginBottom: 3, color: "#666" }}
+        >
+          Please login to your account
         </Typography>
         <Formik
           initialValues={{ email: "", password: "" }}
@@ -133,7 +153,12 @@ const AuthLogin = () => {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
+                  sx={{
+                    backgroundColor: "#FF731D",
+                    "&:hover": { backgroundColor: "#FF4500" },
+                    color: "#fff",
+                    fontWeight: "bold",
+                  }}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Logging in..." : "Login"}
