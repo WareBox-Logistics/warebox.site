@@ -4,7 +4,7 @@ import { Card, Col, Row, Input, Button, Table, message, Select, Spin, Modal, Typ
 import { UserAddOutlined, SearchOutlined, LoadingOutlined, EditOutlined, DeleteOutlined, CloseOutlined } from "@ant-design/icons";
 import MainCard from "ui-component/cards/MainCard";
 import axios from 'axios';
-import { authToken, API_URL_COMPANY, API_URL_SERVICE } from '../../../services/services';
+import { authToken, API_URL_COMPANY, API_URL_ALL_COMPANIES, API_URL_SERVICE } from '../../../services/services';
 const { Text } = Typography;
 
 const CompanyComponent = ({ services, updateServices }) => {
@@ -36,13 +36,15 @@ const CompanyComponent = ({ services, updateServices }) => {
   const fetchCompanies = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(API_URL_COMPANY, {
+      const response = await axios.get(API_URL_ALL_COMPANIES, {
         headers: {
           'Authorization': authToken,
           'Content-Type': 'application/json'
         }
       });
-      setCompanies(response.data.companies || []);
+      if (JSON.stringify(companies) !== JSON.stringify(response.data.companies)) {
+        setCompanies(response.data.companies || []);
+      }
     } catch (error) {
       console.error('Error fetching companies:', error);
       setCompanies([]);

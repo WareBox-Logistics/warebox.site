@@ -45,7 +45,7 @@ const icons = {
 
 const administrador = {
     id: 'administrador',
-    title: 'Administrador',
+    title: 'Admin',
     type: 'group',
     children: [
         {
