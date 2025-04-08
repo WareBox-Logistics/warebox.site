@@ -16,7 +16,7 @@ import AuthContext from "/src/context/AuthContext";
 import axios from "axios";
 import { useLazyQuery } from "@apollo/client";
 import { GET_INFO_USER } from "graphql/queries";
-import logo from "/src/assets/images/logo_bali_blue.jpeg"; // Asegúrate de que la ruta sea correcta
+import logo from "/src/assets/images/logo_bali_blue.jpeg";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),

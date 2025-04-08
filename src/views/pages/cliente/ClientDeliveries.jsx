@@ -253,7 +253,7 @@ const ClientDeliveries = () => {
   return (
     <Paper sx={{ padding: "16px", margin: "5px" }}>
       <MainCard title="Your Deliveries">
-        <Spin spinning={isLoading}>
+        <Spin spinning={isLoading} tip="Loading deliveries...">
           <Col xs={24}>
             <Select
               placeholder="Filter by Status"

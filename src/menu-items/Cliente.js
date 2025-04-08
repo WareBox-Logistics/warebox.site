@@ -28,14 +28,14 @@ const cliente = {
     title: 'Client',
     type: 'group',
     children: [
-        {
-            id: 'dashboard',
-            title: 'Dashboard',
-            type: 'item',
-            url: '/client/client-dashboard',
-            icon: icons.IconChartBar,
-            breadcrumbs: false
-        },
+        // {
+        //     id: 'dashboard',
+        //     title: 'Dashboard',
+        //     type: 'item',
+        //     url: '/client/client-dashboard',
+        //     icon: icons.IconChartBar,
+        //     breadcrumbs: false
+        // },
         {
             id: 'deliveries',
             title: 'Deliveries',

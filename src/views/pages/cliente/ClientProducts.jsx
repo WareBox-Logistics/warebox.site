@@ -166,7 +166,7 @@ const ClientProducts = () => {
             />
           </Col>
         </Row>
-        <Spin spinning={isLoading} size="default">
+        <Spin spinning={isLoading} size="default" tip="Loading products...">
           {!isLoading && renderProductCards()}
         </Spin>
 
