@@ -131,6 +131,9 @@ const Pallets = () => {
                         <strong>Volume:</strong> {pallet.volume || "0"} m³
                       </Text>
                       <Text style={{ display: 'block', fontSize: '16px' }}>
+                        <strong>Company:</strong> {pallet.company?.name || "0"}
+                      </Text>
+                      <Text style={{ display: 'block', fontSize: '16px' }}>
                         <strong>Boxes:</strong> {pallet.box_inventories?.length || 0}
                       </Text>
                       <Text style={{ display: 'block', fontSize: '16px', marginTop: '18px', marginBottom: '-15px' }}>
