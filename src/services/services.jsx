@@ -1,6 +1,6 @@
 //BACKEND VARIABLE
-export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
-// export const BASE_API_URL = 'http://127.0.0.1:8000/api'
+// export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
+export const BASE_API_URL = 'http://127.0.0.1:8000/api'
 
 //TOKEN
 export const authToken = `Bearer ${localStorage.getItem('token')}`;
@@ -69,6 +69,7 @@ export const API_URL_REPORT = BASE_API_URL + '/report';
     export const API_URL_REPORT_WITHOUT_ISSUE = BASE_API_URL + '/report/without-issue';
 export const API_URL_PROBLEM = BASE_API_URL + '/problem';
 export const API_URL_ISSUE = BASE_API_URL + '/issue';
+    export const API_URL_ISSUE_WITHOUT_SUPPORT = BASE_API_URL + '/issue/without-support';
 export const API_URL_SUPPORT = BASE_API_URL + '/support';
 
 //Category

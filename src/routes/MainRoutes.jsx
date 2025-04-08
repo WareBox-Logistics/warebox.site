@@ -27,7 +27,7 @@ const AlmacenistaPallets = Loadable(lazy(()=> import('views/pages/almacenista/Ge
 const DashboardDis = Loadable(lazy(() => import('views/pages/despacho/DashboardDis')));
 const Report = Loadable(lazy(() => import('views/pages/despacho/Report')))
 const Issue = Loadable(lazy(() => import('views/pages/despacho/Issue')))
-const Support = Loadable(lazy(() => import('views/pages/despacho/Report')))
+const Support = Loadable(lazy(() => import('views/pages/despacho/Support')))
 const Problem = Loadable(lazy(() => import('views/pages/despacho/Problem')))
 
 
