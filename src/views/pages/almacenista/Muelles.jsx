@@ -166,7 +166,7 @@ const Muelles = () => {
           if (!warehouses || Object.keys(warehouses).length === 0) {
             await fetchWarehouses();
           }
-      
+          console.log(response)
           const docksWithWHName = response.data.map(dock => ({
             ...dock, 
             warehouseName: warehouses[dock.warehouse] || 'Unknown Warehouse'
@@ -280,7 +280,7 @@ const Muelles = () => {
                                     </div>
                                     {/* Add more dock information as needed */}
                                     <div><strong>Warehouse:</strong> {dock.warehouseName || 'N/A'}</div>
-                                    <div><strong>Type:</strong> {dock.type || 'N/A'}</div>
+                                    <div><strong>Type:</strong> {dock.type || 'Free'}</div>
                                     </Space>
                                 </Card>
                                 </Col>

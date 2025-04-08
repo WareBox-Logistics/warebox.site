@@ -74,7 +74,8 @@ const RouteForm = ({ origin, destination, route }) => {
     if (shippingDate && estimatedArrival && estimatedArrival.isAfter(shippingDate)) {
       fetchAvailableVehicles(
         shippingDate.format('YYYY-MM-DDTHH:mm:ssZ'),
-        estimatedArrival.format('YYYY-MM-DDTHH:mm:ssZ')
+        estimatedArrival.format('YYYY-MM-DDTHH:mm:ssZ'),
+        origin
       );
     }
   }, [form.getFieldValue('shipping_date'), form.getFieldValue('estimated_arrival')]);
@@ -106,31 +107,28 @@ const RouteForm = ({ origin, destination, route }) => {
     }
   };
 
-  const fetchAvailableVehicles = async (startDate, endDate) => {
+  const fetchAvailableVehicles = async (startDate, endDate, origin = null) => {
     setLoadingVehicles(true);
     try {
-      console.log(startDate, endDate)
-      const truckPayload = {
+      const payload = {
         start_date: startDate,
         end_date: endDate,
-        type: "truck"
       };
 
+      // Add origin if provided (e.g., when creating a new delivery)
+      if (origin) {
+        console.log("This is the origin",origin);
+        payload.origin_id = origin.id;
+        payload.origin_type = origin.type; // Should be full model class name
+        console.log("This is the payload with an origin",payload);
+      }
 
-      const trailerPayload = {
-        start_date: startDate,
-        end_date: endDate,
-        type: "trailer"
-      };
 
-
-
-  
       const [trucksResponse, trailersResponse] = await Promise.all([
-        axios.post(API_URL_VEHICLE_AVA, truckPayload,{
+        axios.post(API_URL_VEHICLE_AVA, { ...payload, type: "truck" }, {
           headers: { Authorization: authToken }
         }),
-        axios.post(API_URL_VEHICLE_AVA, trailerPayload,{
+        axios.post(API_URL_VEHICLE_AVA, { ...payload, type: "trailer" }, {
           headers: { Authorization: authToken }
         })
       ]);
@@ -156,7 +154,7 @@ const RouteForm = ({ origin, destination, route }) => {
     } finally {
       setLoadingVehicles(false);
     }
-  };
+};
 
   const fetchModels = async () => {
     try {

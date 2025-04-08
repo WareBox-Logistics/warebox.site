@@ -18,12 +18,12 @@ const App = () => {
         <CssBaseline />
         <AuthProvider>
           <NavigationScroll>
-          <ErrorBoundary>
+          {/* <ErrorBoundary> */}
               <RouterProvider 
                 future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
                 router={router} 
               />
-            </ErrorBoundary>
+            {/* </ErrorBoundary> */}
           </NavigationScroll>
         </AuthProvider>
       </ThemeProvider>
