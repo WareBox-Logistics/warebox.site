@@ -9,7 +9,14 @@ const almacenista = {
     title: 'Almacenista',
     type: 'group',
     children: [
-        {
+         {
+            id: 'dashboard-warehouse',
+            title: 'Dashboard',
+            type: 'item',
+            url: '/warehouseman/dashboard-warehouse',
+            icon: icons.IconDashboard,
+            breadcrumbs: false
+        },{
             id: 'gestion-racks',
             title: 'Gestión de almacenamiento',
             type: 'item',
@@ -33,14 +40,7 @@ const almacenista = {
         //     icon: icons.IconDashboard,
         //     breadcrumbs: false
         // },
-        {
-            id: 'cajas',
-            title: 'Cajas',
-            type: 'item',
-            url: '/warehouseman/cajas',
-            icon: icons.IconPackageExport,
-            breadcrumbs: false
-        },
+       
         {
             id: 'sedes',
             title: 'Sedes',

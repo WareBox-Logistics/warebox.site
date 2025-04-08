@@ -53,17 +53,18 @@ export const API_URL_BRAND = BASE_API_URL + '/brand';
 export const API_URL_MODEL = BASE_API_URL + '/model';
 //Warehouse
 export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
-
+export const API_URL_DASHBOARD_STATS = BASE_API_URL + '/dashboard-stats';
 //Inventory
 export const API_URL_BOX_INVENTORY = BASE_API_URL + '/box-inventory';
 export const API_URL_PALLET = BASE_API_URL + '/pallet';
+export const API_URL_PALLET_FILTER = BASE_API_URL + '/pallets/filter?';
 //export const API_URL_DOCK_ASSIGNMENT = BASE_API_URL + '/dock-assignment';
 export const API_URL_RACK = BASE_API_URL + '/rack';
 export const API_URL_STORAGE_RACK_PALLET = BASE_API_URL + '/storage-rack-pallet';
 export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assignments';
 export const API_URL_DOCK_ALL_ASS = BASE_API_URL + '/docks/reservations/';
 export const API_URL_FILTERED_DELIVERY = BASE_API_URL + '/delivery/filtered/';
-
+export const API_URL_DOCK_FILTER = BASE_API_URL + '/docks/filter?status='
 //Dispatch
 export const API_URL_REPORT = BASE_API_URL + '/report';
     export const API_URL_REPORT_WITHOUT_ISSUE = BASE_API_URL + '/report/without-issue';

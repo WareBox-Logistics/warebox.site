@@ -74,7 +74,7 @@ const GestionPallets = () => {
       axios
         .get(`${API_URL_EMPLOYEE}/${userId}`, {
           headers: {
-            Authorization: `Bearer ${authToken}`,
+             Authorization: authToken,
             "Content-Type": "application/json",
           },
         })
@@ -101,7 +101,7 @@ const GestionPallets = () => {
     try {
       // 1) Pallets: Filtrar solo los que pertenezcan al warehouse asignado
       const palletRes = await axios.get(API_URL_PALLET, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: {  Authorization: authToken },
       });
       const fetchedPallets = (palletRes.data.pallets || []).filter(
         (p) =>
@@ -114,14 +114,14 @@ const GestionPallets = () => {
       // 2) Racks: Se podría filtrar en el back; si no, filtramos en el front
       setLoadingRacks(true);
       const rackRes = await axios.get(API_URL_RACK, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: { Authorization: authToken },
       });
       setRacks(rackRes.data.data || []);
       setLoadingRacks(false);
 
       // 3) StorageRackPallet
       const storageRes = await axios.get(API_URL_STORAGE_RACK_PALLET, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: { Authorization: authToken },
       });
       setStorageRackPallet(storageRes.data.data || []);
     } catch (error) {
@@ -185,7 +185,7 @@ const GestionPallets = () => {
           status: "Occupied",
         };
         await axios.put(url, body, {
-          headers: { Authorization: `Bearer ${authToken}` },
+          headers: { Authorization: authToken },
         });
         message.success(
           `Pallet ${pallet.id} updated in rack ${selectedRack.id}`
@@ -213,13 +213,13 @@ const GestionPallets = () => {
           stored_at: new Date().toISOString(),
         };
         await axios.post(API_URL_STORAGE_RACK_PALLET, newRecord, {
-          headers: { Authorization: `Bearer ${authToken}` },
+          headers: {  Authorization: authToken },
         });
         // 3) DELETE old loc
         if (currentLocation) {
           const deleteUrl = `${API_URL_STORAGE_RACK_PALLET}/${selectedPalletId}/${currentLocation.rack}`;
           await axios.delete(deleteUrl, {
-            headers: { Authorization: `Bearer ${authToken}` },
+            headers: {  Authorization: authToken },
           });
         }
       }
