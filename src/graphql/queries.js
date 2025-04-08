@@ -20,19 +20,13 @@ query Dashboard {
     where: {
     	_and : [
         { completed_date: { _gte: "now()" }},
-        {status : {_in : ["Completed"]}}
   		]
 	}) {
     aggregate {
       count
     }
   }
-    pendientes_hoy:delivery_aggregate(
-      where: {
-        _and : [
-          {status : {_in : ["Pending"]}}
-        ]
-  }) {
+  pendientes_hoy:delivery_aggregate {
       aggregate {
         count
       }
@@ -89,6 +83,11 @@ query Dashboard {
       last_name
   		id
     }
+  }
+  weekly_deliveries {
+    dia_semana
+    fecha
+    entregados
   }
 }
 `

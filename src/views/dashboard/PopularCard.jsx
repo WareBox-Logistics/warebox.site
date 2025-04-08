@@ -103,11 +103,11 @@ reports.forEach(report => {
                         color: stock.up ? '#155724' : '#721c24'
                       }}
                     >
-                      {stock.up ? (
+                      {/* {stock.up ? (
                         <KeyboardArrowUpOutlinedIcon fontSize="small" />
                       ) : (
                         <KeyboardArrowDownOutlinedIcon fontSize="small" />
-                      )}
+                      )} */}
                     </Avatar>
                   </Grid>
                 </Grid>
@@ -120,9 +120,9 @@ reports.forEach(report => {
           </CardContent>
 
           <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
-            <Button size="small" disableElevation>
+            {/* <Button size="small" disableElevation>
               View All <ChevronRightOutlinedIcon />
-            </Button>
+            </Button> */}
           </CardActions>
         </MainCard>
       )}

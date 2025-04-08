@@ -56,7 +56,7 @@ export default function EarningCard({ isLoading, count }) {
               position: 'absolute',
               width: 210,
               height: 210,
-              background: theme.palette.secondary[800],
+              background: theme.palette.primary[800],
               borderRadius: '50%',
               top: { xs: -85 },
               right: { xs: -95 }
@@ -66,7 +66,7 @@ export default function EarningCard({ isLoading, count }) {
               position: 'absolute',
               width: 210,
               height: 210,
-              background: theme.palette.secondary[800],
+              background: theme.palette.primary[800],
               borderRadius: '50%',
               top: { xs: -125 },
               right: { xs: -15 },
@@ -84,7 +84,7 @@ export default function EarningCard({ isLoading, count }) {
                       sx={{
                         ...theme.typography.commonAvatar,
                         ...theme.typography.largeAvatar,
-                        bgcolor: 'secondary.800',
+                        bgcolor: 'primary.800',
                         mt: 1
                       }}
                     >
