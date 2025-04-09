@@ -43,35 +43,55 @@ const ReportFormModal = ({
         cancelText="Cancelar"
       >
         <Form form={form} layout="vertical">
-          <Form.Item
-            name="longitude"
-            label="Longitude: "
-            rules={[
-              { required: true, message: 'Campo obligatorio' },
-            ]}
-          >
-            <InputNumber 
-              placeholder="180.000"
-              min={1}
-              max={120}
-              style={{width: '100%'}}
-            />
-          </Form.Item>
+        <Form.Item
+    name="longitude"
+    label="Longitud"
+    rules={[
+      { required: true, message: 'La longitud es obligatoria' },
+      {
+        validator: (_, value) => {
+          if (value === null || value === undefined) return Promise.resolve();
+          if (isNaN(value)) return Promise.reject('Debe ser un número válido');
+          if (value < -180 || value > 180) {
+            return Promise.reject('La longitud debe estar entre -180 y 180');
+          }
+          return Promise.resolve();
+        }
+      }
+    ]}
+  >
+    <InputNumber 
+      placeholder="-180.000 a 180.000"
+      step="0.000001"
+      precision={6}
+      style={{ width: '100%' }}
+    />
+  </Form.Item>
 
-          <Form.Item
-            name="latitude"
-            label="Latitude: "
-            rules={[
-              { required: true, message: 'Campo obligatorio' },
-            ]}
-          >
-            <InputNumber 
-              placeholder="180.000"
-              min={1}
-              max={120}
-              style={{width: '100%'}}
-            />
-          </Form.Item>
+  <Form.Item
+    name="latitude"
+    label="Latitud"
+    rules={[
+      { required: true, message: 'La latitud es obligatoria' },
+      {
+        validator: (_, value) => {
+          if (value === null || value === undefined) return Promise.resolve();
+          if (isNaN(value)) return Promise.reject('Debe ser un número válido');
+          if (value < -90 || value > 90) {
+            return Promise.reject('La latitud debe estar entre -90 y 90');
+          }
+          return Promise.resolve();
+        }
+      }
+    ]}
+  >
+    <InputNumber 
+      placeholder="-90.000 a 90.000"
+      step="0.000001"
+      precision={6}
+      style={{ width: '100%' }}
+    />
+  </Form.Item>
   
           <Form.Item
             name="problem"
@@ -91,8 +111,9 @@ const ReportFormModal = ({
   
           <Form.Item
             name="issue"
-            label="Issue"
+            label="Issue:"
             valuePropName="checked"
+            initialValue={initialValues?.issue || false}
           >
             <Switch 
               checkedChildren="Activo" 

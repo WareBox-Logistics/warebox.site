@@ -2,177 +2,122 @@ import React, { useEffect, useState } from 'react';
 import ChartsComponent from "/src/components/dispatch/Dashboard/ChartsComponent";
 import Stack from '@mui/material/Stack';
 import MainCard from "ui-component/cards/MainCard";
-import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
-import { Typography, Spin } from "antd";
+import { Typography, Spin, Alert} from "antd";
 import axios from 'axios';
-import { authToken, API_URL_REPORT } from '../../../services/services';
+import { authToken, API_URL_REPORT_TOP5, API_URL_ISSUE_STATS, API_URL_SUPPORT_STATS } from '../../../services/services';
 
 const { Text } = Typography;
 
-const defaultCenter = { lat: 32.462986, lng: -116.958970 };
-const mapContainerStyle = {
-  height: '60vh',
-  width: '100%',
-  borderRadius: '10px',
+// Configuración de APIs
+const API_ENDPOINTS = {
+  TOP_PROBLEMS: API_URL_REPORT_TOP5,
+  ISSUE_STATS: API_URL_ISSUE_STATS,
+  SUPPORT_STATS: API_URL_SUPPORT_STATS
 };
 
-// Different colors for different problem levels
-const PROBLEM_COLORS = {
-  1: '#FF5733', // High severity
-  2: '#FFC300', // Medium severity
-  3: '#2ECC71'  // Low severity
-};
-
-const DashboardDis = () => {
-  const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedReport, setSelectedReport] = useState(null);
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+const DashboardComponent = () => {
+  const [data, setData] = useState({
+    today: { topProblems: [], issueStats: {}, supportStats: {} },
+    week: { topProblems: [], issueStats: {}, supportStats: {} },
+    month: { topProblems: [], issueStats: {}, supportStats: {} }
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Función para obtener datos de las APIs
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Configuración de axios con el token de autenticación
+      const config = {
+        headers: { Authorization: `Bearer ${authToken}` }
+      };
+
+      // Obtener todos los datos en paralelo
+      const [topProblemsRes, issueStatsRes, supportStatsRes] = await Promise.all([
+        axios.get(API_ENDPOINTS.TOP_PROBLEMS, config),
+        axios.get(API_ENDPOINTS.ISSUE_STATS, config),
+        axios.get(API_ENDPOINTS.SUPPORT_STATS, config)
+      ]);
+
+      setData({
+        today: {
+          topProblems: topProblemsRes.data.today || [],
+          issueStats: issueStatsRes.data.today || {},
+          supportStats: supportStatsRes.data.today || {}
+        },
+        week: {
+          topProblems: topProblemsRes.data.this_week || [],
+          issueStats: issueStatsRes.data.this_week || {},
+          supportStats: supportStatsRes.data.this_week || {}
+        },
+        month: {
+          topProblems: topProblemsRes.data.this_month || [],
+          issueStats: issueStatsRes.data.this_month || {},
+          supportStats: supportStatsRes.data.this_month || {}
+        }
+      });
+
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Error al cargar los datos del dashboard. Por favor intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const response = await axios.get(API_URL_REPORT, {
-          headers: {
-            Authorization: authToken,
-            'Content-Type': 'application/json',
-          },
-        });
-        setReports(response.data.reports || []);
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReports();
+    fetchData();
   }, []);
 
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps...</div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '24px' }}>
+        <Alert message="Error" description={error} type="error" showIcon />
+      </div>
+    );
+  }
 
   return (
-    <Stack spacing={10}>
-      <MainCard title="Incident Map">
-        {loading ? (
-          <Spin tip="Loading reports..." />
-        ) : (
-          <div style={{ position: 'relative' }}>
-            {/* Legend */}
-            <div style={{
-              position: 'absolute',
-              top: '10px',
-              left: '10px',
-              zIndex: 1,
-              background: 'white',
-              padding: '8px',
-              borderRadius: '4px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-            }}>
-              <div style={{ marginBottom: '4px' }}>
-                <Text strong>Problem Severity:</Text>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: PROBLEM_COLORS[1],
-                  marginRight: '8px',
-                  borderRadius: '50%'
-                }} />
-                <Text>High</Text>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: PROBLEM_COLORS[2],
-                  marginRight: '8px',
-                  borderRadius: '50%'
-                }} />
-                <Text>Medium</Text>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: PROBLEM_COLORS[3],
-                  marginRight: '8px',
-                  borderRadius: '50%'
-                }} />
-                <Text>Low</Text>
-              </div>
-            </div>
-
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              zoom={11}
-              center={defaultCenter}
-              options={{
-                gestureHandling: 'greedy',
-                disableDefaultUI: false,
-              }}
-            >
-              {reports.map((report) => (
-                <Marker
-                  key={report.id}
-                  position={{ 
-                    lat: parseFloat(report.latitude), 
-                    lng: parseFloat(report.longitude) 
-                  }}
-                  onClick={() => setSelectedReport(report)}
-                  icon={{
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    fillColor: PROBLEM_COLORS[report.problem.level] || '#FF5733',
-                    fillOpacity: 1,
-                    strokeWeight: 0,
-                    scale: 8
-                  }}
-                />
-              ))}
-
-              {selectedReport && (
-                <InfoWindow
-                  position={{ 
-                    lat: parseFloat(selectedReport.latitude), 
-                    lng: parseFloat(selectedReport.longitude) 
-                  }}
-                  onCloseClick={() => setSelectedReport(null)}
-                >
-                  <div style={{ padding: '8px' }}>
-                    <Text strong>{selectedReport.problem.name}</Text>
-                    <p>Severity: Level {selectedReport.problem.level}</p>
-                    <p>Reported by: {selectedReport.driver.first_name} {selectedReport.driver.last_name}</p>
-                    <p>Description: {selectedReport.description}</p>
-                    {selectedReport.created_at && (
-                      <small>
-                        Reported at: {new Date(selectedReport.created_at).toLocaleString()}
-                      </small>
-                    )}
-                  </div>
-                </InfoWindow>
-              )}
-            </GoogleMap>
-          </div>
-        )}
-      </MainCard>
-
+    <Stack spacing={4}>
       <MainCard title="Hoy">
-        <ChartsComponent/>
+        <ChartsComponent 
+          topProblems={data.today.topProblems}
+          issueStats={data.today.issueStats}
+          supportStats={data.today.supportStats}
+          period="hoy"
+        />
       </MainCard>
 
       <MainCard title="Esta semana">
-        <ChartsComponent/>
+        <ChartsComponent 
+          topProblems={data.week.topProblems}
+          issueStats={data.week.issueStats}
+          supportStats={data.week.supportStats}
+          period="esta semana"
+        />
       </MainCard>
 
       <MainCard title="Este mes">
-        <ChartsComponent/>
+        <ChartsComponent 
+          topProblems={data.month.topProblems}
+          issueStats={data.month.issueStats}
+          supportStats={data.month.supportStats}
+          period="este mes"
+        />
       </MainCard>
     </Stack>
   );
 };
 
-export default DashboardDis;
+export default DashboardComponent;

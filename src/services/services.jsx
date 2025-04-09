@@ -68,10 +68,15 @@ export const API_URL_DOCK_FILTER = BASE_API_URL + '/docks/filter?status='
 //Dispatch
 export const API_URL_REPORT = BASE_API_URL + '/report';
     export const API_URL_REPORT_WITHOUT_ISSUE = BASE_API_URL + '/report/without-issue';
+    export const API_URL_REPORT_TOP5 = BASE_API_URL + '/report/top-problems';
 export const API_URL_PROBLEM = BASE_API_URL + '/problem';
 export const API_URL_ISSUE = BASE_API_URL + '/issue';
     export const API_URL_ISSUE_WITHOUT_SUPPORT = BASE_API_URL + '/issue/without-support';
+    export const API_URL_ISSUE_STATS = BASE_API_URL + '/issue/status-stats';
+
 export const API_URL_SUPPORT = BASE_API_URL + '/support';
+    export const API_URL_SUPPORT_STATS = BASE_API_URL + '/support/status-stats';
+
 
 //Category
 export const API_URL_CATEGORY = BASE_API_URL + '/category';
