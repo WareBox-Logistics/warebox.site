@@ -327,12 +327,12 @@ const ProductComponent = ({ categories, updateCategories }) => {
       key: "actions",
       render: (text, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
-          <Tooltip title="View Pallets">
+          {/* <Tooltip title="View Pallets">
             <Button
               icon={<SearchOutlined />}
               onClick={() => handleViewPallets(record)}
             />
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip title="Edit">
             <Button
               icon={<EditOutlined />}

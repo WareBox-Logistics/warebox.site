@@ -83,7 +83,7 @@ export default function TotalOrderLineChartCard({ isLoading, issues, report }) {
                   </Avatar>
                 </Grid>
                 <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Chart {...(timeValue ? ChartDataMonth : ChartDataYear)} />
+                  <Grid item xs={11} sx={{ height: '90px' }}></Grid>
                 </Grid>
               </Grid>
               <Typography sx={{ fontSize: '1rem', fontWeight: 500, color: 'primary.200' }}>

@@ -1,11 +1,14 @@
+import { Icon } from '@mui/material';
 import { 
     IconDashboard, 
     IconPackageExport,
     IconChartBar,
     IconSection,
+    IconMap2,
     IconLayoutGrid,
     IconPackages,
-    IconShoppingBag
+    IconShoppingBag,
+    IconTruckDelivery
 } from '@tabler/icons-react';
 
 const icons = { 
@@ -13,9 +16,11 @@ const icons = {
     IconPackageExport,
     IconChartBar,
     IconSection,
+    IconMap2,
     IconLayoutGrid,
     IconPackages,
-    IconShoppingBag
+    IconShoppingBag,
+    IconTruckDelivery
 };
 
 const cliente = {
@@ -23,12 +28,28 @@ const cliente = {
     title: 'Client',
     type: 'group',
     children: [
+        // {
+        //     id: 'dashboard',
+        //     title: 'Dashboard',
+        //     type: 'item',
+        //     url: '/client/client-dashboard',
+        //     icon: icons.IconChartBar,
+        //     breadcrumbs: false
+        // },
         {
-            id: 'dashboard',
-            title: 'Dashboard',
+            id: 'deliveries',
+            title: 'Deliveries',
             type: 'item',
-            url: '/client/client-dashboard',
-            icon: icons.IconChartBar,
+            url: '/client/client-deliveries',
+            icon: icons.IconTruckDelivery,
+            breadcrumbs: false
+        },
+        {
+            id: 'locations',
+            title: 'Locations',
+            type: 'item',
+            url: '/client/client-locations',
+            icon: icons.IconMap2,
             breadcrumbs: false
         },
         {

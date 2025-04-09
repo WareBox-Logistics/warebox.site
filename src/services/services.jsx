@@ -34,6 +34,8 @@ export const API_URL_DELIVERY_DETAIL = BASE_API_URL + '/delivery-detail';
 export const API_URL_EMPLOYEE = BASE_API_URL + '/employee';
 //Driver
 export const API_URL_DRIVER = BASE_API_URL + '/driver';
+//Operator
+export const API_URL_OPERATOR = BASE_API_URL + '/operator';
 //Client
 export const API_URL_CLIENT = BASE_API_URL + '/client';
 //Location
@@ -51,20 +53,30 @@ export const API_URL_BRAND = BASE_API_URL + '/brand';
 export const API_URL_MODEL = BASE_API_URL + '/model';
 //Warehouse
 export const API_URL_WAREHOUSE = BASE_API_URL + '/warehouse';
-
+export const API_URL_DASHBOARD_STATS = BASE_API_URL + '/dashboard-stats';
 //Inventory
 export const API_URL_BOX_INVENTORY = BASE_API_URL + '/box-inventory';
 export const API_URL_PALLET = BASE_API_URL + '/pallet';
+export const API_URL_PALLET_FILTER = BASE_API_URL + '/pallets/filter?';
 //export const API_URL_DOCK_ASSIGNMENT = BASE_API_URL + '/dock-assignment';
 export const API_URL_RACK = BASE_API_URL + '/rack';
 export const API_URL_STORAGE_RACK_PALLET = BASE_API_URL + '/storage-rack-pallet';
-export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assigmnet';
-
+export const API_URL_DOCK_ASSIGMNET = BASE_API_URL + '/dock-assignments';
+export const API_URL_DOCK_ALL_ASS = BASE_API_URL + '/docks/reservations/';
+export const API_URL_FILTERED_DELIVERY = BASE_API_URL + '/delivery/filtered/';
+export const API_URL_DOCK_FILTER = BASE_API_URL + '/docks/filter?status='
 //Dispatch
 export const API_URL_REPORT = BASE_API_URL + '/report';
+    export const API_URL_REPORT_WITHOUT_ISSUE = BASE_API_URL + '/report/without-issue';
+    export const API_URL_REPORT_TOP5 = BASE_API_URL + '/report/top-problems';
 export const API_URL_PROBLEM = BASE_API_URL + '/problem';
 export const API_URL_ISSUE = BASE_API_URL + '/issue';
+    export const API_URL_ISSUE_WITHOUT_SUPPORT = BASE_API_URL + '/issue/without-support';
+    export const API_URL_ISSUE_STATS = BASE_API_URL + '/issue/status-stats';
+
 export const API_URL_SUPPORT = BASE_API_URL + '/support';
+    export const API_URL_SUPPORT_STATS = BASE_API_URL + '/support/status-stats';
+
 
 //Category
 export const API_URL_CATEGORY = BASE_API_URL + '/category';
@@ -87,6 +99,21 @@ export const API_URL_FREE_LOT = BASE_API_URL + '/lots/free';
 export const API_URL_DOCK = BASE_API_URL + '/dock';
 export const API_URL_DELIVERY = BASE_API_URL + '/delivery';
 
+//QR Code
+export const API_URL_GENERATE_QR = BASE_API_URL + '/deliveries/{delivery}/generate-code';
+export const API_URL_CONFIRM_QR = BASE_API_URL + '/deliveries/confirm-by-code';
+
+
+
+// OPTIMIZED ROUTES
+export const API_URL_ALL_COMPANIES = BASE_API_URL + '/companies/all';
+export const API_URL_ALL_DELIVERIES = BASE_API_URL + '/deliveries/all';
+export const API_URL_DELIVERIES_COMPANY = BASE_API_URL + '/deliveries/company';
+export const API_URL_LOCATIONS_COMPANY = BASE_API_URL + '/locations/company';
+export const API_URL_ALL_PALLETS = BASE_API_URL + '/pallets/all';
+export const API_URL_PALLETS_COMPANY = BASE_API_URL + '/pallets/company';
+// export const API_URL_ALL_PRODUCTS = BASE_API_URL + '/products/all';
+export const API_URL_PRODUCTS_COMPANY = BASE_API_URL + '/products/company';
 
 
 

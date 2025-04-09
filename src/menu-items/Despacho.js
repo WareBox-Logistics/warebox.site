@@ -1,6 +1,6 @@
-import { IconDashboard, IconLayoutDashboard, IconReport, IconTimelineEventExclamation, IconFlag3 } from '@tabler/icons-react';
+import { IconDashboard, IconLayoutDashboard, IconReport, IconTimelineEventExclamation, IconFlag3, IconAlertOctagon} from '@tabler/icons-react';
 
-const icons = { IconDashboard,  IconLayoutDashboard, IconReport, IconTimelineEventExclamation, IconFlag3 };
+const icons = { IconDashboard,  IconLayoutDashboard, IconReport, IconTimelineEventExclamation, IconFlag3, IconAlertOctagon};
 
 const despacho = {
     id: 'despacho',
@@ -28,7 +28,7 @@ const despacho = {
             title: 'Problemas',
             type: 'item',
             url: '/dispatch/problem-despacho',
-            icon: icons.IconReport,
+            icon: icons.IconAlertOctagon,
             breadcrumbs: false
         },
         {

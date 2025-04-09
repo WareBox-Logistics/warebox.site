@@ -5,7 +5,7 @@ import {
   import { GoogleMap, Marker, InfoWindow, Polyline, useLoadScript } from '@react-google-maps/api';
   import { db } from "../../../firebase.js";
   import {ref, onValue} from 'firebase/database'
-  import { Row, Col, Typography, Spin, Card } from "antd";
+  import { Row, Col, Typography, Spin, Card, Tag } from "antd";
   import { authToken, API_URL_DELIVERY, API_URL_DELIVERY_FUTURE } from 'services/services.jsx';
   import {TruckOutlined} from '@ant-design/icons';
   import axios from 'axios';
@@ -70,8 +70,26 @@ import {
           setLoadingDeliveries(false);
         }
       }
-    
 
+      const getStatusTag = (status) => {
+          switch (status) {
+            case "Pending":
+              return <Tag color="orange">Pending</Tag>;
+            case "Docking":
+              return <Tag color="blue">Docking</Tag>;
+            case "Delivering":
+              return <Tag color="green">Delivering</Tag>;
+            case "Loading":
+              return <Tag color="cyan">Loading</Tag>;
+            case "Emptying":
+              return <Tag color="purple">Emptying</Tag>;
+            case "Delivered":
+              return <Tag color="default">Delivered</Tag>;
+            default:
+              return <Tag color="default">Unknown</Tag>;
+          }
+      };
+    
       const handleDeliveryToggle = (trip) => {
         // Toggle selection
         if (selectedDelivery?.id === trip.id) {
@@ -118,8 +136,17 @@ import {
             </div>
           );
         }
+
+        const filteredDeliveries = deliveries
+        .filter((trip) =>
+          ["Delivering", "Docking", "Loading", "Pending"].includes(trip.status)
+        )
+        .sort((a, b) => {
+          if (a.status === "Delivering" && b.status !== "Delivering") return -1;
+          return 0;
+        });
     
-        return deliveries.map((trip) => (
+        return filteredDeliveries.map((trip) => (
           <Card
             key={trip.id}
             hoverable
@@ -139,10 +166,12 @@ import {
                             <Col>
                               <TruckOutlined style={{ fontSize: "36px", color: "#FF731D" }} />
                             </Col>
-                            <Col flex="auto" style={{ paddingLeft: 16 }}>
-                              <Title level={5} style={{ margin: 0 }}>Trip #{trip.id}</Title>
-                              <Text>Origin: {trip.origin.name}</Text><br />
-                              <Text>Destination: {trip.destination.name}</Text>
+                            <Col flex="auto" style={{ paddingLeft: 16, marginLeft: 4 }}>
+                              <Title level={4} style={{ margin: 0 }}>Trip #{trip.id}</Title>
+                              <Text><strong>Origin:</strong> {trip.origin.name}</Text><br />
+                              <Text><strong>Destination:</strong> {trip.destination.name}</Text><br />
+                              <Text><strong>Company:</strong> {trip.company.name}</Text><br />
+                              <Text><strong>Status:</strong> {getStatusTag(trip.status)}</Text>
                             </Col>
                           </Row>
           </Card>
@@ -151,7 +180,7 @@ import {
     
 
     return (
-      <Paper sx={{ padding: '16px', margin: '16px' }}>
+      <Paper sx={{ padding: '16px', margin: '5px' }}>
         <MainCard title="Trip Tracker">
           <Row >
             <Col span={16}>
@@ -165,7 +194,8 @@ import {
                 background: 'white',
                 padding: '8px',
                 borderRadius: '4px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                marginTop: '85px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                   <div style={{
@@ -198,7 +228,7 @@ import {
                   <Text>Route</Text>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <img src={truck} style={{width: '36px',height: '36px',marginRight: '8px'}}/>
+                  <img src={truck} style={{width: '36px',height: '36px',marginRight: '8px'}} alt=''/>
                   <Text>Trucks</Text>
                 </div>
               </div>
@@ -301,7 +331,7 @@ import {
                   <Title level={4} style={{ marginTop: '-10px' }}>
                     Select a delivery
                   </Title>
-                    <div style={{overflowY:'auto',height:'60vh'}}>
+                    <div style={{overflowY:'auto',height:'70vh'}}>
                       {renderDeliveryList()}
                     </div>
                 </div>

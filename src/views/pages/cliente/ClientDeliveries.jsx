@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Table, Modal, Spin, Col, Button, Typography, Tag, message, QRCode, Tooltip, Select } from "antd";
+import React, { useEffect, useState } from "react";
+import { Table, Modal, Col, Spin, Button, Typography, Tag, message, QRCode, Tooltip, Select } from "antd";
 import { EyeOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { Paper } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
 import axios from "axios";
 import { 
-  API_URL_ALL_DELIVERIES, 
-  API_URL_EMPLOYEE, 
-  API_URL_DRIVER, 
-  API_URL_COMPANY,
+  API_URL_DELIVERY, 
+  API_URL_COMPANY, 
+  API_URL_DELIVERIES_COMPANY,
+  API_URL_DRIVER,
   API_URL_GENERATE_QR,
   API_URL_CONFIRM_QR,
   authToken 
@@ -17,56 +17,97 @@ import {
 const { Text, Title } = Typography;
 const { Option } = Select;
 
-const Deliveries = () => {
+const ClientDeliveries = () => {
   const [deliveries, setDeliveries] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [drivers, setDrivers] = useState([]);
-  const [companies, setCompanies] = useState([]);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [companyFilter, setCompanyFilter] = useState(undefined);
   const [isQRModalVisible, setIsQRModalVisible] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
-    fetchData();
+    fetchDeliveries();
+    fetchDrivers();
   }, []);
 
-  const fetchData = async () => {
+  const fetchDeliveries = async () => {
     setIsLoading(true);
     try {
-      const [deliveriesResponse, employeesResponse, driversResponse, companiesResponse] = await Promise.all([
-        axios.get(API_URL_ALL_DELIVERIES, { headers: { Authorization: authToken } }),
-        axios.get(API_URL_EMPLOYEE, { headers: { Authorization: authToken } }),
-        axios.get(API_URL_DRIVER, { headers: { Authorization: authToken } }),
-        axios.get(API_URL_COMPANY, { headers: { Authorization: authToken } }),
-      ]);
-
-      const deliveriesData = deliveriesResponse.data.deliveries.sort((a, b) => {
-        const isAPriority = a.status === "Pending";
-        const isBPriority = b.status === "Pending";
-        return isAPriority && !isBPriority ? -1 : !isAPriority && isBPriority ? 1 : 0;
+      const clientName = localStorage.getItem("first_name");
+      if (!clientName) {
+        throw new Error("Client name not found in localStorage");
+      }
+  
+      const companyResponse = await axios.get(API_URL_COMPANY, {
+        headers: { Authorization: authToken },
       });
-
-      setDeliveries(deliveriesData);
-      setEmployees(employeesResponse.data.employee || []);
-      setDrivers(driversResponse.data.drivers || []);
-      setCompanies(Array.isArray(companiesResponse.data.companies) ? companiesResponse.data.companies : []);
+      const company = companyResponse.data.companies.find(
+        (company) => company.name === clientName
+      );
+      if (!company) {
+        throw new Error("Company not found");
+      }
+  
+      const response = await axios.get(API_URL_DELIVERIES_COMPANY, {
+        headers: { Authorization: authToken },
+        params: { company_id: company.id },
+      });
+  
+      const deliveriesData = response.data.deliveries;
+      const sortedDeliveries = deliveriesData.sort((a, b) => {
+        const isAPriority =
+          a.status === "Pending" &&
+          (a.type === "warehouse_to_location" || a.type === "location_to_location");
+        const isBPriority =
+          b.status === "Pending" &&
+          (b.type === "warehouse_to_location" || b.type === "location_to_location");
+  
+        if (isAPriority && !isBPriority) return -1;
+        if (!isAPriority && isBPriority) return 1;
+        return 0;
+      });
+  
+      setDeliveries(sortedDeliveries);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching deliveries:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fetchDrivers = async () => {
+    try {
+      const response = await axios.get(API_URL_DRIVER, {
+        headers: { Authorization: authToken },
+      });
+      setDrivers(response.data.drivers || []);
+    } catch (error) {
+      message.error("Error fetching drivers");
+      console.error("Error fetching drivers:", error);
+    }
+  };
+
+  const getDriverName = (driverId) => {
+    const driver = drivers.find((d) => d.id === driverId);
+    return driver ? `${driver.first_name} ${driver.last_name}` : "N/A";
+  };
+
+  const handleViewDetails = (delivery) => {
+    setSelectedDelivery(delivery);
+    setIsModalVisible(true);
+  };
+
   const handleGenerateQR = async (delivery) => {
     try {
       if (delivery.confirmation_code) {
+        console.log("QR code already exists:", delivery.confirmation_code);
         setSelectedDelivery(delivery);
         setIsQRModalVisible(true);
         return;
       }
+  
+      console.log("Generating QR code for delivery ID:", delivery.id);
   
       const response = await axios.post(
         API_URL_GENERATE_QR.replace('{delivery}', delivery.id),
@@ -75,6 +116,7 @@ const Deliveries = () => {
       );
   
       const { qr_code } = response.data;
+      console.log("QR code generated successfully:", qr_code);
   
       setDeliveries((prevDeliveries) =>
         prevDeliveries.map((d) =>
@@ -92,6 +134,8 @@ const Deliveries = () => {
 
   const handleQRScanned = async (confirmationCode) => {
     try {
+      console.log("Sending confirmation code:", confirmationCode);
+  
       const response = await axios.post(
         API_URL_CONFIRM_QR,
         { confirmation_code: confirmationCode },
@@ -99,9 +143,10 @@ const Deliveries = () => {
       );
   
       if (response.data.status === "Delivered") {
+        console.log("Delivery confirmed successfully:", response.data);
         message.success("Delivery Confirmed successfully");
         setIsQRModalVisible(false);
-        fetchData();
+        fetchDeliveries();
       }
     } catch (error) {
       console.error("Error confirming delivery:", error);
@@ -109,45 +154,23 @@ const Deliveries = () => {
     }
   };
 
-  const getEmployeeName = (employeeId) => {
-    const employee = employees.find((emp) => emp.id === employeeId);
-    return employee ? `${employee.first_name} ${employee.last_name}` : "Unknown";
-  };
-
-  const getDriverName = (driverId) => {
-    const driver = drivers.find((d) => d.id === driverId);
-    return driver ? `${driver.first_name} ${driver.last_name}` : "N/A";
-  };
-
-  const handleViewDetails = (delivery) => {
-    setSelectedDelivery(delivery);
-    setIsModalVisible(true);
-  };
-
   const handleStatusFilterChange = (value) => {
     setStatusFilter(value);
   };
 
-  const handleCompanyFilterChange = (value) => {
-    setCompanyFilter(value);
-  };
-
-  const filteredDeliveries = useMemo(() => {
-    return deliveries.filter((delivery) => {
-      const statusMatch = !statusFilter || delivery.status === statusFilter;
-      const companyMatch = !companyFilter || (delivery.company && delivery.company.id === companyFilter);
-      return statusMatch && companyMatch;
-    });
-  }, [deliveries, statusFilter, companyFilter]);
+  const filteredDeliveries = deliveries.filter((delivery) => {
+    if (!statusFilter) return true;
+    return delivery.status === statusFilter;
+  });
 
   const formatDateTime = (dateTime) => {
     if (!dateTime) return "N/A";
     const date = new Date(dateTime);
-
+  
     if (isNaN(date.getTime())) return "Invalid Date";
-
+  
     date.setHours(date.getHours() - 7);
-
+  
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
@@ -179,11 +202,6 @@ const Deliveries = () => {
       title: "Destination",
       dataIndex: ["destination", "name"],
       key: "destination",
-    },
-    {
-      title: "Company",
-      dataIndex: ["company", "name"],
-      key: "company",
     },
     {
       title: "Status",
@@ -218,14 +236,15 @@ const Deliveries = () => {
               onClick={() => handleViewDetails(record)}
             />
           </Tooltip>
-          {/* {record.status === "Pending" && (
-            <Tooltip title="Generate QR">
-              <Button
-                icon={<QrcodeOutlined />}
-                onClick={() => handleGenerateQR(record)}
-              />
-            </Tooltip>
-          )} */}
+          {record.status === "Pending" &&
+            (record.type === "warehouse_to_location" || record.type === "location_to_location") && (
+              <Tooltip title="Generate QR">
+                <Button
+                  icon={<QrcodeOutlined />}
+                  onClick={() => handleGenerateQR(record)}
+                />
+              </Tooltip>
+            )}
         </div>
       ),
     },
@@ -233,7 +252,7 @@ const Deliveries = () => {
 
   return (
     <Paper sx={{ padding: "16px", margin: "5px" }}>
-      <MainCard title="Deliveries">
+      <MainCard title="Your Deliveries">
         <Spin spinning={isLoading} tip="Loading deliveries...">
           <Col xs={24}>
             <Select
@@ -249,28 +268,12 @@ const Deliveries = () => {
               <Option value="Loading">Loading</Option>
               <Option value="Pending">Pending</Option>
             </Select>
-            <Select
-              placeholder="Filter by Company"
-              style={{ width: 160, marginLeft: "10px" }}
-              onChange={handleCompanyFilterChange}
-              value={companyFilter}
-              allowClear
-            >
-              {Array.isArray(companies) &&
-                companies.map((company) => (
-                  <Option key={company.id} value={company.id}>
-                    {company.name}
-                  </Option>
-                ))}
-            </Select>
           </Col>
-
           <Table
             dataSource={Array.isArray(filteredDeliveries) ? filteredDeliveries : []}
             columns={columns}
             rowKey="id"
             pagination={{ pageSize: 10 }}
-            scroll={{ x: "max-content" }}
           />
         </Spin>
 
@@ -288,7 +291,7 @@ const Deliveries = () => {
               <Title level={4}>
                 <span style={{ color: "#FF731D" }}>General Information -</span> Delivery #{selectedDelivery?.id}
               </Title>
-              <Text><strong>Created By:</strong> {getEmployeeName(selectedDelivery.created_by)}</Text><br />
+              {/* <Text><strong>Created By:</strong> {selectedDelivery.created_by || "N/A"}</Text><br /> */}
               <Text><strong>Truck:</strong> {selectedDelivery.truck?.plates || "N/A"}</Text><br />
               <Text><strong>Trailer:</strong> {selectedDelivery.trailer?.plates || "N/A"}</Text><br />
               <Text><strong>Driver:</strong> {getDriverName(selectedDelivery.truck?.driver_id)}</Text><br />
@@ -297,7 +300,6 @@ const Deliveries = () => {
               <Text><strong>Estimated Arrival:</strong> {formatDateTime(selectedDelivery.estimated_arrival)}</Text><br />
               <Text><strong>Origin:</strong> {selectedDelivery.origin?.name || "N/A"}</Text><br />
               <Text><strong>Destination:</strong> {selectedDelivery.destination?.name || "N/A"}</Text><br />
-              <Text><strong>Company:</strong> {selectedDelivery.company?.name}</Text><br />
               <Text><strong>Status:</strong> {selectedDelivery.status || "N/A"}</Text><br />
 
               <Title level={4} style={{ marginTop: "20px", color: "#FF731D" }}>Pallets</Title>
@@ -308,6 +310,8 @@ const Deliveries = () => {
                     <Text strong>Pallet ID:</Text> {detail.pallet.id}<br />
                     <Text strong>Weight:</Text> {detail.pallet.weight} kg<br />
                     <Text strong>Volume:</Text> {detail.pallet.volume} m³<br />
+                    {/* <Text strong>Status:</Text> {detail.pallet.status}<br />
+                    <Text strong>Verified:</Text> {detail.pallet.verified ? "Yes" : "No"}<br /> */}
 
                     <Title level={5} style={{ marginTop: "10px" }}>Boxes:</Title>
                     {detail.pallet.box_inventories?.length > 0 ? (
@@ -323,6 +327,7 @@ const Deliveries = () => {
                               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                             }}
                           >
+                            {/* Imagen del producto */}
                             {box.product?.image && (
                               <img
                                 src={box.product.image}
@@ -336,6 +341,8 @@ const Deliveries = () => {
                                 }}
                               />
                             )}
+
+                            {/* Información del producto */}
                             <div>
                               <Text strong>Box ID:</Text> {box.id}<br />
                               <Text strong>Weight:</Text> {box.weight} kg<br />
@@ -362,7 +369,7 @@ const Deliveries = () => {
           )}
         </Modal>
 
-        {/* QR Code Modal */}
+        {/* QR Modal */}
         <Modal
           title="Receive Delivery"
           visible={isQRModalVisible}
@@ -372,7 +379,10 @@ const Deliveries = () => {
         >
           {selectedDelivery && (
             <>
-              <Title level={4}>Delivery #{selectedDelivery?.id}</Title>
+              <Title level={4}>
+                {/* <span style={{ color: "#FF731D" }}>Delivery</span> #{selectedDelivery?.id} */}
+                Delivery #{selectedDelivery?.id}
+              </Title>
               <Text>
                 <strong>Origin:</strong> {selectedDelivery.origin?.name || "N/A"}
               </Text>
@@ -405,4 +415,4 @@ const Deliveries = () => {
   );
 };
 
-export default Deliveries;
+export default ClientDeliveries;

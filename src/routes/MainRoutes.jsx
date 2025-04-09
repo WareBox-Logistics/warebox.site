@@ -22,6 +22,7 @@ const SedesPage = Loadable(lazy(() => import('views/pages/almacenista/Sedes')));
 // const MuellesPage = Loadable(lazy(() => import('views/pages/almacenista/Muelles')));
 const AlmacenistaRacks = Loadable(lazy(()=> import('views/pages/almacenista/GestionRacks')));
 const AlmacenistaPallets = Loadable(lazy(()=> import('views/pages/almacenista/GestionPallets')));
+const AlmacenistaDashboard = Loadable(lazy(()=> import('views/pages/almacenista/DashboardWarehouse')));
 // const Chofer = Loadable(lazy(() => import('views/pages/chofer/Index')));
 
 const DashboardDis = Loadable(lazy(() => import('views/pages/despacho/DashboardDis')));
@@ -50,8 +51,11 @@ const Tracker = Loadable(lazy(() => import('views/pages/administrador/Tracker'))
 
 // const Client = Loadable(lazy(() => import('views/pages/cliente/index')));
 const ClientPallets = Loadable(lazy(() => import('views/pages/cliente/ClientPallets')));
-const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
+// const ClientDashboard = Loadable(lazy(() => import('views/pages/cliente/ClientDashboard')));
 const ClientProducts = Loadable(lazy(() => import('views/pages/cliente/ClientProducts')));
+const ClientDeliveries = Loadable(lazy(() => import('views/pages/cliente/ClientDeliveries')));
+const ClientLocations = Loadable(lazy(() => import('views/pages/cliente/ClientLocations')));
+
 
 const MainRoutes = {
   path: '/',
@@ -135,6 +139,10 @@ const MainRoutes = {
             </ProtectedRoute>
           ),
           children : [
+            {
+              path: 'dashboard-warehouse',
+              element: <AlmacenistaDashboard />
+            },
             {
               path: 'gestion-racks',
               element: <AlmacenistaRacks />
@@ -221,9 +229,17 @@ const MainRoutes = {
             </ProtectedRoute>
           ),
           children : [
+            // {
+            //   path: 'client-dashboard',
+            //   element: <ClientDashboard />
+            // },
             {
-              path: 'client-dashboard',
-              element: <ClientDashboard />
+              path: 'client-deliveries',
+              element: <ClientDeliveries />
+            },
+            {
+              path: 'client-locations',
+              element: <ClientLocations />
             },
             {
               path: 'client-pallets',

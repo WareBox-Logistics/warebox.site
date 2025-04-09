@@ -9,7 +9,15 @@ const chartData = {
         show: true
       }
     },
-    colors: ['#556ee6', '#34c38f', '#f46a6a', '#50a5f1'],
+    title: {
+      text: 'Delivered closed in the last 7 days',
+      align: 'center',
+      style: {
+        fontSize: '18px',
+        color: '#333'
+      }
+    },
+    colors: ['#34c38f', '#f46a6a'],
     plotOptions: {
       bar: {
         horizontal: false,
@@ -26,7 +34,7 @@ const chartData = {
       colors: ['transparent']
     },
     xaxis: {
-      categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      categories: ['Lun', 'Mar', 'Mier', 'Jue', 'Vir', 'Sab', 'Dom'],
       axisBorder: {
         show: true
       },
@@ -68,12 +76,12 @@ const chartData = {
   },
   series: [
     {
-      name: 'Investment',
-      data: [35, 125, 35, 35, 35, 80, 35, 20, 35, 45, 15]
+      name: 'Trabajos exitosos',
+      data: [35, 125, 35, 35, 35, 80, 60]
     },
     {
-      name: 'Loss',
-      data: [35, 15, 15, 35, 65, 40, 80, 25, 15, 85, 25]
+      name: 'Perdidas',
+      data: [35, 15, 15, 35, 65, 40, 80]
     },
   ]
 };

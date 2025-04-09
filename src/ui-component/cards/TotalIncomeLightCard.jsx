@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import TotalIncomeCard from 'ui-component/cards/Skeleton/TotalIncomeCard';
+import { CircularProgress } from '@mui/material';
 
 // styles
 const CardWrapper = styled(MainCard)(({ theme }) => ({
@@ -83,4 +84,4 @@ export default function TotalIncomeLightCard({ isLoading, total, icon, label }) 
   );
 }
 
-TotalIncomeLightCard.propTypes = { isLoading: PropTypes.bool, total: PropTypes.number, icon: PropTypes.node, label: PropTypes.string };
+TotalIncomeLightCard.propTypes = { isLoading: PropTypes.bool, icon: PropTypes.node, label: PropTypes.string };

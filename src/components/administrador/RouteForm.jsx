@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Select, Row, Col, Typography, Spin, Card, DatePicker, message, Progress } from 'antd';
 import { ProductOutlined } from "@ant-design/icons";
 import axios from 'axios';
-import { API_URL_COMPANY, API_URL_MODEL, API_URL_BRAND, authToken, API_URL_PALLET_CWS,API_URL_DELIVERY,userID, API_URL_VEHICLE_AVA, API_URL_VEHICLE_RESERVE } from 'services/services';
+import { API_URL_COMPANY, API_URL_MODEL, API_URL_BRAND, authToken, API_URL_PALLET_CWS,API_URL_DELIVERY,userID, API_URL_VEHICLE_AVA, API_URL_VEHICLE_RESERVE, API_URL_DOCK_RESERVE } from 'services/services';
 import dayjs from 'dayjs'; 
 import DockReservation from './DockAssignation.jsx';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const RouteForm = ({ origin, destination, route }) => {
+const RouteForm = ({ origin, destination, route, onReset }) => {
   const [form] = Form.useForm();
   const [companies, setCompanies] = useState([]);
   const [availableTrucks,setAvailableTrucks] = useState([]);
@@ -28,6 +28,29 @@ const RouteForm = ({ origin, destination, route }) => {
   const [remainingVolume, setRemainingVolume] = useState(0);
   const [isTrailerFull, setIsTrailerFull] = useState(false);
   const [totalVolume, setTotalVolume] = useState(0); 
+
+  const [dockReservation, setDockReservation] = useState({
+    dockId: null,
+    scheduledTime: null,
+    durationMinutes: 60
+  });
+
+  const [deliveryId, setDeliveryId] = useState(null);
+  const [showDockReservation, setShowDockReservation] = useState(false);
+
+  const handleFullReset = () => {
+    // Reset local state
+    form.resetFields();
+    setSelectedPallets([]);
+    setSelectedTruck(null);
+    setSelectedTrailer(null);
+    setShowDockReservation(false);
+    
+    // Propagate to grandparent if needed
+    if (onReset) {
+      onReset();
+    }
+  };
 
 
   const options = [
@@ -65,7 +88,8 @@ const RouteForm = ({ origin, destination, route }) => {
     if (shippingDate && estimatedArrival && estimatedArrival.isAfter(shippingDate)) {
       fetchAvailableVehicles(
         shippingDate.format('YYYY-MM-DDTHH:mm:ssZ'),
-        estimatedArrival.format('YYYY-MM-DDTHH:mm:ssZ')
+        estimatedArrival.format('YYYY-MM-DDTHH:mm:ssZ'),
+        origin
       );
     }
   }, [form.getFieldValue('shipping_date'), form.getFieldValue('estimated_arrival')]);
@@ -97,31 +121,28 @@ const RouteForm = ({ origin, destination, route }) => {
     }
   };
 
-  const fetchAvailableVehicles = async (startDate, endDate) => {
+  const fetchAvailableVehicles = async (startDate, endDate, origin = null) => {
     setLoadingVehicles(true);
     try {
-      console.log(startDate, endDate)
-      const truckPayload = {
+      const payload = {
         start_date: startDate,
         end_date: endDate,
-        type: "truck"
       };
 
+      // Add origin if provided (e.g., when creating a new delivery)
+      if (origin) {
+        console.log("This is the origin",origin);
+        payload.origin_id = origin.id;
+        payload.origin_type = origin.type; // Should be full model class name
+        console.log("This is the payload with an origin",payload);
+      }
 
-      const trailerPayload = {
-        start_date: startDate,
-        end_date: endDate,
-        type: "trailer"
-      };
 
-
-
-  
       const [trucksResponse, trailersResponse] = await Promise.all([
-        axios.post(API_URL_VEHICLE_AVA, truckPayload,{
+        axios.post(API_URL_VEHICLE_AVA, { ...payload, type: "truck" }, {
           headers: { Authorization: authToken }
         }),
-        axios.post(API_URL_VEHICLE_AVA, trailerPayload,{
+        axios.post(API_URL_VEHICLE_AVA, { ...payload, type: "trailer" }, {
           headers: { Authorization: authToken }
         })
       ]);
@@ -147,7 +168,7 @@ const RouteForm = ({ origin, destination, route }) => {
     } finally {
       setLoadingVehicles(false);
     }
-  };
+};
 
   const fetchModels = async () => {
     try {
@@ -241,91 +262,82 @@ const RouteForm = ({ origin, destination, route }) => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // Construct the payload
+      // 1. Construct the delivery payload (keep all your existing fields)
       const payload = {
         type: deliveryType,
         truck: values.truck,
-        trailer: values.trailer || null, // Trailer is optional
+        trailer: values.trailer || null,
         company_id: values.company,
         origin_id: origin.id,
         origin_type: origin.type,
-          destination_id: destination.id,
-          destination_type: destination.type,
+        destination_id: destination.id,
+        destination_type: destination.type,
         shipping_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
         estimated_arrival: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
         route: route,
-        created_by:userID,
+        created_by: parseInt(userID),
         status: 'pending',
         delivery_details: selectedPallets.map(pallet => ({
           pallet_id: pallet.id,
         }))
       };
-
-      console.log('Submitting payload:', payload);
-      
-    
-      const response = await axios.post(API_URL_DELIVERY, payload, {
+  
+      console.log(payload);
+      // 2. Create the delivery (existing code)
+      const deliveryResponse = await axios.post(API_URL_DELIVERY, payload, {
         headers: {
           Authorization: authToken,
           'Content-Type': 'application/json',
         },
       });
-
-      console.log(response);
-      const payloadReserveTruck = {
-        vehicleID: values.truck,
-        start_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
-        end_date: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
-        type: 'delivery',
-        deliveryID: response.data.data.id
+      const deliveryId = deliveryResponse.data.data.id;
+      setDeliveryId(deliveryId); // Store for dock reservation
+  
+      // 3. Reserve vehicles (existing code with small adjustment)
+      const reservePromises = [
+        axios.post(API_URL_VEHICLE_RESERVE, {
+          vehicleID: values.truck,
+          start_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
+          end_date: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
+          type: 'delivery',
+          deliveryID: deliveryId // Now using the created delivery ID
+        }, {
+          headers: { Authorization: authToken }
+        })
+      ];
+  
+      if (values.trailer) {
+        reservePromises.push(
+          axios.post(API_URL_VEHICLE_RESERVE, {
+            vehicleID: values.trailer,
+            start_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
+            end_date: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
+            type: 'delivery',
+            deliveryID: deliveryId // Now using the created delivery ID
+          }, {
+            headers: { Authorization: authToken }
+          })
+        );
       }
-
-      const payloadReserveTrailer = {
-        vehicleID: values.trailer,
-        start_date: values.shipping_date.format('YYYY-MM-DDTHH:mm:ssZ'),
-        end_date: values.estimated_arrival.format('YYYY-MM-DDTHH:mm:ssZ'),
-        type: 'delivery',
-        deliveryID: response.data.data.id
-      }
-
-      console.log(payloadReserveTruck);
-
-
-      await axios.post(API_URL_VEHICLE_RESERVE, payloadReserveTruck, {
-        headers: {
-          Authorization: authToken,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      await axios.post(API_URL_VEHICLE_RESERVE, payloadReserveTrailer, {
-        headers: {
-          Authorization: authToken,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      message.success('Delivery created successfully!');
-      form.resetFields();
-      setSelectedPallets([]);
-      setSelectedTruck(null);
-      setSelectedTrailer(null);
-      setAvailableTrucks([]);
-      setAvailableTrailers([]);
-      setPallets([]);
-      setTotalVolume(0);
-      setRemainingVolume(0);
-      setIsTrailerFull(false);
-      
-      // For now, just log the payload
-      console.log('Delivery payload:', payload);
-      
+  
+      await Promise.all(reservePromises);
+  
+      // 4. Show dock reservation instead of completing
+      setShowDockReservation(true);
+  
+      // (Optional) Keep success message here if needed
+      message.success('Delivery created! Now reserve a dock');
+  
     } catch (error) {
       console.error('Error creating delivery:', error);
-      message.error('Failed to create delivery');
+      message.error(error.response?.data?.message || 'Failed to create delivery');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDockReservation = (reservation) => {
+    setDockReservation(reservation);
   };
 
   const updateFilledPercentage = (pallets, trailerVolume) => {
@@ -378,9 +390,22 @@ const RouteForm = ({ origin, destination, route }) => {
     <>
       <Col span={12}>
         <div style={{ paddingLeft: '30px', borderRadius: '10px'}}>
+       
           <Row gutter={8}>
-            <Title level={4}>Delivery Info</Title>
+            <Title level={4}>
+              {showDockReservation ? 'Dock Reservation' : 'Delivery Info'}
+            </Title>
+            {showDockReservation && (
+            <Button 
+              onClick={() => setShowDockReservation(false)}
+              style={{ marginLeft: 'auto' }}
+              size="small"
+            >
+              ← Back to delivery
+            </Button>
+          )}
           </Row>
+          {!showDockReservation ? (
           <Form
             form={form}
             name="delivery"
@@ -563,26 +588,37 @@ const RouteForm = ({ origin, destination, route }) => {
               )}
             </Form.Item>
 
-            {origin?.type === 'warehouse' && 
-              form.getFieldValue('shipping_date') && 
-              form.getFieldValue('truck') && 
-              (form.getFieldValue('trailer') || true) && (
-                <DockReservation 
-                  warehouseId={origin.id}
-                  shippingDate={form.getFieldValue('shipping_date')}
-                  trailerId={form.getFieldValue('trailer')}
-                  truckId={form.getFieldValue('truck')}
-                  authToken={authToken}
-                />
-            )}
-
             {/* Submit Button */}
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
               <Button type="primary" htmlType="submit" loading={loading}>
-                Create Order Delivery
+              {selectedPallets.length > 0 
+                  ? `Create Delivery (${selectedPallets.length} pallets)`
+                  : 'Create Delivery'}
               </Button>
             </Form.Item>
           </Form>
+              ) : (
+          <DockReservation 
+          warehouseId={origin.id}
+          shippingDate={form.getFieldValue('shipping_date')}
+          authToken={authToken}
+          deliveryId={deliveryId}
+          palletCount={selectedPallets.length}
+          onSuccess={() => {
+            message.success(`
+              Delivery created with ${selectedPallets.length} pallets!
+              Dock reserved successfully
+            `);
+            // Reset form
+            form.resetFields();
+            setSelectedPallets([]);
+            setSelectedTruck(null);
+            setSelectedTrailer(null);
+            setShowDockReservation(false);
+          }}
+          resetAll={handleFullReset}
+        />
+      )}
         </div>
       </Col>  
 

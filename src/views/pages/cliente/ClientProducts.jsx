@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Typography, Modal, Spin, Empty, Input, Dropdown, Menu, Button } from "antd";
+import { Row, Col, Card, Typography, Modal, Spin, Empty, Input, Tag } from "antd";
 import { Paper } from "@mui/material";
-import { SearchOutlined, EyeOutlined, MoreOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import MainCard from "ui-component/cards/MainCard";
 import axios from "axios";
-import { API_URL_PRODUCT, API_URL_COMPANY, API_URL_BOX_INVENTORY, authToken } from "../../../services/services";
+import { API_URL_PRODUCTS_COMPANY, API_URL_COMPANY, authToken } from "../../../services/services";
 
 const { Title, Text } = Typography;
 
@@ -14,11 +14,8 @@ const ClientProducts = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [clientCompany, setClientCompany] = useState(null);
   const [searchText, setSearchText] = useState("");
-  const [isPalletModalVisible, setIsPalletModalVisible] = useState(false);
-  const [pallets, setPallets] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isLoadingPallets, setIsLoadingPallets] = useState(false);
-
 
   useEffect(() => {
     fetchClientCompany();
@@ -52,70 +49,31 @@ const ClientProducts = () => {
     }
   };
 
-  const fetchClientProducts = async () => {
-    if (!clientCompany) return;
+  const fetchProducts = async () => {
+    if (!clientCompany || products.length > 0) return;
 
     setIsLoading(true);
     try {
-      const productResponse = await axios.get(API_URL_PRODUCT, {
+      const response = await axios.get(API_URL_PRODUCTS_COMPANY, {
         headers: { Authorization: authToken },
+        params: { company_id: clientCompany.id },
       });
 
-      const fetchedProducts = productResponse.data.products.filter(
-        (product) => product.company?.id === clientCompany.id
-      );
-
-      if (JSON.stringify(fetchedProducts) !== JSON.stringify(products)) {
-        setProducts(fetchedProducts);
-        setFilteredProducts(fetchedProducts);
-      }
+      const fetchedProducts = response.data.products;
+      setProducts(fetchedProducts);
+      setFilteredProducts(fetchedProducts);
     } catch (error) {
-      console.error("Error fetching client products:", error);
+      console.error("Error fetching products:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchPalletsByProduct = async (productId) => {
-    setIsLoadingPallets(true);
-    try {
-      const response = await axios.get(API_URL_BOX_INVENTORY, {
-        headers: {
-          Authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      });
-  
-      const boxes = response.data.boxes || [];
-      const filteredPallets = boxes.filter((box) => box.product.id === productId);
-  
-      setPallets(filteredPallets);
-    } catch (error) {
-      console.error("Error fetching pallets:", error);
-      setPallets([]);
-    } finally {
-      setIsLoadingPallets(false);
-    }
-  };
-
   useEffect(() => {
     if (clientCompany) {
-      fetchClientProducts();
+      fetchProducts();
     }
   }, [clientCompany]);
-
-  useEffect(() => {
-    const clientName = localStorage.getItem("first_name");
-    if (clientName) {
-      fetchClientCompany();
-    }
-  }, []);
-
-  const handleViewPallets = (product) => {
-    setSelectedProduct(product);
-    setIsPalletModalVisible(true);
-    fetchPalletsByProduct(product.id);
-  };
 
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
@@ -127,6 +85,10 @@ const ClientProducts = () => {
     setFilteredProducts(filtered);
   };
 
+  const handleCardClick = (product) => {
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
 
   const renderProductCards = () => {
     if (filteredProducts.length === 0) {
@@ -150,6 +112,7 @@ const ClientProducts = () => {
                 cursor: "pointer",
                 padding: "6px",
               }}
+              onClick={() => handleCardClick(product)}
             >
               <Row gutter={[16, 16]} align="top">
                 <Col xs={8}>
@@ -170,10 +133,10 @@ const ClientProducts = () => {
                     {product.name}
                   </Title>
                   <Text style={{ display: "block", marginBottom: "8px" }}>
-                    <strong>Description:</strong> {product.description || "N/A"}
+                    <strong>SKU:</strong> <Tag color="blue">{product.sku || "N/A"}</Tag>
                   </Text>
                   <Text style={{ display: "block", marginBottom: "8px" }}>
-                    <strong>SKU:</strong> {product.sku || "N/A"}
+                    <strong>Description:</strong> {product.description || "N/A"}
                   </Text>
                   <Text style={{ display: "block", marginBottom: "8px" }}>
                     <strong>Price:</strong> ${product.price || "0.00"}
@@ -183,33 +146,6 @@ const ClientProducts = () => {
                   </Text>
                 </Col>
               </Row>
-
-              <Dropdown
-                overlay={
-                    <Menu>
-                    <Menu.Item
-                        key="viewPallets"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewPallets(product)}
-                    >
-                        View Pallets
-                    </Menu.Item>
-                    </Menu>
-                }
-                trigger={["click"]}
-              >
-                <Button
-                    type="text"
-                    icon={<MoreOutlined />}
-                    style={{
-                    fontSize: "25px",
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    cursor: "pointer",
-                    }}
-                />
-              </Dropdown>
             </Card>
           </Col>
         ))}
@@ -219,7 +155,7 @@ const ClientProducts = () => {
 
   return (
     <Paper sx={{ padding: "16px", margin: "5px" }}>
-      <MainCard title="Products">
+      <MainCard title="Your Products">
         <Row justify="center" style={{ marginBottom: "20px" }}>
           <Col xs={24} sm={12} md={8}>
             <Input
@@ -227,37 +163,52 @@ const ClientProducts = () => {
               value={searchText}
               prefix={<SearchOutlined />}
               onChange={handleSearch}
-            //   style={{ width: "150px" }}
             />
           </Col>
         </Row>
-        <Spin spinning={isLoading} size="default">
+        <Spin spinning={isLoading} size="default" tip="Loading products...">
           {!isLoading && renderProductCards()}
         </Spin>
 
         <Modal
-            title={`Pallets with product: "${selectedProduct?.name || ""}"`}
-            visible={isPalletModalVisible}
-            onCancel={() => setIsPalletModalVisible(false)}
-            footer={null}
+          title={`Pallets with product: "${selectedProduct?.name || ""}"`}
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={null}
+          width={370}
+          style={{ marginTop: "-30px" }}
+          bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
         >
-            {isLoadingPallets ? (
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                <Spin size="default" />
-                </div>
-            ) : pallets.length > 0 ? (
-                <ul>
-                {pallets.map((pallet) => (
-                    <li key={pallet.pallet.id}>
-                    Pallet {pallet.pallet.id}
-                    </li>
-                ))}
-                </ul>
-            ) : (
-                <p>There are no pallets with this product.</p>
-            )}
+          {selectedProduct ? (
+            <div>
+              <Title level={5} style={{ color: "#FF731D" }}>Pallets:</Title>
+              {selectedProduct.pallets?.length > 0 ? (
+                selectedProduct.pallets.map((pallet) => (
+                  <div key={pallet.id} style={{ marginBottom: "10px" }}>
+                    <Text strong>Pallet ID:</Text> {pallet.id}<br />
+                    <Text strong>Boxes:</Text>
+                    <ul>
+                      {pallet.box_inventories?.map((box) => (
+                        <>
+                          <li key={box.id} style={{ marginTop: "-20px" }}>
+                            Box ID: {box.id}
+                          </li>
+                          <li style={{ marginTop: "-5px" }}>
+                            Quantity: {box.qty}
+                          </li>
+                        </>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              ) : (
+                <Text>No pallets found for this product.</Text>
+              )}
+            </div>
+          ) : (
+            <Text>No details available.</Text>
+          )}
         </Modal>
-
       </MainCard>
     </Paper>
   );
