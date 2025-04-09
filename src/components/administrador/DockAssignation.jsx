@@ -14,7 +14,8 @@ const DockReservation = ({
     deliveryId,
     authToken,
     onReservation,
-    currentReservation
+    currentReservation,
+    resetAll
   }) => {
     const [docks, setDocks] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -24,6 +25,9 @@ const DockReservation = ({
     const [duration, setDuration] = useState(60);
     const [reservationModalVisible, setReservationModalVisible] = useState(false);
 
+    const resetEverything = () => {
+      resetAll(); 
+    };
 
     if (!warehouseId || !shippingDate || !authToken) {
         console.error('Missing required props:', {
@@ -62,7 +66,15 @@ const DockReservation = ({
           setDockAssignments(assignments);
         } catch (error) {
           console.error('Error fetching docks:', error);
-          message.error('Failed to load docks');
+          if (error.response && error.response.status === 404) {
+            message.warning("You can't choose a dock in a location, that's not in our hands!");
+            setDocks([]);
+            resetEverything();
+          } else {
+            // For other errors, show a generic message
+            message.error('Failed to load docks');
+            setDocks([]);
+          }
         } finally {
           setLoading(false);
         }
@@ -147,6 +159,7 @@ const DockReservation = ({
   
         message.success(`Dock ${selectedDock.number} reserved successfully for ${duration} minutes!`);
         setReservationModalVisible(false);
+        resetEverything();
       } catch (error) {
         console.error('Error reserving dock:', error);
         message.error(error.response?.data?.message || 'Failed to reserve dock');

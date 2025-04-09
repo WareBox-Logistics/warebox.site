@@ -41,6 +41,18 @@ const Routes = () => {
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
+  const resetAll = () => {
+    setCalculatedRoute(null);
+    setRouteInfo(null);
+    setWaypoints([]);
+    setFullNavigation(null);
+    setTransformedRoute(null);
+    setRouteDetails(null);
+    setRouteDirections([]);
+    setPolylinePath([]);
+    setSelectedPoint(null);
+  };
+
   useEffect(() => {
     fetchLocations();
     fetchWarehouses();
@@ -436,10 +448,10 @@ const Routes = () => {
         </Row>
         <Row>
         {calculatedRoute &&
-              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)} route={fullNavigation}/>)}
+              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)} route={fullNavigation}  onReset={resetAll}/>)}
         
         {routeInfo &&
-              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)} route={transformedRoute}/>)}
+              (  <RouteForm origin={waypoints[0]} destination={waypoints.at(-1)} route={transformedRoute}  onReset={resetAll}/>)}
 
         </Row>
       </MainCard>

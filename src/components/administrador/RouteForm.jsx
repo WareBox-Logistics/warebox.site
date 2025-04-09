@@ -9,7 +9,7 @@ import DockReservation from './DockAssignation.jsx';
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const RouteForm = ({ origin, destination, route }) => {
+const RouteForm = ({ origin, destination, route, onReset }) => {
   const [form] = Form.useForm();
   const [companies, setCompanies] = useState([]);
   const [availableTrucks,setAvailableTrucks] = useState([]);
@@ -37,6 +37,20 @@ const RouteForm = ({ origin, destination, route }) => {
 
   const [deliveryId, setDeliveryId] = useState(null);
   const [showDockReservation, setShowDockReservation] = useState(false);
+
+  const handleFullReset = () => {
+    // Reset local state
+    form.resetFields();
+    setSelectedPallets([]);
+    setSelectedTruck(null);
+    setSelectedTrailer(null);
+    setShowDockReservation(false);
+    
+    // Propagate to grandparent if needed
+    if (onReset) {
+      onReset();
+    }
+  };
 
 
   const options = [
@@ -602,6 +616,7 @@ const RouteForm = ({ origin, destination, route }) => {
             setSelectedTrailer(null);
             setShowDockReservation(false);
           }}
+          resetAll={handleFullReset}
         />
       )}
         </div>
