@@ -56,16 +56,12 @@ const ClientDeliveries = () => {
   
       const deliveriesData = response.data.deliveries;
       const sortedDeliveries = deliveriesData.sort((a, b) => {
-        const isAPriority =
-          a.status === "Pending" &&
-          (a.type === "warehouse_to_location" || a.type === "location_to_location");
-        const isBPriority =
-          b.status === "Pending" &&
-          (b.type === "warehouse_to_location" || b.type === "location_to_location");
-  
-        if (isAPriority && !isBPriority) return -1;
-        if (!isAPriority && isBPriority) return 1;
-        return 0;
+        // Priorizar "Pending"
+        if (a.status === "Pending" && b.status !== "Pending") return -1;
+        if (a.status !== "Pending" && b.status === "Pending") return 1;
+
+        // Ordenar por ID descendente
+        return b.id - a.id;
       });
   
       setDeliveries(sortedDeliveries);
@@ -163,14 +159,17 @@ const ClientDeliveries = () => {
     return delivery.status === statusFilter;
   });
 
-  const formatDateTime = (dateTime) => {
+  const formatDateTime = (dateTime, adjustHours = 0) => {
     if (!dateTime) return "N/A";
+  
     const date = new Date(dateTime);
   
     if (isNaN(date.getTime())) return "Invalid Date";
   
-    date.setHours(date.getHours() - 7);
+    // Ajustar horas según el parámetro
+    date.setHours(date.getHours() + adjustHours);
   
+    // Formatear la fecha y hora
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
@@ -185,13 +184,13 @@ const ClientDeliveries = () => {
       title: "Shipping Date",
       dataIndex: "shipping_date",
       key: "shipping_date",
-      render: (date) => formatDateTime(date),
+      render: (date) => formatDateTime(date, 7),
     },
     {
       title: "Completed Date",
       dataIndex: "completed_date",
       key: "completed_date",
-      render: (date) => formatDateTime(date),
+      render: (date) => formatDateTime(date, -7),
     },
     {
       title: "Origin",
@@ -295,9 +294,9 @@ const ClientDeliveries = () => {
               <Text><strong>Truck:</strong> {selectedDelivery.truck?.plates || "N/A"}</Text><br />
               <Text><strong>Trailer:</strong> {selectedDelivery.trailer?.plates || "N/A"}</Text><br />
               <Text><strong>Driver:</strong> {getDriverName(selectedDelivery.truck?.driver_id)}</Text><br />
-              <Text><strong>Shipping Date:</strong> {formatDateTime(selectedDelivery.shipping_date)}</Text><br />
-              <Text><strong>Completed Date:</strong> {formatDateTime(selectedDelivery.completed_date)}</Text><br />
-              <Text><strong>Estimated Arrival:</strong> {formatDateTime(selectedDelivery.estimated_arrival)}</Text><br />
+              <Text><strong>Shipping Date:</strong> {formatDateTime(selectedDelivery.shipping_date, 7)}</Text><br />
+              <Text><strong>Completed Date:</strong> {formatDateTime(selectedDelivery.completed_date, -7)}</Text><br />
+              <Text><strong>Estimated Arrival:</strong> {formatDateTime(selectedDelivery.estimated_arrival, 7)}</Text><br />
               <Text><strong>Origin:</strong> {selectedDelivery.origin?.name || "N/A"}</Text><br />
               <Text><strong>Destination:</strong> {selectedDelivery.destination?.name || "N/A"}</Text><br />
               <Text><strong>Status:</strong> {selectedDelivery.status || "N/A"}</Text><br />

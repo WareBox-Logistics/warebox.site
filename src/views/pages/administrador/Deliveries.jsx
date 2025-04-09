@@ -44,9 +44,12 @@ const Deliveries = () => {
       ]);
 
       const deliveriesData = deliveriesResponse.data.deliveries.sort((a, b) => {
-        const isAPriority = a.status === "Pending";
-        const isBPriority = b.status === "Pending";
-        return isAPriority && !isBPriority ? -1 : !isAPriority && isBPriority ? 1 : 0;
+        // Prioritize "Pending" status
+        if (a.status === "Pending" && b.status !== "Pending") return -1;
+        if (a.status !== "Pending" && b.status === "Pending") return 1;
+
+        // If both have the same status, sort by ID in descending order
+        return b.id - a.id;
       });
 
       setDeliveries(deliveriesData);
@@ -140,14 +143,17 @@ const Deliveries = () => {
     });
   }, [deliveries, statusFilter, companyFilter]);
 
-  const formatDateTime = (dateTime) => {
+  const formatDateTime = (dateTime, adjustHours = 0) => {
     if (!dateTime) return "N/A";
+  
     const date = new Date(dateTime);
-
+  
     if (isNaN(date.getTime())) return "Invalid Date";
-
-    date.setHours(date.getHours() - 7);
-
+  
+    // Ajustar horas según el parámetro
+    date.setHours(date.getHours() + adjustHours);
+  
+    // Formatear la fecha y hora
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
@@ -162,13 +168,13 @@ const Deliveries = () => {
       title: "Shipping Date",
       dataIndex: "shipping_date",
       key: "shipping_date",
-      render: (date) => formatDateTime(date),
+      render: (date) => formatDateTime(date, 7),
     },
     {
       title: "Completed Date",
       dataIndex: "completed_date",
       key: "completed_date",
-      render: (date) => formatDateTime(date),
+      render: (date) => formatDateTime(date, -7),
     },
     {
       title: "Origin",
@@ -292,9 +298,9 @@ const Deliveries = () => {
               <Text><strong>Truck:</strong> {selectedDelivery.truck?.plates || "N/A"}</Text><br />
               <Text><strong>Trailer:</strong> {selectedDelivery.trailer?.plates || "N/A"}</Text><br />
               <Text><strong>Driver:</strong> {getDriverName(selectedDelivery.truck?.driver_id)}</Text><br />
-              <Text><strong>Shipping Date:</strong> {formatDateTime(selectedDelivery.shipping_date)}</Text><br />
-              <Text><strong>Completed Date:</strong> {formatDateTime(selectedDelivery.completed_date)}</Text><br />
-              <Text><strong>Estimated Arrival:</strong> {formatDateTime(selectedDelivery.estimated_arrival)}</Text><br />
+              <Text><strong>Shipping Date:</strong> {formatDateTime(selectedDelivery.shipping_date, 7)}</Text><br />
+              <Text><strong>Completed Date:</strong> {formatDateTime(selectedDelivery.completed_date, -7)}</Text><br />
+              <Text><strong>Estimated Arrival:</strong> {formatDateTime(selectedDelivery.estimated_arrival, 7)}</Text><br />
               <Text><strong>Origin:</strong> {selectedDelivery.origin?.name || "N/A"}</Text><br />
               <Text><strong>Destination:</strong> {selectedDelivery.destination?.name || "N/A"}</Text><br />
               <Text><strong>Company:</strong> {selectedDelivery.company?.name}</Text><br />
